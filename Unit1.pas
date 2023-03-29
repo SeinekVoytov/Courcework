@@ -106,7 +106,7 @@ Function IsMathExprValid(Const Expr: String): Boolean;
     End;
 
   Var
-    I, Len: Integer;
+    I, Len, TempIndex: Integer;
     CurrSymbol: Char;
     Temp: String;
   Begin
@@ -121,7 +121,20 @@ Function IsMathExprValid(Const Expr: String): Boolean;
               Begin
                 if (IsSign(CurrSymbol)) then
                   Begin
-                    Result := Result and not IsSign(Expr[I - 1]) and not IsSign(Expr[I + 1]);
+                    Result := Result and ((I > 1) or (Length(Expr) > 1));
+                    TempIndex := I;
+                    Inc(I);
+                    while (I < Length(Expr)) and (Expr[I] = ' ') do
+                      Begin
+                        Inc(I);
+                      End;
+                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l'])));
+                    while (TempIndex > 1) and (Expr[TempIndex] = ' ') do
+                      Begin
+                        Dec(TempIndex);
+                      End;
+                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l'])));
+                    Dec(I);
                   End
                 else if IsNumber(CurrSymbol) then
                   Begin
