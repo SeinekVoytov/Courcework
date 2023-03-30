@@ -30,7 +30,7 @@ Function IsMathExprValid(Const Expr: String): Boolean;
   Function IsCharValid(Const Symbol: Char): Boolean;
     Begin
       Result := CharInSet(Symbol, ['0'..'9', '+', '-', '*', '/', '^', '(', '.',
-                                   ')', 's', 'c', 't', 'l', 'x', ' ']);
+                                   ')', 's', 'c', 't', 'l', 'x', ' ', 'a', 'p']);
     End;
 
   Function IsNumber(Const Item: Char): Boolean;
@@ -128,42 +128,59 @@ Function IsMathExprValid(Const Expr: String): Boolean;
                       Begin
                         Inc(I);
                       End;
-                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l'])));
+                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p'])));
                     while (TempIndex > 1) and (Expr[TempIndex] = ' ') do
                       Begin
                         Dec(TempIndex);
                       End;
-                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l'])));
+                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p'])));
                     Dec(I);
                   End
                 else if IsNumber(CurrSymbol) then
                   Begin
                     Result := Result and CheckNumber(I);
                   End
-                else
+                else if (CurrSymbol = 's') or (CurrSymbol = 'c') then
                   Begin
-                    if (CurrSymbol = 's') or (CurrSymbol = 'c') then
+                    if (I < Len - 4) then
                       Begin
-                        if (I < Len - 4) then
-                          Begin
-                            Temp := Copy(Expr, I, 4);
-                            Result := ((Temp = 'sin(') or (Temp = 'cos(') or (Temp = 'ctg(')) and (Expr[I + 4] <> ')');
-                            Inc(I, 3);
-                          End
-                        else
-                          Result := False;
+                        Temp := Copy(Expr, I, 4);
+                        Result := ((Temp = 'sin(') or (Temp = 'cos(') or (Temp = 'ctg(')) and (Expr[I + 4] <> ')');
+                        Inc(I, 3);
                       End
-                    else if (CurrSymbol = 't') or (CurrSymbol = 'l') then
+                    else
+                      Result := False;
+                  End
+                else if (CurrSymbol = 't') or (CurrSymbol = 'l') then
+                  Begin
+                    if (I < Len - 3) then
                       Begin
-                        if (I < Len - 3) then
-                          Begin
-                            Temp := Copy(Expr, I, 3);
-                            Result := ((Temp = 'tg(') or (Temp = 'ln(')) and (Expr[I + 3] <> ')');
-                            Inc(I, 2);
-                          End
-                        else
-                          Result := False;
-                      End;
+                        Temp := Copy(Expr, I, 3);
+                        Result := ((Temp = 'tg(') or (Temp = 'ln(')) and (Expr[I + 3] <> ')');
+                        Inc(I, 2);
+                      End
+                    else
+                      Result := False;
+                  End
+                else if (CurrSymbol = 'a') then
+                  Begin
+                    if (I < Len - 4) then
+                      Begin
+                        Result := (Copy(Expr, I, 3) = 'arc') and (CharInSet(Expr[I + 3], ['s', 'c', 't']));
+                        Inc(I, 2);
+                      End
+                    else
+                      Result := False;
+                  End
+                else if (CurrSymbol = 'p') then
+                  Begin
+                    if (I < Len) then
+                      Begin
+                        Result := (Copy(Expr, I, 2) = 'pi');
+                        Inc(I, 1);
+                      End
+                    else
+                      Result := False;
                   End;
               End
             else
