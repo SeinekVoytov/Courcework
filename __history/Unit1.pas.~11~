@@ -259,11 +259,11 @@ Function IsMathExprValid(Const Expr: String): Boolean;
     Begin
       Result := CharInSet(Item, ['!', '@', '#', '$', '%', '&', '_', '{', '}']);
     End;
-
   Function IsOperand(Item: Char): Boolean;
     Begin
       Result := ((Item >= '0') and (Item <= '9')) or (Item = 'x');
     End;
+
 
   Var
     OperandStack: TStack<Extended>;
