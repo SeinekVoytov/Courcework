@@ -48,7 +48,7 @@ Function IsMathExprValid(Const Expr: String): Boolean;
       WasDot: Boolean;
     Begin
       Result := True;
-      if (Expr[Index] = '.') or ((Expr[Index] = '0') and (Index + 1 <= Length(Expr)) and (CharInSet(Expr[Index + 1], ['0'..'9']))) then
+      if (Expr[Index] = '.') or ((Expr[Index] = '0') and (Index < Length(Expr)) and (CharInSet(Expr[Index + 1], ['0'..'9']))) then
         Begin
           Result := False;
         End
@@ -74,7 +74,7 @@ Function IsMathExprValid(Const Expr: String): Boolean;
       Dec(Index);
     End;
 
-  Function CheckParenthesis(): Boolean;
+  Function CheckParentheses(): Boolean;
     Var
       I, ParenthesisCounter: Integer;
       CurrSymbol: Char;
@@ -112,7 +112,7 @@ Function IsMathExprValid(Const Expr: String): Boolean;
   Begin
     I := 1;
     Len := Length(Expr);
-    Result := CheckParenthesis();
+    Result := CheckParentheses();
     while (I <= Len) and (Result) do
       Begin
         CurrSymbol := Expr[I];
@@ -128,12 +128,12 @@ Function IsMathExprValid(Const Expr: String): Boolean;
                       Begin
                         Inc(I);
                       End;
-                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p'])));
+                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (Expr[I] = 'x') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p'])));
                     while (TempIndex > 1) and (Expr[TempIndex] = ' ') do
                       Begin
                         Dec(TempIndex);
                       End;
-                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p'])));
+                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = 'x') or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p'])));
                     Dec(I);
                   End
                 else if IsNumber(CurrSymbol) then
