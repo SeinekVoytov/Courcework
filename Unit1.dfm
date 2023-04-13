@@ -11,30 +11,50 @@ object Form1: TForm1
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Graph: TPaintBox
-    Left = 272
-    Top = 48
-    Width = 553
-    Height = 489
-  end
-  object Input: TEdit
-    Left = 8
-    Top = 8
-    Width = 209
-    Height = 21
+  object GraphPanel: TPanel
+    Left = 274
+    Top = 0
+    Width = 600
+    Height = 577
+    Align = alClient
     TabOrder = 0
-    Text = 'Input'
-    OnChange = InputChange
+    object GraphPaintBox: TPaintBox
+      Left = 1
+      Top = 1
+      Width = 598
+      Height = 575
+      Align = alClient
+      OnPaint = GraphPaintBoxPaint
+      ExplicitLeft = -135
+      ExplicitTop = 113
+    end
   end
-  object ShowGraph: TButton
-    Left = 64
-    Top = 48
-    Width = 75
-    Height = 25
-    Caption = 'ShowGraph'
+  object EditPanel: TPanel
+    Left = 0
+    Top = 0
+    Width = 274
+    Height = 577
+    Align = alLeft
     TabOrder = 1
-    OnClick = ShowGraphClick
+    object InputEdit: TEdit
+      Left = 16
+      Top = 38
+      Width = 209
+      Height = 21
+      TabOrder = 0
+      Text = 'InputEdit'
+      OnChange = InputEditChange
+    end
+    object ShowGraphButton: TButton
+      Left = 48
+      Top = 65
+      Width = 121
+      Height = 25
+      Caption = 'ShowGraphButton'
+      TabOrder = 1
+    end
   end
 end

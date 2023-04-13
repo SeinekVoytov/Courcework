@@ -1,0 +1,79 @@
+unit Unit1;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Stack, Calculate;
+
+type
+  TForm1 = class(TForm)
+    GraphPanel: TPanel;
+    GraphPaintBox: TPaintBox;
+    EditPanel: TPanel;
+    InputEdit: TEdit;
+    ShowGraphButton: TButton;
+    procedure InputEditChange(Sender: TObject);
+    procedure ShowGraphButtonClick(Sender: TObject);
+    procedure GraphPaintBoxPaint(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+
+  private
+    { Private declarations }
+  public
+    GraphPicture: TBitmap;
+  end;
+
+var
+  Form1: TForm1;
+
+implementation
+
+{$R *.dfm}
+
+Procedure DeleteSpaces(var Expr: String);
+  Begin
+    Expr := StringReplace(Expr, ' ', '', [rfReplaceAll]);
+  End;
+
+procedure TForm1.FormCreate(Sender: TObject);
+  begin
+    GraphPicture := TBitmap.Create;
+  end;
+
+procedure TForm1.GraphPaintBoxPaint(Sender: TObject);
+  begin
+    GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+    GraphPaintBox.Canvas.MoveTo(GraphPaintBox.Width div 2, 0);
+    GraphPaintBox.Canvas.LineTo(GraphPaintBox.Width div 2, GraphPaintBox.Height);
+  end;
+
+procedure TForm1.InputEditChange(Sender: TObject);
+Var
+    Text: String;
+begin
+  Text := Lowercase(InputEdit.Text);
+  if (not TChecker.IsMathExprValid(Text)) then
+    Begin
+      ShowGraphButton.Enabled := False;
+    End
+  else
+    Begin
+      ShowGraphButton.Enabled := True;
+    End;
+
+
+end;
+
+procedure TForm1.ShowGraphButtonClick(Sender: TObject);
+  begin
+    GraphPicture.Canvas.MoveTo(GraphPaintBox.Width div 2, 0);
+    GraphPicture.Canvas.LineTo(GraphPaintBox.Width div 2, GraphPaintBox.Height);
+    GraphPicture.Canvas.MoveTo(0, GraphPaintBox.Height div 2);
+    GraphPicture.Canvas.LineTo(GraphPaintBox.Width, GraphPaintBox.Height div 2);
+    GraphPaintBox.Invalidate;
+  end;
+
+
+
+end.

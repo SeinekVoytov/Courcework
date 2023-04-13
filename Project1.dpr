@@ -5,7 +5,8 @@ uses
   Unit1 in 'Unit1.pas' {Form1},
   Converter in 'Converter.pas',
   Checker in 'Checker.pas',
-  Stack in 'Stack.pas';
+  Stack in 'Stack.pas',
+  Calculate in 'Calculate.pas';
 
 {$R *.res}
 
