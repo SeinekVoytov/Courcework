@@ -1,10 +1,10 @@
-unit Unit1;
+﻿unit Unit1;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Stack, Calculate;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Calculate, Converter;
 
 type
   TForm1 = class(TForm)
@@ -13,14 +13,23 @@ type
     InputEdit: TEdit;
     ShowGraphButton: TButton;
     GraphPaintBox: TPaintBox;
+    RangeFromEdit: TEdit;
+    RangeToEdit: TEdit;
+    RangeLabel: TLabel;
+    FromLabel: TLabel;
+    ToLabel: TLabel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure RangeFromEditChange(Sender: TObject);
+    procedure RangeToEditChange(Sender: TObject);
 
   private
     { Private declarations }
   public
     GraphPicture: TBitmap;
+    DotArray: array of Extended;
+    RangeFrom, RangeTo: Integer;
   end;
 
 var
@@ -33,6 +42,16 @@ implementation
 Procedure DeleteSpaces(var Expr: String);
   Begin
     Expr := StringReplace(Expr, ' ', '', [rfReplaceAll]);
+  End;
+
+Function CheckInput(Const s: String): Boolean;
+  Begin
+    try
+      StrToInt(s);
+      Result := True;
+    except
+      Result := False;
+    end;
   End;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -61,8 +80,27 @@ begin
     ShowGraphButton.Enabled := False
   else
     ShowGraphButton.Enabled := True;
+end;
 
 
+procedure TForm1.RangeFromEditChange(Sender: TObject);
+begin
+  if (not CheckInput(RangeFromEdit.Text)) then
+    Begin
+      // покраснение рамки edit и блокировка кнопки
+    End
+  else
+    RangeFrom :=  StrToInt(RangeFromEdit.Text);
+end;
+
+procedure TForm1.RangeToEditChange(Sender: TObject);
+begin
+  if (not CheckInput(RangeFromEdit.Text)) then
+    Begin
+      // покраснение рамки edit и блокировка кнопки
+    End
+  else
+    RangeTo :=  StrToInt(RangeFromEdit.Text);
 end;
 
 end.

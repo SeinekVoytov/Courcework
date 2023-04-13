@@ -43,6 +43,11 @@ implementation
 
 {$R *.dfm}
 
+Procedure DeleteSpaces(var Expr: String);
+  Begin
+    Expr := StringReplace(Expr, ' ', '', [rfReplaceAll]);
+  End;
+
 Function CheckInput(Const s: String): Boolean;
   Begin
     try

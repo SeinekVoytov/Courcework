@@ -38,10 +38,10 @@ implementation
       Expr := StringReplace(Expr, 'arccos', '_', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'arctg', '{', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'arcctg', '}', [rfReplaceAll]);
-      Expr := StringReplace(Expr, 'ctg', '$', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'sin', '!', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'cos', '@', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'tg', '#', [rfReplaceAll]);
+      Expr := StringReplace(Expr, 'ctg', '$', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'ln', '%', [rfReplaceAll]);
     End;
 
@@ -78,11 +78,6 @@ implementation
         End;
       Result := Copy(Expr, Index, I - Index);
       Index := I - 1;
-    End;
-
-  Procedure DeleteSpaces(var Expr: String);
-    Begin
-      Expr := StringReplace(Expr, ' ', '', [rfReplaceAll]);
     End;
 
   Procedure Convert(Var SignStack: TStack<TSign>; Var OperandStack: TStack<String>; Var Sign: TSign);
@@ -150,7 +145,6 @@ implementation
   Begin
     InitPriority(Priority);
     ReplaceFunctions(Expr);
-     DeleteSpaces(Expr);
     Expr := '(' + Expr + ')';
     Len := Length(Expr);
     OperandStack := TStack<String>.Create(Len);
@@ -276,8 +270,8 @@ implementation
 
     Result := OperandStack.Peek();
 
-    OperandStack.Destroy();
-    SignStack.Destroy();
+    //OperandStack.Destroy();
+    //SignStack.Destroy();
   End;
 
 end.

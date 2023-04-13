@@ -23,7 +23,7 @@ implementation
 
   destructor TStack<T>.Destroy();
     Begin
-      //FreeMem(Pointer(Stack), SizeOf(T) * Length(Stack));
+      FreeMem(Pointer(Stack), SizeOf(T) * Length(Stack));
       inherited;
     End;
 

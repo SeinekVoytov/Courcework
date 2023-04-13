@@ -43,6 +43,11 @@ implementation
 
 {$R *.dfm}
 
+Procedure DeleteSpaces(var Expr: String);
+  Begin
+    Expr := StringReplace(Expr, ' ', '', [rfReplaceAll]);
+  End;
+
 Function CheckInput(Const s: String): Boolean;
   Begin
     try
@@ -104,7 +109,8 @@ end;
 
 procedure TForm1.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX, CurrY, Step, XOffset, YOffset: Real;
+    Step: Real;
+    CurrX, CurrY: Extended;
     DotNumber, I: Integer;
 begin
 
@@ -114,27 +120,15 @@ begin
 //  GraphPicture.Canvas.MoveTo(0, Trunc((CurrY + 10) * 100));
 //  CurrX := RangeFrom + Step;
   //DotNumber := (RangeTo - RangeFrom) /
+  CurrX := RangeFrom;
   DotNumber := 1000;
   SetLength(DotArray, DotNumber);
-  CurrX := RangeFrom;
 
   for I := 0 to DotNumber - 1 do
     Begin
       DotArray[I] := -TCalculate.Calculate(PolNotExpr, CurrX);
       CurrX := CurrX + Step;
     End;
-
-  CurrX := 0;
-  CurrY := Trunc(DotArray[0] * 100);
-  XOffset := GraphPaintBox.Width / DotNumber;
-  YOffset := GraphPaintBox.Height / 2;
-  GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 100 + YOffset));
-  for I := 1 to DotNumber - 1 do
-    Begin
-      CurrX := CurrX + XOffset;
-      GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * 100 + YOffset));
-    End;
-
 
 
   GraphPaintBox.Invalidate;
