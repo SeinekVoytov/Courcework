@@ -37,13 +37,15 @@ implementation
       Result := ((Item >= '0') and (Item <= '9')) or (Item = 'x');
     End;
 
+  Const HalfPi: Extended = Pi/2;
+
   Var
-    OperandStack: TStack<Extended>;
+    OperandStack: TStack<Real>;
     Index: Integer;
     CurrSymbol: Char;
-    Operand1, Operand2, Temp: Extended;
+    Operand1, Operand2, TempValue: Extended;
   Begin
-    OperandStack := TStack<Extended>.Create(Length(Expr));
+    OperandStack := TStack<Real>.Create(Length(Expr));
     Index := Length(Expr);
     while (Index > 0) do
       Begin
@@ -75,15 +77,33 @@ implementation
                     '@':
                       OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1), -3));
                     '#':
-                      OperandStack.Push(System.Math.RoundTo(System.Sin(Operand1) / System.Cos(Operand1), -3));
+                      Begin
+                        TempValue := Operand1 / Pi;
+                        if (Abs(Frac(TempValue)) > 0.4) and (Abs(Frac(TempValue)) < 0.6) then
+                          OperandStack.Push(Math.NaN)
+                        else
+                          OperandStack.Push(System.Math.RoundTo(System.Sin(Operand1) / System.Cos(Operand1), -3));
+                      End;
                     '$':
-                      OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1) / System.Sin(Operand1), -3));
+                      Begin
+                        TempValue := Operand1 / Pi;
+                        if (Abs(Frac(TempValue)) > 0.9) or (Abs(Frac(TempValue)) < 0.1) then
+                            OperandStack.Push(Math.NaN)
+                        else
+                          OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1) / System.Sin(Operand1), -3));
+                      End;
                     '%':
                       OperandStack.Push(System.Math.RoundTo(System.Ln(Operand1), -3));
                     '&':
-                      OperandStack.Push(System.Math.RoundTo(System.Math.ArcSin(Operand1), -3));
+                      if (Operand1 < -1) or (Operand1 > 1) then
+                        OperandStack.Push(Math.NaN)
+                      else
+                        OperandStack.Push(System.Math.RoundTo(System.Math.ArcSin(Operand1), -3));
                     '_':
-                      OperandStack.Push(System.Math.RoundTo(System.Math.ArcCos(Operand1), -3));
+                      if (Operand1 < -1) or (Operand1 > 1) then
+                        OperandStack.Push(Math.NaN)
+                      else
+                        OperandStack.Push(System.Math.RoundTo(System.Math.ArcCos(Operand1), -3));
                     '{':
                       OperandStack.Push(System.Math.RoundTo(System.ArcTan(Operand1), -3));
                     '}':

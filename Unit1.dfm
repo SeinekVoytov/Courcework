@@ -84,6 +84,7 @@ object Form1: TForm1
       Width = 41
       Height = 21
       TabOrder = 2
+      Text = '-10'
       OnChange = RangeFromEditChange
     end
     object RangeToEdit: TEdit
@@ -92,6 +93,7 @@ object Form1: TForm1
       Width = 45
       Height = 21
       TabOrder = 3
+      Text = '10'
       OnChange = RangeToEditChange
     end
   end
