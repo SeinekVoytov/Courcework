@@ -35,7 +35,7 @@ type
   end;
 
 const
-  IterationCount = 100000;
+  IterationCount = 10000;
 var
   Form1: TForm1;
 
@@ -104,38 +104,55 @@ end;
 
 procedure TForm1.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX, CurrY, Step, XOffset, YOffset: Real;
+    CurrX, CurrY, Step, XOffset, YOffset, MaxY, MinY, ScaleX, ScaleY: Real;
     DotNumber, I: Integer;
+    WasNaN: Boolean;
 begin
-
+//  RangeFrom := -10;
+//  RangeTo := 10;
   PolNotExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   Step := (RangeTo - RangeFrom) / IterationCount;
-//  CurrY := -TCalculate.Calculate(PolNotExpr, RangeFrom);
-//  GraphPicture.Canvas.MoveTo(0, Trunc((CurrY + 10) * 100));
-//  CurrX := RangeFrom + Step;
-  //DotNumber := (RangeTo - RangeFrom) /
   DotNumber := IterationCount;
   SetLength(DotArray, DotNumber);
   CurrX := RangeFrom;
+  MaxY := Math.NegInfinity;
+  MinY := Math.Infinity;
 
   for I := 0 to DotNumber - 1 do
     Begin
-      DotArray[I] := -TCalculate.Calculate(PolNotExpr, CurrX);
+        DotArray[I] := (-TCalculate.Calculate(PolNotExpr, CurrX));
+        if (FloatToStr(DotArray[I]) <> 'NAN') then
+          Begin
+            if (DotArray[I] > MaxY) then
+              MaxY := DotArray[I];
+
+            if (DotArray[I] < MinY) then
+              MinY := DotArray[I];
+          End;
       CurrX := CurrX + Step;
     End;
 
   CurrX := 0;
-  CurrY := Trunc(DotArray[0] * 100);
   XOffset := GraphPaintBox.Width / DotNumber;
   YOffset := GraphPaintBox.Height / 2;
-  GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 100 + YOffset));
+  WasNaN := False;
+  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
+  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
+  GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * ScaleY + YOffset));
   for I := 1 to DotNumber - 1 do
     Begin
+      if (FloatToStr(DotArray[I]) = 'NAN') then
+        WasNaN := True
+      else if (WasNan) then
+        Begin
+          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
+          WasNan := False;
+        End
+      else
+        GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
+
       CurrX := CurrX + XOffset;
-      GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * 100 + YOffset));
     End;
-
-
 
   GraphPaintBox.Invalidate;
 end;

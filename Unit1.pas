@@ -108,8 +108,8 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
     DotNumber, I: Integer;
     WasNaN: Boolean;
 begin
-  RangeFrom := -10;
-  RangeTo := 10;
+//  RangeFrom := -10;
+//  RangeTo := 10;
   PolNotExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   Step := (RangeTo - RangeFrom) / IterationCount;
   DotNumber := IterationCount;
@@ -133,15 +133,8 @@ begin
     End;
 
   CurrX := 0;
-//  CurrY := Trunc(DotArray[0] * 100);
   XOffset := GraphPaintBox.Width / DotNumber;
   YOffset := GraphPaintBox.Height / 2;
-//  GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 100+ YOffset));
-//  for I := 1 to DotNumber - 1 do
-//    Begin
-//      CurrX := CurrX + XOffset;
-//      GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * 100 + YOffset));
-//    End;
   WasNaN := False;
   ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
   ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
