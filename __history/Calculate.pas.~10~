@@ -122,8 +122,6 @@ implementation
                     '*':
                       OperandStack.Push(Operand1 * Operand2);
                     '/':
-                      if (Operand2 < -0.1) and (Operand2 > 0.1) then
-
                       OperandStack.Push(Operand1 / Operand2);
                     '^':
                       OperandStack.Push(Math.Power(Operand1, Operand2));
