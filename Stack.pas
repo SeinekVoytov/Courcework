@@ -23,7 +23,7 @@ implementation
 
   destructor TStack<T>.Destroy();
     Begin
-      Self := nil;
+      Stack := nil;
       inherited;
     End;
 
