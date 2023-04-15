@@ -61,9 +61,9 @@ object Form1: TForm1
     end
     object MathInputPanel: TPanel
       Left = -1
-      Top = 266
+      Top = 167
       Width = 269
-      Height = 185
+      Height = 95
       BevelOuter = bvNone
       TabOrder = 2
       object SinButton: TButton

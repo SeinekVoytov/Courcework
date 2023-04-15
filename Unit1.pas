@@ -181,7 +181,7 @@ begin
   XOffset := GraphPaintBox.Width / DotNumber;
   YOffset := GraphPaintBox.Height / 2;
   //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
-  WasNaN := False;
+  WasNaN := True;
   ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
   ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
   GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 10 + YOffset));
