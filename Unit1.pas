@@ -47,6 +47,9 @@ type
     procedure ACosButtonClick(Sender: TObject);
     procedure ATgButtonClick(Sender: TObject);
     procedure ACtgButtonClick(Sender: TObject);
+    procedure SqrtButtonClick(Sender: TObject);
+    procedure LogButtonClick(Sender: TObject);
+    procedure LnButtonClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -110,7 +113,6 @@ begin
   else
     ShowGraphButton.Enabled := True;
 end;
-
 
 procedure TForm1.MathInputButtonClick(Sender: TObject);
 Var
@@ -314,6 +316,45 @@ begin
   InputEdit.Text := CurrInput;
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 7;
+end;
+
+procedure TForm1.SqrtButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('sqrt()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 5;
+end;
+
+procedure TForm1.LogButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('log10()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 6;
+end;
+
+procedure TForm1.LnButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('ln()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 3;
 end;
 
 end.

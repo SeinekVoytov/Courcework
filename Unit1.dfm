@@ -147,6 +147,7 @@ object Form1: TForm1
         Caption = #8730
         DisabledImageIndex = 42
         TabOrder = 8
+        OnClick = SqrtButtonClick
       end
       object LogButton: TButton
         Left = 73
@@ -155,6 +156,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'Log'#8321#8320
         TabOrder = 9
+        OnClick = LogButtonClick
       end
       object LnButton: TButton
         Left = 104
@@ -163,6 +165,7 @@ object Form1: TForm1
         Height = 25
         Caption = 'Ln'
         TabOrder = 10
+        OnClick = LnButtonClick
       end
     end
     object RangeAndBuildPanel: TPanel

@@ -16,7 +16,8 @@ implementation
   Function IsCharValid(Const Symbol: Char): Boolean;
     Begin
       Result := CharInSet(Symbol, ['0'..'9', '+', '-', '*', '/', '^', '(', '.',
-                                   ')', 's', 'c', 't', 'l', 'x', ' ', 'a', 'p']);
+                                   ')', 's', 'c', 't', 'l', 'x', ' ', 'a', 'p',
+                                   'g', 'q', 'r']);
     End;
 
   Function IsNumber(Const Item: Char): Boolean;
@@ -126,23 +127,59 @@ implementation
                   Begin
                     Result := Result and CheckNumber(I);
                   End
-                else if (CurrSymbol = 's') or (CurrSymbol = 'c') then
+                else if (CurrSymbol = 's') then
                   Begin
                     if (I < Len - 4) then
                       Begin
                         Temp := Copy(Expr, I, 4);
-                        Result := ((Temp = 'sin(') or (Temp = 'cos(') or (Temp = 'ctg(')) and (Expr[I + 4] <> ')');
+                        Result := (Temp = 'sin(') and (Expr[I + 4] <> ')');
+                        if (I < Len - 5) and (not Result) then
+                          Begin
+                            Temp := Copy(Expr, I, 5);
+                            Result := (Temp = 'sqrt(') and (Expr[I + 5] <> ')');
+                            Inc(I, 4);
+                          End
+                        else
+                          Inc(I, 3);
+                      End
+                    else
+                      Result := False;
+                  End
+                else if (CurrSymbol = 'c') then
+                  Begin
+                    if (I < Len - 4) then
+                      Begin
+                        Temp := Copy(Expr, I, 4);
+                        Result := ((Temp = 'cos(') or (Temp = 'ctg(')) and (Expr[I + 4] <> ')');
                         Inc(I, 3);
                       End
                     else
                       Result := False;
                   End
-                else if (CurrSymbol = 't') or (CurrSymbol = 'l') then
+                else if (CurrSymbol = 'l') then
                   Begin
                     if (I < Len - 3) then
                       Begin
                         Temp := Copy(Expr, I, 3);
-                        Result := ((Temp = 'tg(') or (Temp = 'ln(')) and (Expr[I + 3] <> ')');
+                        Result := (Temp = 'ln(') and (Expr[I + 3] <> ')');
+                        if (I < Len - 6) and (not Result) then
+                          Begin
+                            Temp := Copy(Expr, I, 6);
+                            Result := (Temp = 'log10(') and (Expr[I + 6] <> ')');
+                            Inc(I, 5);
+                          End
+                        else
+                          Inc(I, 2);
+                      End
+                    else
+                      Result := False;
+                  End
+                else if (CurrSymbol = 't') then
+                  Begin
+                    if (I < Len - 3) then
+                      Begin
+                        Temp := Copy(Expr, I, 3);
+                        Result := (Temp = 'tg(') and (Expr[I + 3] <> ')');
                         Inc(I, 2);
                       End
                     else

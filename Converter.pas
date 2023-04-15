@@ -12,14 +12,14 @@ implementation
   class Function TConverter.ConvertToPolishNotation(Expr: String): String;
 
   Type
-    TSign = (Uno_Minus, Uno_Plus, Sin, Cos, Tg, Ctg, ArcSin, ArcCos, ArcTg, ArcCtg, Ln, Caret, Minus, Plus, Star, Slash, Open, Close);
+    TSign = (Uno_Minus, Uno_Plus, Sin, Cos, Tg, Ctg, ArcSin, ArcCos, ArcTg, ArcCtg, Ln, Log10, Sqrt, Caret, Minus, Plus, Star, Slash, Open, Close);
 
   Type
     TPriority = array [TSign] of Integer;
 
   Function IsFunction(Item: Char): Boolean;
     Begin
-      Result := CharInSet(Item, ['!', '@', '#', '$', '%', '&', '_', '{', '}']);
+      Result := CharInSet(Item, ['!', '@', '#', '$', '%', '&', '?', '_', '{', '}', '''']);
     End;
 
   Function IsOperand(Item: Char): Boolean;
@@ -29,7 +29,7 @@ implementation
 
   Function IsSign(Item: Char): Boolean;
     Begin
-      Result := CharInSet(Item, ['+', '-', '*', '/', '^', '!', '@', '#', '$', '&', '_', '{', '}', '~']);
+      Result := CharInSet(Item, ['+', '-', '*', '/', '^', '!', '@', '#', '$', '&', '_', '{', '}', '~', '?', '''']);
     End;
 
   Procedure ReplaceFunctions(Var Expr: String);
@@ -38,6 +38,8 @@ implementation
       Expr := StringReplace(Expr, 'arccos', '_', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'arctg', '{', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'arcctg', '}', [rfReplaceAll]);
+      Expr := StringReplace(Expr, 'log10', '?', [rfReplaceAll]);
+      Expr := StringReplace(Expr, 'sqrt', '''', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'ctg', '$', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'sin', '!', [rfReplaceAll]);
       Expr := StringReplace(Expr, 'cos', '@', [rfReplaceAll]);
@@ -63,6 +65,8 @@ implementation
       Priority[Tg] := 4;
       Priority[Ctg] := 4;
       Priority[Ln] := 4;
+      Priority[Log10] := 4;
+      Priority[Sqrt] := 4;
       Priority[Uno_Minus] := 5;
       Priority[Uno_Plus] := 5;
     End;
@@ -92,6 +96,7 @@ implementation
     Sign := SignStack.Pop();
     if (Sign = Uno_Minus) or (Sign = Uno_Plus) or (Sign = Sin) or
        (Sign = Cos) or (Sign = Tg) or (Sign = Ctg) or (Sign = Ln) or
+       (Sign = Sqrt) or (Sign = Log10) or
        (Sign = ArcSin) or (Sign = ArcCos) or (Sign = ArcTg) or (Sign = ArcCtg) then
       Begin
         LeftPart := OperandStack.Pop();
@@ -116,6 +121,10 @@ implementation
               LeftPart := '{ ' + LeftPart;
             ArcCtg:
               LeftPart := '} ' + LeftPart;
+            Sqrt:
+              LeftPart := '''' + LeftPart;
+            Log10:
+              LeftPart := '?' + LeftPart;
           end;
       End
     else
@@ -198,6 +207,10 @@ implementation
                   SignStack.Push(ArcTg);
                 '}':
                   SignStack.Push(ArcCtg);
+                '''':
+                  SignStack.Push(Sqrt);
+                '?':
+                  SignStack.Push(Log10);
               end;
           End
         else
