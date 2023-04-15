@@ -28,8 +28,10 @@ type
     ACosButton: TButton;
     ATgButton: TButton;
     ACtgButton: TButton;
-    Button4: TButton;
+    SqrtButton: TButton;
     RangeAndBuildPanel: TPanel;
+    LogButton: TButton;
+    LnButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);

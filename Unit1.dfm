@@ -60,8 +60,8 @@ object Form1: TForm1
       OnClick = MathInputButtonClick
     end
     object MathInputPanel: TPanel
-      Left = 0
-      Top = 256
+      Left = -1
+      Top = 266
       Width = 269
       Height = 185
       BevelOuter = bvNone
@@ -139,13 +139,30 @@ object Form1: TForm1
         TabOrder = 7
         OnClick = ACtgButtonClick
       end
-      object Button4: TButton
-        Left = 37
-        Top = 65
+      object SqrtButton: TButton
+        Left = 42
+        Top = 60
         Width = 30
         Height = 25
         Caption = #8730
+        DisabledImageIndex = 42
         TabOrder = 8
+      end
+      object LogButton: TButton
+        Left = 73
+        Top = 60
+        Width = 30
+        Height = 25
+        Caption = 'Log'#8321#8320
+        TabOrder = 9
+      end
+      object LnButton: TButton
+        Left = 104
+        Top = 60
+        Width = 30
+        Height = 25
+        Caption = 'Ln'
+        TabOrder = 10
       end
     end
     object RangeAndBuildPanel: TPanel
