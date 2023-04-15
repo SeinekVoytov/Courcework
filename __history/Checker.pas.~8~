@@ -145,12 +145,12 @@ implementation
                     else
                       Result := False;
                   End
-                else if (CurrSymbol = 'c') then
+                else if (CurrSymbol = 'c') or (CurrSymbol = 'a') then
                   Begin
                     if (I < Len - 4) then
                       Begin
                         Temp := Copy(Expr, I, 4);
-                        Result := ((Temp = 'cos(') or (Temp = 'ctg(')) and (Expr[I + 4] <> ')');
+                        Result := ((Temp = 'abs(') or (Temp = 'cos(') or (Temp = 'ctg(')) and (Expr[I + 4] <> ')');
                         Inc(I, 3);
                       End
                     else
@@ -189,10 +189,7 @@ implementation
                   Begin
                     if (I < Len - 4) then
                       Begin
-                        Temp := Copy(Expr, I, 3);
-                        Result := (Temp = 'arc') and (CharInSet(Expr[I + 3], ['s', 'c', 't']));
-                        if (not Result) then
-                          Result := (Temp = 'abs') and (Expr[I + 3] = '(') and (Expr[I + 4] <> ')');
+                        Result := (Copy(Expr, I, 3) = 'arc') and (CharInSet(Expr[I + 3], ['s', 'c', 't']));
                         Inc(I, 2);
                       End
                     else
