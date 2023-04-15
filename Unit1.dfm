@@ -28,8 +28,8 @@ object Form1: TForm1
       Height = 575
       Align = alClient
       OnPaint = GraphPaintBoxPaint
-      ExplicitLeft = -135
-      ExplicitTop = 113
+      ExplicitLeft = 6
+      ExplicitTop = 2
     end
   end
   object EditPanel: TPanel
@@ -38,28 +38,8 @@ object Form1: TForm1
     Width = 274
     Height = 577
     Align = alLeft
+    BevelOuter = bvNone
     TabOrder = 1
-    object RangeLabel: TLabel
-      Left = 16
-      Top = 77
-      Width = 110
-      Height = 13
-      Caption = #1043#1088#1072#1085#1080#1094#1099' '#1087#1086#1089#1090#1088#1086#1077#1085#1080#1103':'
-    end
-    object FromLabel: TLabel
-      Left = 20
-      Top = 99
-      Width = 14
-      Height = 13
-      Caption = #1054#1090
-    end
-    object ToLabel: TLabel
-      Left = 87
-      Top = 99
-      Width = 13
-      Height = 13
-      Caption = #1076#1086
-    end
     object InputEdit: TEdit
       Left = 16
       Top = 36
@@ -68,42 +48,161 @@ object Form1: TForm1
       TabOrder = 0
       OnChange = InputEditChange
     end
-    object ShowGraphButton: TButton
-      Left = 56
-      Top = 137
-      Width = 121
-      Height = 25
-      Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
-      TabOrder = 1
-      OnClick = ShowGraphButtonClick
-    end
-    object RangeFromEdit: TEdit
-      Left = 40
-      Top = 96
-      Width = 41
-      Height = 21
-      TabOrder = 2
-      Text = '-10'
-      OnChange = RangeFromEditChange
-    end
-    object RangeToEdit: TEdit
-      Left = 113
-      Top = 96
-      Width = 45
-      Height = 21
-      TabOrder = 3
-      Text = '10'
-      OnChange = RangeToEditChange
-    end
     object MathInputButton: TButton
       Left = 200
-      Top = 34
+      Top = 36
       Width = 25
-      Height = 25
+      Height = 23
       Hint = #1052#1072#1090#1077#1084#1072#1090#1080#1095#1077#1089#1082#1080#1081' '#1074#1074#1086#1076
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 4
+      TabOrder = 1
+      OnClick = MathInputButtonClick
+    end
+    object MathInputPanel: TPanel
+      Left = 0
+      Top = 256
+      Width = 269
+      Height = 185
+      BevelOuter = bvNone
+      TabOrder = 2
+      object SinButton: TButton
+        Left = 42
+        Top = 8
+        Width = 30
+        Height = 25
+        Caption = 'Sin'
+        TabOrder = 0
+        OnClick = SinButtonClick
+      end
+      object CosButton: TButton
+        Left = 73
+        Top = 8
+        Width = 30
+        Height = 25
+        Caption = 'Cos'
+        TabOrder = 1
+        OnClick = CosButtonClick
+      end
+      object TgButton: TButton
+        Left = 104
+        Top = 8
+        Width = 30
+        Height = 25
+        Caption = 'Tg'
+        TabOrder = 2
+        OnClick = TgButtonClick
+      end
+      object CtgButton: TButton
+        Left = 135
+        Top = 8
+        Width = 30
+        Height = 25
+        Caption = 'Ctg'
+        TabOrder = 3
+        OnClick = CtgButtonClick
+      end
+      object ASinButton: TButton
+        Left = 42
+        Top = 34
+        Width = 30
+        Height = 25
+        Caption = 'ASin'
+        TabOrder = 4
+        OnClick = ASinButtonClick
+      end
+      object ACosButton: TButton
+        Left = 73
+        Top = 34
+        Width = 30
+        Height = 25
+        Caption = 'ACos'
+        TabOrder = 5
+        TabStop = False
+        OnClick = ACosButtonClick
+      end
+      object ATgButton: TButton
+        Left = 104
+        Top = 34
+        Width = 30
+        Height = 25
+        Caption = 'ATg'
+        TabOrder = 6
+        OnClick = ATgButtonClick
+      end
+      object ACtgButton: TButton
+        Left = 135
+        Top = 34
+        Width = 30
+        Height = 25
+        Caption = 'ACtg'
+        TabOrder = 7
+        OnClick = ACtgButtonClick
+      end
+      object Button4: TButton
+        Left = 37
+        Top = 65
+        Width = 30
+        Height = 25
+        Caption = #8730
+        TabOrder = 8
+      end
+    end
+    object RangeAndBuildPanel: TPanel
+      Left = 0
+      Top = 65
+      Width = 269
+      Height = 96
+      BevelOuter = bvNone
+      TabOrder = 3
+      object RangeLabel: TLabel
+        Left = 17
+        Top = 9
+        Width = 110
+        Height = 13
+        Caption = #1043#1088#1072#1085#1080#1094#1099' '#1087#1086#1089#1090#1088#1086#1077#1085#1080#1103':'
+      end
+      object ToLabel: TLabel
+        Left = 82
+        Top = 31
+        Width = 13
+        Height = 13
+        Caption = #1076#1086
+      end
+      object FromLabel: TLabel
+        Left = 20
+        Top = 31
+        Width = 14
+        Height = 13
+        Caption = #1054#1090
+      end
+      object RangeFromEdit: TEdit
+        Left = 37
+        Top = 28
+        Width = 41
+        Height = 21
+        TabOrder = 0
+        Text = '-10'
+        OnChange = RangeFromEditChange
+      end
+      object RangeToEdit: TEdit
+        Left = 98
+        Top = 28
+        Width = 45
+        Height = 21
+        TabOrder = 1
+        Text = '10'
+        OnChange = RangeToEditChange
+      end
+      object ShowGraphButton: TButton
+        Left = 37
+        Top = 69
+        Width = 121
+        Height = 25
+        Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
+        TabOrder = 2
+        OnClick = ShowGraphButtonClick
+      end
     end
   end
 end

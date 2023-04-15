@@ -19,12 +19,32 @@ type
     FromLabel: TLabel;
     ToLabel: TLabel;
     MathInputButton: TButton;
+    MathInputPanel: TPanel;
+    SinButton: TButton;
+    CosButton: TButton;
+    TgButton: TButton;
+    CtgButton: TButton;
+    ASinButton: TButton;
+    ACosButton: TButton;
+    ATgButton: TButton;
+    ACtgButton: TButton;
+    Button4: TButton;
+    RangeAndBuildPanel: TPanel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure RangeFromEditChange(Sender: TObject);
     procedure RangeToEditChange(Sender: TObject);
     procedure ShowGraphButtonClick(Sender: TObject);
+    procedure MathInputButtonClick(Sender: TObject);
+    procedure SinButtonClick(Sender: TObject);
+    procedure CosButtonClick(Sender: TObject);
+    procedure TgButtonClick(Sender: TObject);
+    procedure CtgButtonClick(Sender: TObject);
+    procedure ASinButtonClick(Sender: TObject);
+    procedure ACosButtonClick(Sender: TObject);
+    procedure ATgButtonClick(Sender: TObject);
+    procedure ACtgButtonClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -54,9 +74,16 @@ Function CheckInput(Const s: String): Boolean;
     end;
   End;
 
+
+
 procedure TForm1.FormCreate(Sender: TObject);
+//  var
+//    Image: TImage;
   begin
     GraphPicture := TBitmap.Create;
+    MathInputPanel.Visible := False;
+//    Image := TImage.Create(Self);
+//    Image.Picture.LoadFromFile();
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     GraphPicture.Canvas.MoveTo(GraphPaintBox.Width div 2, 0);
     GraphPicture.Canvas.LineTo(GraphPaintBox.Width div 2, GraphPaintBox.Height);
@@ -82,6 +109,17 @@ begin
     ShowGraphButton.Enabled := True;
 end;
 
+
+procedure TForm1.MathInputButtonClick(Sender: TObject);
+Var
+  Temp: Integer;
+begin
+  Temp := MathInputPanel.Top;
+  MathInputPanel.Top := RangeAndBuildPanel.Top;
+  RangeAndBuildPanel.Top := Temp;
+  MathInputPanel.Visible := True;
+
+end;
 
 procedure TForm1.RangeFromEditChange(Sender: TObject);
 begin
@@ -109,8 +147,8 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
     DotNumber, I: Integer;
     WasNaN: Boolean;
 begin
-  RangeFrom := -10;
-  RangeTo := 10;
+//  RangeFrom := -10;
+//  RangeTo := 10;
   PolNotExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   Step := (RangeTo - RangeFrom) / IterationCount;
   DotNumber := IterationCount;
@@ -135,12 +173,12 @@ begin
 
    CurrX := 0;
   XOffset := GraphPaintBox.Width / DotNumber;
-  //YOffset := GraphPaintBox.Height / 2;
-  YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
+  YOffset := GraphPaintBox.Height / 2;
+  //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
   WasNaN := False;
   ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
   ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
-  GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * ScaleY + YOffset));
+  GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 10 + YOffset));
 //  for I := 1 to DotNumber - 1 do
 //    Begin
 //      if (FloatToStr(DotArray[I]) = 'NAN') then
@@ -161,15 +199,119 @@ begin
         WasNaN := True
       else if (WasNan) then
         Begin
-          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] + YOffset));
+          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * 500 + YOffset));
           WasNan := False;
         End
       else
-        GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
+        GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * 500 + YOffset));
 
       CurrX := CurrX + XOffset;
     End;
   GraphPaintBox.Invalidate;
+end;
+
+procedure TForm1.SinButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('sin()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 4;
+end;
+
+procedure TForm1.CosButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('cos()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 4;
+end;
+
+procedure TForm1.TgButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('tg()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 3;
+end;
+
+procedure TForm1.CtgButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('ctg()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 4;
+end;
+
+procedure TForm1.ASinButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('arcsin()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 7;
+end;
+
+procedure TForm1.ACosButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('arccos()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 7;
+end;
+
+procedure TForm1.ATgButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('arctg()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 6;
+end;
+
+procedure TForm1.ACtgButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('arcctg()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 7;
 end;
 
 end.
