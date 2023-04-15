@@ -29,7 +29,7 @@ implementation
 
   Function IsFunction(Item: Char): Boolean;
     Begin
-      Result := CharInSet(Item, ['!', '@', '#', '$', '%', '&', '_', '{', '}', '"', '?']);
+      Result := CharInSet(Item, ['!', '@', '#', '$', '%', '&', '_', '{', '}', '"', '?', '|']);
     End;
 
   Function IsOperand(Item: Char): Boolean;
@@ -107,6 +107,8 @@ implementation
                         OperandStack.Push(System.Math.NaN)
                       else
                         OperandStack.Push(System.Math.RoundTo(System.Sqrt(Operand1), -3));
+                    '|':
+                      OperandStack.Push(System.Math.RoundTo(System.Abs(Operand1), -3));
                     '&':
                       if (Operand1 < -1) or (Operand1 > 1) then
                         OperandStack.Push(Math.NaN)

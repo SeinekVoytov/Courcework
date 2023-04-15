@@ -32,6 +32,7 @@ type
     RangeAndBuildPanel: TPanel;
     LogButton: TButton;
     LnButton: TButton;
+    AbsButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -50,6 +51,7 @@ type
     procedure SqrtButtonClick(Sender: TObject);
     procedure LogButtonClick(Sender: TObject);
     procedure LnButtonClick(Sender: TObject);
+    procedure AbsButtonClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -151,8 +153,8 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
     DotNumber, I: Integer;
     WasNaN: Boolean;
 begin
-//  RangeFrom := -10;
-//  RangeTo := 10;
+  RangeFrom := -10;
+  RangeTo := 10;
   PolNotExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   Step := (RangeTo - RangeFrom) / IterationCount;
   DotNumber := IterationCount;
@@ -357,4 +359,16 @@ begin
   InputEdit.SelStart := CurrCursorPos + 3;
 end;
 
+procedure TForm1.AbsButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('abs()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 4;
+end;
 end.

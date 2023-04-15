@@ -98,7 +98,7 @@ implementation
     Sign := SignStack.Pop();
     if (Sign = Uno_Minus) or (Sign = Uno_Plus) or (Sign = Sin) or
        (Sign = Cos) or (Sign = Tg) or (Sign = Ctg) or (Sign = Ln) or
-       (Sign = Sqrt) or (Sign = Log10) or (Sign = Abs) or
+       (Sign = Sqrt) or (Sign = Log10) or
        (Sign = ArcSin) or (Sign = ArcCos) or (Sign = ArcTg) or (Sign = ArcCtg) then
       Begin
         LeftPart := OperandStack.Pop();
@@ -137,15 +137,15 @@ implementation
         LeftPart := OperandStack.Pop();
           case Sign of
             Caret:
-              LeftPart := '^' + LeftPart + ' ' + RightPart;
+              LeftPart := '^ ' + LeftPart + ' ' + RightPart;
             Minus:
-              LeftPart := '-' + LeftPart + ' ' + RightPart;
+              LeftPart := '- ' + LeftPart + ' ' + RightPart;
             Plus:
-              LeftPart := '+' + LeftPart + ' ' + RightPart;
+              LeftPart := '+ ' + LeftPart + ' ' + RightPart;
             Star:
-              LeftPart := '*' + LeftPart + ' ' + RightPart;
+              LeftPart := '* ' + LeftPart + ' ' + RightPart;
             Slash:
-              LeftPart := '/' + LeftPart + ' ' + RightPart;
+              LeftPart := '/ ' + LeftPart + ' ' + RightPart;
           end;
       End;
 
@@ -215,8 +215,6 @@ implementation
                   SignStack.Push(Sqrt);
                 '?':
                   SignStack.Push(Log10);
-                '|':
-                  SignStack.Push(Abs);
               end;
           End
         else

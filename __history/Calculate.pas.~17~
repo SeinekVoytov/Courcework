@@ -29,7 +29,7 @@ implementation
 
   Function IsFunction(Item: Char): Boolean;
     Begin
-      Result := CharInSet(Item, ['!', '@', '#', '$', '%', '&', '_', '{', '}']);
+      Result := CharInSet(Item, ['!', '@', '#', '$', '%', '&', '_', '{', '}', '"', '?']);
     End;
 
   Function IsOperand(Item: Char): Boolean;
@@ -40,12 +40,12 @@ implementation
   Const HalfPi: Extended = Pi/2;
 
   Var
-    OperandStack: TStack<Extended>;
+    OperandStack: TStack<Real>;
     Index: Integer;
     CurrSymbol: Char;
-    Operand1, Operand2, Temp: Extended;
+    Operand1, Operand2, TempValue: Extended;
   Begin
-    OperandStack := TStack<Extended>.Create(Length(Expr));
+    OperandStack := TStack<Real>.Create(Length(Expr));
     Index := Length(Expr);
     while (Index > 0) do
       Begin
@@ -77,18 +77,48 @@ implementation
                     '@':
                       OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1), -3));
                     '#':
-                      if (Abs(Frac(Operand1 / HalfPi)) < 0.1) or (Abs(Frac(Operand1 / HalfPi)) > 0.9)then
+                      Begin
+                        TempValue := Operand1 / Pi;
+                        if (Abs(Frac(TempValue)) > 0.49) and (Abs(Frac(TempValue)) < 0.51) then
+                          OperandStack.Push(Math.NaN)
+                        else
+                          OperandStack.Push(System.Math.RoundTo(System.Sin(Operand1) / System.Cos(Operand1), -3));
+                      End;
+                    '$':
+                      Begin
+                        TempValue := Operand1 / Pi;
+                        if (Abs(Frac(TempValue)) > 0.99) or (Abs(Frac(TempValue)) < 0.01) then
+                            OperandStack.Push(Math.NaN)
+                        else
+                          OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1) / System.Sin(Operand1), -3));
+                      End;
+                    '%':
+                      if (Operand1 < 0) then
+                        OperandStack.Push(System.Math.NaN)
+                      else
+                        OperandStack.Push(System.Math.RoundTo(System.Ln(Operand1), -3));
+                    '?':
+                      if (Operand1 < 0) then
+                        OperandStack.Push(System.Math.NaN)
+                      else
+                        OperandStack.Push(System.Math.RoundTo(System.Math.Log10(Operand1), -3));
+                    '"':
+                      if (Operand1 < 0) then
+                        OperandStack.Push(System.Math.NaN)
+                      else
+                        OperandStack.Push(System.Math.RoundTo(System.Sqrt(Operand1), -3));
+                    '|':
+                      OperandStack.Push(System.Math.RoundTo(System.Abs(Operand1), -3));
+                    '&':
+                      if (Operand1 < -1) or (Operand1 > 1) then
                         OperandStack.Push(Math.NaN)
                       else
-                        OperandStack.Push(System.Math.RoundTo(System.Sin(Operand1) / System.Cos(Operand1), -3));
-                    '$':
-                      OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1) / System.Sin(Operand1), -3));
-                    '%':
-                      OperandStack.Push(System.Math.RoundTo(System.Ln(Operand1), -3));
-                    '&':
-                      OperandStack.Push(System.Math.RoundTo(System.Math.ArcSin(Operand1), -3));
+                        OperandStack.Push(System.Math.RoundTo(System.Math.ArcSin(Operand1), -3));
                     '_':
-                      OperandStack.Push(System.Math.RoundTo(System.Math.ArcCos(Operand1), -3));
+                      if (Operand1 < -1) or (Operand1 > 1) then
+                        OperandStack.Push(Math.NaN)
+                      else
+                        OperandStack.Push(System.Math.RoundTo(System.Math.ArcCos(Operand1), -3));
                     '{':
                       OperandStack.Push(System.Math.RoundTo(System.ArcTan(Operand1), -3));
                     '}':
@@ -107,7 +137,10 @@ implementation
                     '*':
                       OperandStack.Push(Operand1 * Operand2);
                     '/':
-                      OperandStack.Push(Operand1 / Operand2);
+                      if (Operand2 > -0.1) and (Operand2 < 0.1) then
+                        OperandStack.Push(Math.NaN)
+                      else
+                        OperandStack.Push(Operand1 / Operand2);
                     '^':
                       OperandStack.Push(Math.Power(Operand1, Operand2));
                   End;
