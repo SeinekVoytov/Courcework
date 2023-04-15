@@ -18,6 +18,7 @@ type
     RangeLabel: TLabel;
     FromLabel: TLabel;
     ToLabel: TLabel;
+    MathInputButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -108,8 +109,8 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
     DotNumber, I: Integer;
     WasNaN: Boolean;
 begin
-//  RangeFrom := -10;
-//  RangeTo := 10;
+  RangeFrom := -10;
+  RangeTo := 10;
   PolNotExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   Step := (RangeTo - RangeFrom) / IterationCount;
   DotNumber := IterationCount;
@@ -120,7 +121,7 @@ begin
 
   for I := 0 to DotNumber - 1 do
     Begin
-        DotArray[I] := (-TCalculate.Calculate(PolNotExpr, CurrX));
+        DotArray[I] := GraphPaintBox.Height * (-TCalculate.Calculate(PolNotExpr, CurrX)) / 10000;
         if (FloatToStr(DotArray[I]) <> 'NAN') then
           Begin
             if (DotArray[I] > MaxY) then
@@ -132,20 +133,35 @@ begin
       CurrX := CurrX + Step;
     End;
 
-  CurrX := 0;
+   CurrX := 0;
   XOffset := GraphPaintBox.Width / DotNumber;
-  YOffset := GraphPaintBox.Height / 2;
+  //YOffset := GraphPaintBox.Height / 2;
+  YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
   WasNaN := False;
   ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
   ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
   GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * ScaleY + YOffset));
+//  for I := 1 to DotNumber - 1 do
+//    Begin
+//      if (FloatToStr(DotArray[I]) = 'NAN') then
+//        WasNaN := True
+//      else if (WasNan) then
+//        Begin
+//          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
+//          WasNan := False;
+//        End
+//      else
+//        GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
+//
+//      CurrX := CurrX + XOffset;
+//    End;
   for I := 1 to DotNumber - 1 do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
         WasNaN := True
       else if (WasNan) then
         Begin
-          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
+          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] + YOffset));
           WasNan := False;
         End
       else
@@ -153,7 +169,6 @@ begin
 
       CurrX := CurrX + XOffset;
     End;
-
   GraphPaintBox.Invalidate;
 end;
 

@@ -79,7 +79,7 @@ implementation
                     '#':
                       Begin
                         TempValue := Operand1 / Pi;
-                        if (Abs(Frac(TempValue)) > 0.4) and (Abs(Frac(TempValue)) < 0.6) then
+                        if (Abs(Frac(TempValue)) > 0.49) and (Abs(Frac(TempValue)) < 0.51) then
                           OperandStack.Push(Math.NaN)
                         else
                           OperandStack.Push(System.Math.RoundTo(System.Sin(Operand1) / System.Cos(Operand1), -3));
@@ -87,7 +87,7 @@ implementation
                     '$':
                       Begin
                         TempValue := Operand1 / Pi;
-                        if (Abs(Frac(TempValue)) > 0.9) or (Abs(Frac(TempValue)) < 0.1) then
+                        if (Abs(Frac(TempValue)) > 0.99) or (Abs(Frac(TempValue)) < 0.01) then
                             OperandStack.Push(Math.NaN)
                         else
                           OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1) / System.Sin(Operand1), -3));

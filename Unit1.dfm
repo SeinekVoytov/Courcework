@@ -62,11 +62,10 @@ object Form1: TForm1
     end
     object InputEdit: TEdit
       Left = 16
-      Top = 38
+      Top = 36
       Width = 209
-      Height = 21
+      Height = 23
       TabOrder = 0
-      Text = 'InputEdit'
       OnChange = InputEditChange
     end
     object ShowGraphButton: TButton
@@ -95,6 +94,16 @@ object Form1: TForm1
       TabOrder = 3
       Text = '10'
       OnChange = RangeToEditChange
+    end
+    object MathInputButton: TButton
+      Left = 200
+      Top = 34
+      Width = 25
+      Height = 25
+      Hint = #1052#1072#1090#1077#1084#1072#1090#1080#1095#1077#1089#1082#1080#1081' '#1074#1074#1086#1076
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
     end
   end
 end
