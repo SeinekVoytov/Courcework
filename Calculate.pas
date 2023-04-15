@@ -93,9 +93,15 @@ implementation
                           OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1) / System.Sin(Operand1), -3));
                       End;
                     '%':
-                      OperandStack.Push(System.Math.RoundTo(System.Ln(Operand1), -3));
+                      if (Operand1 < 0) then
+                        OperandStack.Push(System.Math.NaN)
+                      else
+                        OperandStack.Push(System.Math.RoundTo(System.Ln(Operand1), -3));
                     '?':
-                      OperandStack.Push(System.Math.RoundTo(System.Math.Log10(Operand1), -3));
+                      if (Operand1 < 0) then
+                        OperandStack.Push(System.Math.NaN)
+                      else
+                        OperandStack.Push(System.Math.RoundTo(System.Math.Log10(Operand1), -3));
                     '"':
                       if (Operand1 < 0) then
                         OperandStack.Push(System.Math.NaN)
