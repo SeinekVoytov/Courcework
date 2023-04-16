@@ -231,6 +231,7 @@ object Form1: TForm1
         TabOrder = 0
         Text = '-10'
         OnChange = RangeFromEditChange
+        OnExit = RangeFromEditExit
       end
       object RangeToEdit: TEdit
         Left = 98
@@ -240,6 +241,7 @@ object Form1: TForm1
         TabOrder = 1
         Text = '10'
         OnChange = RangeToEditChange
+        OnExit = RangeToEditExit
       end
       object ShowGraphButton: TButton
         Left = 79

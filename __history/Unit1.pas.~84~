@@ -33,6 +33,8 @@ type
     LogButton: TButton;
     LnButton: TButton;
     AbsButton: TButton;
+    ColorBox: TColorBox;
+    PenWidthComboBox: TComboBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -52,18 +54,23 @@ type
     procedure LogButtonClick(Sender: TObject);
     procedure LnButtonClick(Sender: TObject);
     procedure AbsButtonClick(Sender: TObject);
+    procedure InputEditKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure RangeFromEditExit(Sender: TObject);
 
   private
-    { Private declarations }
-  public
-    GraphPicture: TBitmap;
+    CurrXAxisPos: Integer;
     DotArray: array of Extended;
     RangeFrom, RangeTo: Integer;
     PolNotExpr: String;
+  public
+    GraphPicture: TBitmap;
   end;
 
 const
   IterationCount = 10000;
+  ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
+    ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
   Form1: TForm1;
 
@@ -81,16 +88,27 @@ Function CheckInput(Const s: String): Boolean;
     end;
   End;
 
-
-
 procedure TForm1.FormCreate(Sender: TObject);
-//  var
+  var
+    I: Integer;
 //    Image: TImage;
   begin
+    RangeFrom := -10;
+    RangeTo := 10;
+    CurrXAxisPos := GraphPaintBox.Width div 2;
     GraphPicture := TBitmap.Create;
     MathInputPanel.Visible := False;
 //    Image := TImage.Create(Self);
 //    Image.Picture.LoadFromFile();
+    PenWidthComboBox.Items.Add('low');
+    PenWidthComboBox.Items.Add('mid');
+    PenWidthComboBox.Items.Add('high');
+    PenWidthComboBox.ItemIndex := 1;
+    ColorBox.Clear;
+    for I := 0 to High(ColorValues) do
+      ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
+
+    ColorBox.Selected := clBlack;
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     GraphPicture.Canvas.MoveTo(GraphPaintBox.Width div 2, 0);
     GraphPicture.Canvas.LineTo(GraphPaintBox.Width div 2, GraphPaintBox.Height);
@@ -116,6 +134,13 @@ begin
     ShowGraphButton.Enabled := True;
 end;
 
+procedure TForm1.InputEditKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
+    ShowGraphButtonClick(Sender);
+end;
+
 procedure TForm1.MathInputButtonClick(Sender: TObject);
 Var
   Temp: Integer;
@@ -124,12 +149,11 @@ begin
   MathInputPanel.Top := RangeAndBuildPanel.Top;
   RangeAndBuildPanel.Top := Temp;
   MathInputPanel.Visible := True;
-
 end;
 
 procedure TForm1.RangeFromEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeFromEdit.Text)) then
+  if (not CheckInput(RangeFromEdit.Text) or (RangeTo <= RangeFrom)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
     End
@@ -139,7 +163,7 @@ end;
 
 procedure TForm1.RangeToEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeToEdit.Text)) then
+  if (not CheckInput(RangeToEdit.Text) or (RangeTo <= RangeFrom)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
     End
@@ -147,14 +171,23 @@ begin
     RangeTo :=  StrToInt(RangeToEdit.Text);
 end;
 
+procedure TForm1.RangeFromEditExit(Sender: TObject);
+begin
+  if (RangeTo <> RangeFrom) then
+    Begin
+
+    End;
+end;
+
 procedure TForm1.ShowGraphButtonClick(Sender: TObject);
   Var
     CurrX, CurrY, Step, XOffset, YOffset, MaxY, MinY, ScaleX, ScaleY: Real;
     DotNumber, I: Integer;
     WasNaN: Boolean;
+    SelectedValue: String;
 begin
-  RangeFrom := -10;
-  RangeTo := 10;
+//  RangeFrom := -10;
+//  RangeTo := 10;
   PolNotExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   Step := (RangeTo - RangeFrom) / IterationCount;
   DotNumber := IterationCount;
@@ -162,10 +195,12 @@ begin
   CurrX := RangeFrom;
   MaxY := Math.NegInfinity;
   MinY := Math.Infinity;
+  ScaleY := GraphPaintBox.Height / IterationCount;
+
 
   for I := 0 to DotNumber - 1 do
     Begin
-        DotArray[I] := GraphPaintBox.Height * (-TCalculate.Calculate(PolNotExpr, CurrX)) / 10000;
+        DotArray[I] := ScaleY * (-TCalculate.Calculate(PolNotExpr, CurrX));
         if (FloatToStr(DotArray[I]) <> 'NAN') then
           Begin
             if (DotArray[I] > MaxY) then
@@ -177,13 +212,13 @@ begin
       CurrX := CurrX + Step;
     End;
 
-   CurrX := 0;
+  CurrX := 0;
   XOffset := GraphPaintBox.Width / DotNumber;
   YOffset := GraphPaintBox.Height / 2;
   //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
-  WasNaN := False;
-  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
-  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
+  WasNaN := True;
+//  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
+//  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
   GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 10 + YOffset));
 //  for I := 1 to DotNumber - 1 do
 //    Begin
@@ -199,6 +234,16 @@ begin
 //
 //      CurrX := CurrX + XOffset;
 //    End;
+  GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
+
+  SelectedValue := PenWidthComboBox.Items[PenWidthComboBox.ItemIndex];
+  if (SelectedValue = 'mid') then
+    GraphPicture.Canvas.Pen.Width := 3
+  else if (SelectedValue = 'low') then
+    GraphPicture.Canvas.Pen.Width := 1
+  else
+    GraphPicture.Canvas.Pen.Width := 5;
+
   for I := 1 to DotNumber - 1 do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
@@ -213,6 +258,7 @@ begin
 
       CurrX := CurrX + XOffset;
     End;
+
   GraphPaintBox.Invalidate;
 end;
 

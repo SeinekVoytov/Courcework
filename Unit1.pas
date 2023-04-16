@@ -56,20 +56,23 @@ type
     procedure AbsButtonClick(Sender: TObject);
     procedure InputEditKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure RangeFromEditExit(Sender: TObject);
+    procedure RangeToEditExit(Sender: TObject);
 
   private
-
-  public
-    GraphPicture: TBitmap;
+    CurrXAxisPos, CurrYAxisPos: Integer;
     DotArray: array of Extended;
     RangeFrom, RangeTo: Integer;
     PolNotExpr: String;
+    IsGrappBuilt: Boolean;
+  public
+    GraphPicture: TBitmap;
   end;
 
 const
   IterationCount = 10000;
   ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
-    ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
+  ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
   Form1: TForm1;
 
@@ -87,31 +90,76 @@ Function CheckInput(Const s: String): Boolean;
     end;
   End;
 
+Procedure PaintYAxis(const X: Integer);
+begin
+  with Form1.GraphPicture.Canvas do
+  begin
+    MoveTo(X, 0);
+    LineTo(X, Form1.GraphPaintBox.Height);
+  end;
+end;
 
+Procedure PaintXAxis(const Y: Integer);
+begin
+  with Form1.GraphPicture.Canvas do
+    begin
+      MoveTo(0, Y);
+      LineTo(Form1.GraphPaintBox.Width, Y);
+    end;
+end;
+
+Procedure RewriteYAxis(var CurrYAxisPos: Integer;
+                       const RangeTo, RangeFrom, CurrXAxisPos: Integer
+                       );
+var
+  Temp: Integer;
+begin
+  Temp := Form1.GraphPicture.Canvas.Pen.Width;
+  with Form1.GraphPicture.Canvas do
+        Begin
+          Pen.Color := clWhite;
+          Pen.Width := 3;
+          PaintYAxis(CurrYAxisPos);
+
+          CurrYAxisPos := Trunc(Abs(RangeFrom) * Form1.GraphPaintBox.Width / (RangeTo - RangeFrom));
+
+          MoveTo(CurrYAxisPos, 0);
+          Pen.Color := clBlack;
+          LineTo(CurrYAxisPos, Form1.GraphPaintBox.Height);
+          PaintXAxis(CurrXAxisPos);
+          Pen.Width := Temp;
+        End;
+
+  Form1.GraphPaintBox.Invalidate;
+end;
 
 procedure TForm1.FormCreate(Sender: TObject);
   var
     I: Integer;
-//    Image: TImage;
   begin
+    RangeFrom := -10;
+    RangeTo := 10;
+    CurrXAxisPos := GraphPaintBox.Height div 2;
+    CurrYAxisPos := GraphPaintBox.Width div 2;
     GraphPicture := TBitmap.Create;
+    GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
-//    Image := TImage.Create(Self);
-//    Image.Picture.LoadFromFile();
-    PenWidthComboBox.Items.Add('low');
-    PenWidthComboBox.Items.Add('mid');
-    PenWidthComboBox.Items.Add('high');
-    PenWidthComboBox.ItemIndex := 1;
+    with PenWidthComboBox do
+      Begin
+        Items.Add('low');
+        Items.Add('mid');
+        Items.Add('high');
+        ItemIndex := 1;
+      End;
+
     ColorBox.Clear;
     for I := 0 to High(ColorValues) do
       ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
 
     ColorBox.Selected := clBlack;
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
-    GraphPicture.Canvas.MoveTo(GraphPaintBox.Width div 2, 0);
-    GraphPicture.Canvas.LineTo(GraphPaintBox.Width div 2, GraphPaintBox.Height);
-    GraphPicture.Canvas.MoveTo(0, GraphPaintBox.Height div 2);
-    GraphPicture.Canvas.LineTo(GraphPaintBox.Width, GraphPaintBox.Height div 2);
+    PaintYAxis(CurrXAxisPos);
+    PaintXAxis(CurrYAxisPos);
   end;
 
 procedure TForm1.GraphPaintBoxPaint(Sender: TObject);
@@ -151,7 +199,7 @@ end;
 
 procedure TForm1.RangeFromEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeFromEdit.Text)) then
+  if (not CheckInput(RangeFromEdit.Text) or (RangeTo <= RangeFrom)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
     End
@@ -161,12 +209,22 @@ end;
 
 procedure TForm1.RangeToEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeToEdit.Text)) then
+  if (not CheckInput(RangeToEdit.Text) or (RangeTo <= RangeFrom)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
     End
   else
     RangeTo :=  StrToInt(RangeToEdit.Text);
+end;
+
+procedure TForm1.RangeToEditExit(Sender: TObject);
+begin
+  RewriteYAxis(CurrYAxisPos, RangeTo, RangeFrom, CurrXAxisPos);
+end;
+
+procedure TForm1.RangeFromEditExit(Sender: TObject);
+begin
+  RewriteYAxis(CurrYAxisPos, RangeTo, RangeFrom, CurrXAxisPos);
 end;
 
 procedure TForm1.ShowGraphButtonClick(Sender: TObject);
@@ -176,8 +234,8 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
     WasNaN: Boolean;
     SelectedValue: String;
 begin
-  RangeFrom := -10;
-  RangeTo := 10;
+//  RangeFrom := -10;
+//  RangeTo := 10;
   PolNotExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   Step := (RangeTo - RangeFrom) / IterationCount;
   DotNumber := IterationCount;
@@ -185,10 +243,12 @@ begin
   CurrX := RangeFrom;
   MaxY := Math.NegInfinity;
   MinY := Math.Infinity;
+  ScaleY := GraphPaintBox.Height / IterationCount;
+
 
   for I := 0 to DotNumber - 1 do
     Begin
-        DotArray[I] := GraphPaintBox.Height * (-TCalculate.Calculate(PolNotExpr, CurrX)) / 10000;
+        DotArray[I] := ScaleY * (-TCalculate.Calculate(PolNotExpr, CurrX));
         if (FloatToStr(DotArray[I]) <> 'NAN') then
           Begin
             if (DotArray[I] > MaxY) then
@@ -205,8 +265,8 @@ begin
   YOffset := GraphPaintBox.Height / 2;
   //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
   WasNaN := True;
-  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
-  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
+//  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
+//  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
   GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 10 + YOffset));
 //  for I := 1 to DotNumber - 1 do
 //    Begin
@@ -246,6 +306,7 @@ begin
 
       CurrX := CurrX + XOffset;
     End;
+
   GraphPaintBox.Invalidate;
 end;
 
