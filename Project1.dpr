@@ -2,7 +2,11 @@ program Project1;
 
 uses
   Vcl.Forms,
-  Unit1 in 'Unit1.pas' {Form1};
+  Unit1 in 'Unit1.pas' {Form1},
+  Converter in 'Converter.pas',
+  Checker in 'Checker.pas',
+  Stack in 'Stack.pas',
+  Calculate in 'Calculate.pas';
 
 {$R *.res}
 
