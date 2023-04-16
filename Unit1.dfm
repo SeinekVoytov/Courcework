@@ -3,7 +3,7 @@ object Form1: TForm1
   Top = 0
   Caption = 'Form1'
   ClientHeight = 577
-  ClientWidth = 874
+  ClientWidth = 851
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,19 +17,21 @@ object Form1: TForm1
   object GraphPanel: TPanel
     Left = 274
     Top = 0
-    Width = 600
+    Width = 577
     Height = 577
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 600
     object GraphPaintBox: TPaintBox
       Left = 1
       Top = 1
-      Width = 598
+      Width = 575
       Height = 575
       Align = alClient
       OnPaint = GraphPaintBoxPaint
       ExplicitLeft = 6
       ExplicitTop = 2
+      ExplicitWidth = 598
     end
   end
   object EditPanel: TPanel
@@ -47,6 +49,7 @@ object Form1: TForm1
       Height = 21
       TabOrder = 0
       OnChange = InputEditChange
+      OnKeyDown = InputEditKeyDown
     end
     object MathInputButton: TButton
       Left = 200
@@ -232,6 +235,14 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = ShowGraphButtonClick
       end
+    end
+    object ColorPanel: TPanel
+      Left = 0
+      Top = 336
+      Width = 269
+      Height = 41
+      Caption = 'ColorPanel'
+      TabOrder = 4
     end
   end
 end

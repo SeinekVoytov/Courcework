@@ -33,6 +33,7 @@ type
     LogButton: TButton;
     LnButton: TButton;
     AbsButton: TButton;
+    ColorPanel: TPanel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -52,6 +53,8 @@ type
     procedure LogButtonClick(Sender: TObject);
     procedure LnButtonClick(Sender: TObject);
     procedure AbsButtonClick(Sender: TObject);
+    procedure InputEditKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
 
   private
     { Private declarations }
@@ -114,6 +117,13 @@ begin
     ShowGraphButton.Enabled := False
   else
     ShowGraphButton.Enabled := True;
+end;
+
+procedure TForm1.InputEditKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
+    ShowGraphButtonClick(Sender);
 end;
 
 procedure TForm1.MathInputButtonClick(Sender: TObject);
