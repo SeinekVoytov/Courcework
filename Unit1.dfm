@@ -41,8 +41,6 @@ object Form1: TForm1
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitLeft = -5
-    ExplicitTop = 8
     object InputEdit: TEdit
       Left = 16
       Top = 36
@@ -244,9 +242,9 @@ object Form1: TForm1
         OnExit = RangeToEditExit
       end
       object ShowGraphButton: TButton
-        Left = 79
+        Left = 34
         Top = 124
-        Width = 121
+        Width = 106
         Height = 25
         Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
         TabOrder = 2
@@ -265,6 +263,15 @@ object Form1: TForm1
         Width = 145
         Height = 21
         TabOrder = 4
+      end
+      object ClearGraphButton: TButton
+        Left = 146
+        Top = 124
+        Width = 91
+        Height = 25
+        Caption = #1057#1090#1077#1088#1077#1090#1100' '#1075#1088#1072#1092#1080#1082
+        TabOrder = 5
+        OnClick = ClearGraphButtonClick
       end
     end
   end

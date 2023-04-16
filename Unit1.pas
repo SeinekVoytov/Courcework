@@ -6,6 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Calculate, Converter;
 
+Type
+  TDotArray = array of Real;
 type
   TForm1 = class(TForm)
     GraphPanel: TPanel;
@@ -35,6 +37,7 @@ type
     AbsButton: TButton;
     ColorBox: TColorBox;
     PenWidthComboBox: TComboBox;
+    ClearGraphButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -58,13 +61,16 @@ type
       Shift: TShiftState);
     procedure RangeFromEditExit(Sender: TObject);
     procedure RangeToEditExit(Sender: TObject);
+    procedure ClearGraphButtonClick(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
-    DotArray: array of Extended;
+    DotArrays: array [1..3] of TDotArray;
     RangeFrom, RangeTo: Integer;
-    PolNotExpr: String;
-    IsGrappBuilt: Boolean;
+    PolNotExprs: array [1..3] of String;
+    GraphNumber: Byte;
+    XOffset, YOffset: Real;
+    ColorsArray: array [1..3] of TColor;
   public
     GraphPicture: TBitmap;
   end;
@@ -133,12 +139,55 @@ begin
   Form1.GraphPaintBox.Invalidate;
 end;
 
+Procedure SetSelectedWidth();
+var
+  SelectedWidth: String;
+begin
+  SelectedWidth := Form1.PenWidthComboBox.Items[Form1.PenWidthComboBox.ItemIndex];
+    with Form1.GraphPicture.Canvas.Pen do
+    if (SelectedWidth = 'mid') then
+      Width := 3
+    else if (SelectedWidth = 'low') then
+      Width := 1
+    else
+      Width := 5;
+end;
+
+Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Real);
+var
+  I: Integer;
+  WasNan: Boolean;
+  CurrX: Real;
+begin
+   WasNan := True;
+   CurrX := 0;
+   for I := 1 to High(DotArray) do
+    Begin
+      if (FloatToStr(DotArray[I]) = 'NAN') then
+        WasNaN := True
+      else if (WasNan) then
+        Begin
+          Form1.GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * 500 + YOffset));
+          WasNan := False;
+        End
+      else
+        Form1.GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * 500 + YOffset));
+
+      CurrX := CurrX + XOffset;
+    End;
+
+    Form1.GraphPaintBox.Invalidate;
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
   var
     I: Integer;
   begin
     RangeFrom := -10;
     RangeTo := 10;
+    GraphNumber := 0;
+    XOffset := GraphPaintBox.Width / IterationCount;
+    YOffset := GraphPaintBox.Height / 2;
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
     GraphPicture := TBitmap.Create;
@@ -229,85 +278,72 @@ end;
 
 procedure TForm1.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX, CurrY, Step, XOffset, YOffset, MaxY, MinY, ScaleX, ScaleY: Real;
+    CurrX, CurrY, Step, MaxY, MinY, ScaleX, ScaleY: Real;
     DotNumber, I: Integer;
     WasNaN: Boolean;
-    SelectedValue: String;
+    SelectedValue, CurrExpr: String;
 begin
-//  RangeFrom := -10;
-//  RangeTo := 10;
-  PolNotExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
-  Step := (RangeTo - RangeFrom) / IterationCount;
-  DotNumber := IterationCount;
-  SetLength(DotArray, DotNumber);
-  CurrX := RangeFrom;
-  MaxY := Math.NegInfinity;
-  MinY := Math.Infinity;
-  ScaleY := GraphPaintBox.Height / IterationCount;
+      Inc(GraphNumber, 1);
+
+      CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
+      PolNotExprs[GraphNumber] := CurrExpr;
+      Step := (RangeTo - RangeFrom) / IterationCount;
+      DotNumber := IterationCount;
+      SetLength(DotArrays[GraphNumber], DotNumber);
+      CurrX := RangeFrom;
+//      MaxY := Math.NegInfinity;
+//      MinY := Math.Infinity;
+      ScaleY := GraphPaintBox.Height / IterationCount;
 
 
-  for I := 0 to DotNumber - 1 do
-    Begin
-        DotArray[I] := ScaleY * (-TCalculate.Calculate(PolNotExpr, CurrX));
-        if (FloatToStr(DotArray[I]) <> 'NAN') then
-          Begin
-            if (DotArray[I] > MaxY) then
-              MaxY := DotArray[I];
-
-            if (DotArray[I] < MinY) then
-              MinY := DotArray[I];
-          End;
-      CurrX := CurrX + Step;
-    End;
-
-  CurrX := 0;
-  XOffset := GraphPaintBox.Width / DotNumber;
-  YOffset := GraphPaintBox.Height / 2;
-  //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
-  WasNaN := True;
-//  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
-//  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
-  GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 10 + YOffset));
-//  for I := 1 to DotNumber - 1 do
-//    Begin
-//      if (FloatToStr(DotArray[I]) = 'NAN') then
-//        WasNaN := True
-//      else if (WasNan) then
-//        Begin
-//          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
-//          WasNan := False;
-//        End
-//      else
-//        GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
-//
-//      CurrX := CurrX + XOffset;
-//    End;
-  GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
-
-  SelectedValue := PenWidthComboBox.Items[PenWidthComboBox.ItemIndex];
-  if (SelectedValue = 'mid') then
-    GraphPicture.Canvas.Pen.Width := 3
-  else if (SelectedValue = 'low') then
-    GraphPicture.Canvas.Pen.Width := 1
-  else
-    GraphPicture.Canvas.Pen.Width := 5;
-
-  for I := 1 to DotNumber - 1 do
-    Begin
-      if (FloatToStr(DotArray[I]) = 'NAN') then
-        WasNaN := True
-      else if (WasNan) then
+      for I := 0 to DotNumber - 1 do
         Begin
-          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * 500 + YOffset));
-          WasNan := False;
-        End
-      else
-        GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * 500 + YOffset));
+            DotArrays[GraphNumber][I] := ScaleY * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
+//            if (FloatToStr(DotArrays[GraphNumber][I]) <> 'NAN') then
+//              Begin
+//                if (DotArray[I] > MaxY) then
+//                  MaxY := DotArray[I];
+//
+//                if (DotArray[I] < MinY) then
+//                  MinY := DotArray[I];
+//              End;
+          CurrX := CurrX + Step;
+        End;
 
-      CurrX := CurrX + XOffset;
-    End;
+      //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
+      WasNaN := True;
+    //  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
+    //  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
+    //  for I := 1 to DotNumber - 1 do
+    //    Begin
+    //      if (FloatToStr(DotArray[I]) = 'NAN') then
+    //        WasNaN := True
+    //      else if (WasNan) then
+    //        Begin
+    //          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
+    //          WasNan := False;
+    //        End
+    //      else
+    //        GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
+    //
+    //      CurrX := CurrX + XOffset;
+    //    End;
+      GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
+      ColorsArray[GraphNumber] := ColorBox.Selected;
 
-  GraphPaintBox.Invalidate;
+      SetSelectedWidth();
+
+      PaintGraph(DotArrays[GraphNumber], XOffset, YOffset);
+
+      if (GraphNumber = 3) then
+        Begin
+          RangeFromEdit.Enabled := False;
+          RangeToEdit.Enabled := False;
+          MathInputPanel.Enabled := False;
+          InputEdit.Enabled := False;
+          ColorBox.Enabled := False;
+          PenWidthComboBox.Enabled := False;
+        End;
 end;
 
 procedure TForm1.SinButtonClick(Sender: TObject);
@@ -321,6 +357,32 @@ begin
   InputEdit.Text := CurrInput;
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 4;
+end;
+
+procedure TForm1.ClearGraphButtonClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  if (GraphNumber <= 0) then
+    MessageDlg('',  mtError, [mbOK], 0)
+  else
+    Begin
+      Dec(GraphNumber);
+      GraphPicture.Canvas.Pen.Color := clWhite;
+      GraphPicture.Canvas.Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
+      GraphPicture.Canvas.Pen.Width := 3;
+      GraphPicture.Canvas.Pen.Color := clBlack;
+      CurrXAxisPos := GraphPaintBox.Height div 2;
+      CurrYAxisPos := GraphPaintBox.Width div 2;
+      PaintYAxis(CurrXAxisPos);
+      PaintXAxis(CurrYAxisPos);
+      for I := 1 to GraphNumber do
+        Begin
+          GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+          PaintGraph(DotArrays[I], XOffset, YOffset);
+        End;
+      GraphPaintBox.Invalidate;
+    End;
 end;
 
 procedure TForm1.CosButtonClick(Sender: TObject);
