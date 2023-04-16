@@ -38,6 +38,7 @@ type
     ColorBox: TColorBox;
     PenWidthComboBox: TComboBox;
     ClearGraphButton: TButton;
+    ClearAllButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -62,6 +63,7 @@ type
     procedure RangeFromEditExit(Sender: TObject);
     procedure RangeToEditExit(Sender: TObject);
     procedure ClearGraphButtonClick(Sender: TObject);
+    procedure ClearAllButtonClick(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -359,6 +361,18 @@ begin
   InputEdit.SelStart := CurrCursorPos + 4;
 end;
 
+procedure TForm1.ClearAllButtonClick(Sender: TObject);
+begin
+  GraphPicture.Canvas.Pen.Color := clWhite;
+  GraphPicture.Canvas.Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
+  CurrXAxisPos := GraphPaintBox.Height div 2;
+  CurrYAxisPos := GraphPaintBox.Width div 2;
+  GraphPicture.Canvas.Pen.Color := clBlack;
+  PaintYAxis(CurrXAxisPos);
+  PaintXAxis(CurrYAxisPos);
+  GraphPaintBox.Invalidate;
+end;
+
 procedure TForm1.ClearGraphButtonClick(Sender: TObject);
 var
   I: Integer;
@@ -383,6 +397,7 @@ begin
         End;
       GraphPaintBox.Invalidate;
     End;
+
 end;
 
 procedure TForm1.CosButtonClick(Sender: TObject);

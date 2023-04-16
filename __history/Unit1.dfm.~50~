@@ -21,7 +21,6 @@ object Form1: TForm1
     Height = 577
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 600
     object GraphPaintBox: TPaintBox
       Left = 1
       Top = 1
@@ -71,8 +70,8 @@ object Form1: TForm1
       OnClick = MathInputButtonClick
     end
     object MathInputPanel: TPanel
-      Left = -1
-      Top = 167
+      Left = 5
+      Top = 259
       Width = 269
       Height = 95
       BevelOuter = bvNone
@@ -198,7 +197,7 @@ object Form1: TForm1
       Left = -1
       Top = 65
       Width = 269
-      Height = 96
+      Height = 168
       BevelOuter = bvNone
       TabOrder = 3
       object RangeLabel: TLabel
@@ -230,6 +229,7 @@ object Form1: TForm1
         TabOrder = 0
         Text = '-10'
         OnChange = RangeFromEditChange
+        OnExit = RangeFromEditExit
       end
       object RangeToEdit: TEdit
         Left = 98
@@ -239,23 +239,40 @@ object Form1: TForm1
         TabOrder = 1
         Text = '10'
         OnChange = RangeToEditChange
+        OnExit = RangeToEditExit
       end
       object ShowGraphButton: TButton
-        Left = 37
-        Top = 69
-        Width = 121
+        Left = 34
+        Top = 124
+        Width = 106
         Height = 25
         Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
         TabOrder = 2
         OnClick = ShowGraphButtonClick
       end
-    end
-    object ColorBox: TColorBox
-      Left = 64
-      Top = 360
-      Width = 145
-      Height = 22
-      TabOrder = 4
+      object ColorBox: TColorBox
+        Left = 17
+        Top = 69
+        Width = 145
+        Height = 22
+        TabOrder = 3
+      end
+      object PenWidthComboBox: TComboBox
+        Left = 17
+        Top = 97
+        Width = 145
+        Height = 21
+        TabOrder = 4
+      end
+      object ClearGraphButton: TButton
+        Left = 146
+        Top = 124
+        Width = 91
+        Height = 25
+        Caption = #1057#1090#1077#1088#1077#1090#1100' '#1075#1088#1072#1092#1080#1082
+        TabOrder = 5
+        OnClick = ClearGraphButtonClick
+      end
     end
   end
 end

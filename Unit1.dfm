@@ -274,5 +274,14 @@ object Form1: TForm1
         OnClick = ClearGraphButtonClick
       end
     end
+    object ClearAllButton: TButton
+      Left = 67
+      Top = 384
+      Width = 75
+      Height = 25
+      Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
+      TabOrder = 4
+      OnClick = ClearAllButtonClick
+    end
   end
 end
