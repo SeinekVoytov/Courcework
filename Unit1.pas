@@ -34,6 +34,7 @@ type
     LnButton: TButton;
     AbsButton: TButton;
     ColorBox: TColorBox;
+    PenWidthComboBox: TComboBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -57,7 +58,7 @@ type
       Shift: TShiftState);
 
   private
-    { Private declarations }
+
   public
     GraphPicture: TBitmap;
     DotArray: array of Extended;
@@ -67,6 +68,8 @@ type
 
 const
   IterationCount = 10000;
+  ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
+    ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
   Form1: TForm1;
 
@@ -87,9 +90,6 @@ Function CheckInput(Const s: String): Boolean;
 
 
 procedure TForm1.FormCreate(Sender: TObject);
-  const
-    ColorNames: array[0..7] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Фиолетовый', 'Розовый');
-    ColorValues: array[0..7] of string = ('$000000', '$FF0000', '$00FF00', '$0000FF', '$FFFF00', '$FFA500', '$800080', '$FFC0CB');
   var
     I: Integer;
 //    Image: TImage;
@@ -99,9 +99,10 @@ procedure TForm1.FormCreate(Sender: TObject);
 //    Image := TImage.Create(Self);
 //    Image.Picture.LoadFromFile();
     ColorBox.Clear;
-    for I := Low(ColorValues) to High(ColorValues) do
+    for I := 0 to High(ColorValues) do
       ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
 
+    ColorBox.Selected := clBlack;
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     GraphPicture.Canvas.MoveTo(GraphPaintBox.Width div 2, 0);
     GraphPicture.Canvas.LineTo(GraphPaintBox.Width div 2, GraphPaintBox.Height);
@@ -217,6 +218,8 @@ begin
 //
 //      CurrX := CurrX + XOffset;
 //    End;
+  GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
+  GraphPicture.Canvas.Pen.Width := 3;
   for I := 1 to DotNumber - 1 do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
