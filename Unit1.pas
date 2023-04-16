@@ -393,6 +393,8 @@ begin
   RangeToEdit.Text := IntToStr(RangeTo);
   RangeFromEdit.Enabled := True;
   RangeToEdit.Enabled := True;
+  InputEdit.Enabled := True;
+  InputEdit.Clear;
 
 end;
 
@@ -418,6 +420,7 @@ begin
           GraphPicture.Canvas.Pen.Color := ColorsArray[I];
           PaintGraph(DotArrays[I], XOffset, YOffset);
         End;
+      InputEdit.Enabled := True;
       GraphPaintBox.Invalidate;
 
 end;
