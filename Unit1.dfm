@@ -263,7 +263,6 @@ object Form1: TForm1
         Width = 145
         Height = 21
         TabOrder = 4
-        Text = 'PenWidthComboBox'
       end
     end
   end

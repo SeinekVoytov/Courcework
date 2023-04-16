@@ -32,6 +32,9 @@ type
     RangeAndBuildPanel: TPanel;
     LogButton: TButton;
     LnButton: TButton;
+    AbsButton: TButton;
+    ColorBox: TColorBox;
+    PenWidthComboBox: TComboBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -50,9 +53,12 @@ type
     procedure SqrtButtonClick(Sender: TObject);
     procedure LogButtonClick(Sender: TObject);
     procedure LnButtonClick(Sender: TObject);
+    procedure AbsButtonClick(Sender: TObject);
+    procedure InputEditKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
 
   private
-    { Private declarations }
+
   public
     GraphPicture: TBitmap;
     DotArray: array of Extended;
@@ -62,6 +68,8 @@ type
 
 const
   IterationCount = 10000;
+  ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
+    ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
   Form1: TForm1;
 
@@ -82,13 +90,19 @@ Function CheckInput(Const s: String): Boolean;
 
 
 procedure TForm1.FormCreate(Sender: TObject);
-//  var
+  var
+    I: Integer;
 //    Image: TImage;
   begin
     GraphPicture := TBitmap.Create;
     MathInputPanel.Visible := False;
 //    Image := TImage.Create(Self);
 //    Image.Picture.LoadFromFile();
+    ColorBox.Clear;
+    for I := 0 to High(ColorValues) do
+      ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
+
+    ColorBox.Selected := clBlack;
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     GraphPicture.Canvas.MoveTo(GraphPaintBox.Width div 2, 0);
     GraphPicture.Canvas.LineTo(GraphPaintBox.Width div 2, GraphPaintBox.Height);
@@ -112,6 +126,13 @@ begin
     ShowGraphButton.Enabled := False
   else
     ShowGraphButton.Enabled := True;
+end;
+
+procedure TForm1.InputEditKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
+    ShowGraphButtonClick(Sender);
 end;
 
 procedure TForm1.MathInputButtonClick(Sender: TObject);
@@ -175,11 +196,11 @@ begin
       CurrX := CurrX + Step;
     End;
 
-   CurrX := 0;
+  CurrX := 0;
   XOffset := GraphPaintBox.Width / DotNumber;
   YOffset := GraphPaintBox.Height / 2;
   //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
-  WasNaN := False;
+  WasNaN := True;
   ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
   ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
   GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[0] * 10 + YOffset));
@@ -197,6 +218,8 @@ begin
 //
 //      CurrX := CurrX + XOffset;
 //    End;
+  GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
+  GraphPicture.Canvas.Pen.Width := 3;
   for I := 1 to DotNumber - 1 do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
@@ -357,4 +380,16 @@ begin
   InputEdit.SelStart := CurrCursorPos + 3;
 end;
 
+procedure TForm1.AbsButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('abs()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 4;
+end;
 end.

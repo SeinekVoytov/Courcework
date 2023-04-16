@@ -98,6 +98,10 @@ procedure TForm1.FormCreate(Sender: TObject);
     MathInputPanel.Visible := False;
 //    Image := TImage.Create(Self);
 //    Image.Picture.LoadFromFile();
+    PenWidthComboBox.Items.Add('low');
+    PenWidthComboBox.Items.Add('mid');
+    PenWidthComboBox.Items.Add('high');
+    PenWidthComboBox.ItemIndex := 1;
     ColorBox.Clear;
     for I := 0 to High(ColorValues) do
       ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
@@ -143,7 +147,6 @@ begin
   MathInputPanel.Top := RangeAndBuildPanel.Top;
   RangeAndBuildPanel.Top := Temp;
   MathInputPanel.Visible := True;
-
 end;
 
 procedure TForm1.RangeFromEditChange(Sender: TObject);
@@ -171,6 +174,7 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
     CurrX, CurrY, Step, XOffset, YOffset, MaxY, MinY, ScaleX, ScaleY: Real;
     DotNumber, I: Integer;
     WasNaN: Boolean;
+    SelectedValue: String;
 begin
   RangeFrom := -10;
   RangeTo := 10;
@@ -219,7 +223,15 @@ begin
 //      CurrX := CurrX + XOffset;
 //    End;
   GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
-  GraphPicture.Canvas.Pen.Width := 3;
+
+  SelectedValue := PenWidthComboBox.Items[PenWidthComboBox.ItemIndex];
+  if (SelectedValue = 'mid') then
+    GraphPicture.Canvas.Pen.Width := 3
+  else if (SelectedValue = 'low') then
+    GraphPicture.Canvas.Pen.Width := 1
+  else
+    GraphPicture.Canvas.Pen.Width := 5;
+
   for I := 1 to DotNumber - 1 do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
