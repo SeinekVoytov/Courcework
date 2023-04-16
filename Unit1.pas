@@ -182,6 +182,23 @@ begin
     Form1.GraphPaintBox.Invalidate;
 end;
 
+Procedure SetEditEnabled();
+begin
+  with Form1 do
+    Begin
+      RangeToEdit.Enabled := False;
+      RangeFromEdit.Enabled := False;
+    End;
+end;
+
+Procedure SetButtonEnabled(const Value: Boolean);
+begin
+  with Form1 do
+    Begin
+        ClearAllButton.Enabled := Value;
+        ClearGraphButton.Enabled := Value;
+    End;
+end;
 procedure TForm1.FormCreate(Sender: TObject);
   var
     I: Integer;
@@ -194,6 +211,7 @@ procedure TForm1.FormCreate(Sender: TObject);
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
     MathInput := False;
+    SetButtonEnabled(False);
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
@@ -296,7 +314,8 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
     SelectedValue, CurrExpr: String;
 begin
       Inc(GraphNumber, 1);
-
+      SetEditEnabled();
+      SetButtonEnabled(True);
       CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
       PolNotExprs[GraphNumber] := CurrExpr;
       Step := (RangeTo - RangeFrom) / IterationCount;
@@ -358,19 +377,6 @@ begin
         End;
 end;
 
-procedure TForm1.SinButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
-begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('sin()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
-end;
-
 procedure TForm1.ClearAllButtonClick(Sender: TObject);
 begin
   GraphPicture.Canvas.Pen.Color := clWhite;
@@ -394,27 +400,39 @@ procedure TForm1.ClearGraphButtonClick(Sender: TObject);
 var
   I: Integer;
 begin
-  if (GraphNumber <= 0) then
-    MessageDlg('',  mtError, [mbOK], 0)
-  else
-    Begin
       Dec(GraphNumber);
-      GraphPicture.Canvas.Pen.Color := clWhite;
-      GraphPicture.Canvas.Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
-      GraphPicture.Canvas.Pen.Width := 3;
-      GraphPicture.Canvas.Pen.Color := clBlack;
-      CurrXAxisPos := GraphPaintBox.Height div 2;
-      CurrYAxisPos := GraphPaintBox.Width div 2;
-      PaintYAxis(CurrXAxisPos);
-      PaintXAxis(CurrYAxisPos);
+      if (GraphNumber = 0) then
+        ClearGraphButton.Enabled := False;
+      with GraphPicture.Canvas do
+        Begin
+          Pen.Color := clWhite;
+          Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
+          Pen.Width := 3;
+          Pen.Color := clBlack;
+        End;
+
+      PaintYAxis(CurrYAxisPos);
+      PaintXAxis(CurrXAxisPos);
       for I := 1 to GraphNumber do
         Begin
           GraphPicture.Canvas.Pen.Color := ColorsArray[I];
           PaintGraph(DotArrays[I], XOffset, YOffset);
         End;
       GraphPaintBox.Invalidate;
-    End;
 
+end;
+
+procedure TForm1.SinButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('sin()', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 4;
 end;
 
 procedure TForm1.CosButtonClick(Sender: TObject);
