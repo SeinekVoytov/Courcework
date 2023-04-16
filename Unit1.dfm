@@ -41,6 +41,7 @@ object Form1: TForm1
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitHeight = 361
     object InputEdit: TEdit
       Left = 16
       Top = 36
@@ -197,7 +198,7 @@ object Form1: TForm1
       Left = -1
       Top = 65
       Width = 269
-      Height = 168
+      Height = 188
       BevelOuter = bvNone
       TabOrder = 3
       object RangeLabel: TLabel
@@ -265,7 +266,7 @@ object Form1: TForm1
         TabOrder = 4
       end
       object ClearGraphButton: TButton
-        Left = 146
+        Left = 168
         Top = 124
         Width = 91
         Height = 25
@@ -273,15 +274,15 @@ object Form1: TForm1
         TabOrder = 5
         OnClick = ClearGraphButtonClick
       end
-    end
-    object ClearAllButton: TButton
-      Left = 67
-      Top = 384
-      Width = 75
-      Height = 25
-      Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
-      TabOrder = 4
-      OnClick = ClearAllButtonClick
+      object ClearAllButton: TButton
+        Left = 170
+        Top = 155
+        Width = 89
+        Height = 25
+        Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
+        TabOrder = 6
+        OnClick = ClearAllButtonClick
+      end
     end
   end
 end

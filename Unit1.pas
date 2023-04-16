@@ -73,6 +73,7 @@ type
     GraphNumber: Byte;
     XOffset, YOffset: Real;
     ColorsArray: array [1..3] of TColor;
+    MathInput: Boolean;
   public
     GraphPicture: TBitmap;
   end;
@@ -192,6 +193,7 @@ procedure TForm1.FormCreate(Sender: TObject);
     YOffset := GraphPaintBox.Height / 2;
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
+    MathInput := False;
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
@@ -239,13 +241,21 @@ begin
 end;
 
 procedure TForm1.MathInputButtonClick(Sender: TObject);
-Var
-  Temp: Integer;
 begin
-  Temp := MathInputPanel.Top;
-  MathInputPanel.Top := RangeAndBuildPanel.Top;
-  RangeAndBuildPanel.Top := Temp;
-  MathInputPanel.Visible := True;
+  if (not MathInput) then
+    Begin
+      MathInputPanel.Visible := True;
+      MathInput := True;
+      MathInputPanel.Top := RangeAndBuildPanel.Top;
+      RangeAndBuildPanel.Top := MathInputPanel.Top + MathInputPanel.Height;
+    End
+  else
+    Begin
+      MathInputPanel.Visible := False;
+      MathInput := False;
+      RangeAndBuildPanel.Top := MathInputPanel.Top;
+      MathInputPanel.Top := RangeAndBuildPanel.Top + RangeAndBuildPanel.Height;
+    End
 end;
 
 procedure TForm1.RangeFromEditChange(Sender: TObject);
@@ -371,6 +381,13 @@ begin
   PaintYAxis(CurrXAxisPos);
   PaintXAxis(CurrYAxisPos);
   GraphPaintBox.Invalidate;
+  RangeFrom := -10;
+  RangeTo := 10;
+  RangeFromEdit.Text := IntToStr(RangeFrom);
+  RangeToEdit.Text := IntToStr(RangeTo);
+  RangeFromEdit.Enabled := True;
+  RangeToEdit.Enabled := True;
+
 end;
 
 procedure TForm1.ClearGraphButtonClick(Sender: TObject);
