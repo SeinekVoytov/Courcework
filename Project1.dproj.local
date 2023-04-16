@@ -2,8 +2,16 @@
 <BorlandProject>
 	<Transactions>
     <Transaction>2023/03/28 20:36:35.000.060,=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2023/03/28 20:36:49.000.598,\\Mac\Home\Documents\kursachF\Unit1.dfm=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
-    <Transaction>2023/03/28 20:36:49.000.598,\\Mac\Home\Documents\kursachF\Unit1.pas=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2023/03/28 20:36:57.000.774,\\Mac\Home\Documents\kursachF\Project1.dproj=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>2023/03/28 20:36:49.000.598,\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.pas=\\Mac\Home\Documents\kursachF\Unit1.pas</Transaction>
+    <Transaction>2023/03/28 20:36:49.000.598,\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.dfm=\\Mac\Home\Documents\kursachF\Unit1.dfm</Transaction>
+    <Transaction>2023/03/28 20:36:57.000.774,\\Mac\Home\Documents\Embarcadero\Studio\Projects\Project1.dproj=\\Mac\Home\Documents\kursachF\Project1.dproj</Transaction>
+    <Transaction>2023/04/12 20:49:35.000.896,=\\Mac\Home\Documents\kursachF\Unit2.pas</Transaction>
+    <Transaction>2023/04/12 20:50:15.000.521,\\Mac\Home\Documents\kursachF\Unit2.pas=\\Mac\Home\Documents\kursachF\Converter.pas</Transaction>
+    <Transaction>2023/04/12 20:50:41.000.623,=\\Mac\Home\Documents\kursachF\Unit2.pas</Transaction>
+    <Transaction>2023/04/12 20:51:12.000.873,\\Mac\Home\Documents\kursachF\Unit2.pas=\\Mac\Home\Documents\kursachF\Checker.pas</Transaction>
+    <Transaction>2023/04/12 20:59:55.000.709,=\\Mac\Home\Documents\kursachF\Unit2.pas</Transaction>
+    <Transaction>2023/04/12 21:00:21.000.450,\\Mac\Home\Documents\kursachF\Stack.pas=\\Mac\Home\Documents\kursachF\Unit2.pas</Transaction>
+    <Transaction>2023/04/13 12:58:14.000.981,=\\Mac\Home\Documents\kursachF\Unit2.pas</Transaction>
+    <Transaction>2023/04/13 12:58:30.000.443,\\Mac\Home\Documents\kursachF\Unit2.pas=\\Mac\Home\Documents\kursachF\Calculate.pas</Transaction>
   </Transactions>
 </BorlandProject>
