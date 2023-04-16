@@ -46,16 +46,24 @@ object Form1: TForm1
       Left = 16
       Top = 36
       Width = 209
-      Height = 21
+      Height = 20
+      BorderStyle = bsNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
       TabOrder = 0
       OnChange = InputEditChange
       OnKeyDown = InputEditKeyDown
     end
     object MathInputButton: TButton
-      Left = 200
+      AlignWithMargins = True
+      Left = 223
       Top = 36
-      Width = 25
-      Height = 23
+      Width = 21
+      Height = 21
       Hint = #1052#1072#1090#1077#1084#1072#1090#1080#1095#1077#1089#1082#1080#1081' '#1074#1074#1086#1076
       ParentShowHint = False
       ShowHint = True
@@ -68,6 +76,12 @@ object Form1: TForm1
       Width = 269
       Height = 95
       BevelOuter = bvNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
       TabOrder = 2
       object SinButton: TButton
         Left = 42
@@ -181,7 +195,7 @@ object Form1: TForm1
       end
     end
     object RangeAndBuildPanel: TPanel
-      Left = 0
+      Left = -1
       Top = 65
       Width = 269
       Height = 96
@@ -236,12 +250,11 @@ object Form1: TForm1
         OnClick = ShowGraphButtonClick
       end
     end
-    object ColorPanel: TPanel
-      Left = 0
-      Top = 336
-      Width = 269
-      Height = 41
-      Caption = 'ColorPanel'
+    object ColorBox: TColorBox
+      Left = 64
+      Top = 360
+      Width = 145
+      Height = 22
       TabOrder = 4
     end
   end

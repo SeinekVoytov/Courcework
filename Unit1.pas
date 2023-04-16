@@ -33,7 +33,7 @@ type
     LogButton: TButton;
     LnButton: TButton;
     AbsButton: TButton;
-    ColorPanel: TPanel;
+    ColorBox: TColorBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -87,13 +87,21 @@ Function CheckInput(Const s: String): Boolean;
 
 
 procedure TForm1.FormCreate(Sender: TObject);
-//  var
+  const
+    ColorNames: array[0..7] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Фиолетовый', 'Розовый');
+    ColorValues: array[0..7] of string = ('$000000', '$FF0000', '$00FF00', '$0000FF', '$FFFF00', '$FFA500', '$800080', '$FFC0CB');
+  var
+    I: Integer;
 //    Image: TImage;
   begin
     GraphPicture := TBitmap.Create;
     MathInputPanel.Visible := False;
 //    Image := TImage.Create(Self);
 //    Image.Picture.LoadFromFile();
+    ColorBox.Clear;
+    for I := Low(ColorValues) to High(ColorValues) do
+      ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
+
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     GraphPicture.Canvas.MoveTo(GraphPaintBox.Width div 2, 0);
     GraphPicture.Canvas.LineTo(GraphPaintBox.Width div 2, GraphPaintBox.Height);
@@ -187,7 +195,7 @@ begin
       CurrX := CurrX + Step;
     End;
 
-   CurrX := 0;
+  CurrX := 0;
   XOffset := GraphPaintBox.Width / DotNumber;
   YOffset := GraphPaintBox.Height / 2;
   //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
