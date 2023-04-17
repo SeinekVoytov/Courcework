@@ -315,8 +315,7 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
   Var
     CurrX, CurrY, Step, MaxY, MinY, ScaleX, ScaleY: Real;
     DotNumber, I: Integer;
-    WasNaN: Boolean;
-    SelectedValue, CurrExpr: String;
+    CurrExpr: String;
 begin
       Inc(GraphNumber, 1);
       SetEditEnabled(False);
@@ -329,7 +328,7 @@ begin
       CurrX := RangeFrom;
 //      MaxY := Math.NegInfinity;
 //      MinY := Math.Infinity;
-      ScaleY := 300 * GraphPaintBox.Height / IterationCount;
+      ScaleY := 100 * GraphPaintBox.Height / IterationCount;
 
 
       for I := 0 to DotNumber - 1 do
@@ -346,8 +345,7 @@ begin
           CurrX := CurrX + Step;
         End;
 
-      //YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
-      WasNaN := True;
+    //  YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
     //  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
     //  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
     //  for I := 1 to DotNumber - 1 do
@@ -364,6 +362,7 @@ begin
     //
     //      CurrX := CurrX + XOffset;
     //    End;
+
       GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
       ColorsArray[GraphNumber] := ColorBox.Selected;
 
@@ -377,6 +376,7 @@ begin
           InputEdit.Enabled := False;
           ColorBox.Enabled := False;
           PenWidthComboBox.Enabled := False;
+          ShowGraphButton.Enabled := False;
         End;
 end;
 
@@ -394,14 +394,15 @@ begin
   RangeTo := 10;
   RangeFromEdit.Text := IntToStr(RangeFrom);
   RangeToEdit.Text := IntToStr(RangeTo);
-  RangeFromEdit.Enabled := True;
-  RangeToEdit.Enabled := True;
+  SetEditEnabled(True);
+  SetButtonEnabled(False);
   InputEdit.Enabled := True;
   InputEdit.Clear;
   ColorBox.Enabled := True;
   PenWidthComboBox.Enabled := True;
   MathInputPanel.Enabled := True;
   PenWidthComboBox.ItemIndex := 1;
+  ShowGraphButton.Enabled := True;
 end;
 
 procedure TForm1.ClearGraphButtonClick(Sender: TObject);
@@ -431,6 +432,7 @@ begin
       ColorBox.Enabled := True;
       PenWidthComboBox.Enabled := True;
       MathInputPanel.Enabled := True;
+      ShowGraphButton.Enabled := True;
 
 end;
 
