@@ -73,6 +73,7 @@ type
     GraphNumber: Byte;
     XOffset, YOffset: Real;
     ColorsArray: array [1..3] of TColor;
+    MathInput: Boolean;
   public
     GraphPicture: TBitmap;
   end;
@@ -181,6 +182,23 @@ begin
     Form1.GraphPaintBox.Invalidate;
 end;
 
+Procedure SetEditEnabled();
+begin
+  with Form1 do
+    Begin
+      RangeToEdit.Enabled := False;
+      RangeFromEdit.Enabled := False;
+    End;
+end;
+
+Procedure SetButtonEnabled(const Value: Boolean);
+begin
+  with Form1 do
+    Begin
+        ClearAllButton.Enabled := Value;
+        ClearGraphButton.Enabled := Value;
+    End;
+end;
 procedure TForm1.FormCreate(Sender: TObject);
   var
     I: Integer;
@@ -192,6 +210,8 @@ procedure TForm1.FormCreate(Sender: TObject);
     YOffset := GraphPaintBox.Height / 2;
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
+    MathInput := False;
+    SetButtonEnabled(False);
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
@@ -239,13 +259,21 @@ begin
 end;
 
 procedure TForm1.MathInputButtonClick(Sender: TObject);
-Var
-  Temp: Integer;
 begin
-  Temp := MathInputPanel.Top;
-  MathInputPanel.Top := RangeAndBuildPanel.Top;
-  RangeAndBuildPanel.Top := Temp;
-  MathInputPanel.Visible := True;
+  if (not MathInput) then
+    Begin
+      MathInputPanel.Visible := True;
+      MathInput := True;
+      MathInputPanel.Top := RangeAndBuildPanel.Top;
+      RangeAndBuildPanel.Top := MathInputPanel.Top + MathInputPanel.Height;
+    End
+  else
+    Begin
+      MathInputPanel.Visible := False;
+      MathInput := False;
+      RangeAndBuildPanel.Top := MathInputPanel.Top;
+      MathInputPanel.Top := RangeAndBuildPanel.Top + RangeAndBuildPanel.Height;
+    End
 end;
 
 procedure TForm1.RangeFromEditChange(Sender: TObject);
@@ -286,7 +314,8 @@ procedure TForm1.ShowGraphButtonClick(Sender: TObject);
     SelectedValue, CurrExpr: String;
 begin
       Inc(GraphNumber, 1);
-
+      SetEditEnabled();
+      SetButtonEnabled(True);
       CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
       PolNotExprs[GraphNumber] := CurrExpr;
       Step := (RangeTo - RangeFrom) / IterationCount;
@@ -348,6 +377,59 @@ begin
         End;
 end;
 
+procedure TForm1.ClearAllButtonClick(Sender: TObject);
+begin
+  GraphPicture.Canvas.Pen.Color := clWhite;
+  GraphPicture.Canvas.Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
+  CurrXAxisPos := GraphPaintBox.Height div 2;
+  CurrYAxisPos := GraphPaintBox.Width div 2;
+  GraphPicture.Canvas.Pen.Color := clBlack;
+  PaintYAxis(CurrXAxisPos);
+  PaintXAxis(CurrYAxisPos);
+  GraphPaintBox.Invalidate;
+  RangeFrom := -10;
+  RangeTo := 10;
+  RangeFromEdit.Text := IntToStr(RangeFrom);
+  RangeToEdit.Text := IntToStr(RangeTo);
+  RangeFromEdit.Enabled := True;
+  RangeToEdit.Enabled := True;
+  InputEdit.Enabled := True;
+  InputEdit.Clear;
+  ColorBox.Enabled := True;
+  PenWidthComboBox.Enabled := True;
+  MathInputPanel.Enabled := True;
+end;
+
+procedure TForm1.ClearGraphButtonClick(Sender: TObject);
+var
+  I: Integer;
+begin
+      Dec(GraphNumber);
+      if (GraphNumber = 0) then
+        ClearGraphButton.Enabled := False;
+      with GraphPicture.Canvas do
+        Begin
+          Pen.Color := clWhite;
+          Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
+          Pen.Width := 3;
+          Pen.Color := clBlack;
+        End;
+
+      PaintYAxis(CurrYAxisPos);
+      PaintXAxis(CurrXAxisPos);
+      for I := 1 to GraphNumber do
+        Begin
+          GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+          PaintGraph(DotArrays[I], XOffset, YOffset);
+        End;
+      GraphPaintBox.Invalidate;
+      InputEdit.Enabled := True;
+      ColorBox.Enabled := True;
+      PenWidthComboBox.Enabled := True;
+      MathInputPanel.Enabled := True;
+
+end;
+
 procedure TForm1.SinButtonClick(Sender: TObject);
 var
   CurrInput: String;
@@ -359,45 +441,6 @@ begin
   InputEdit.Text := CurrInput;
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 4;
-end;
-
-procedure TForm1.ClearAllButtonClick(Sender: TObject);
-begin
-  GraphPicture.Canvas.Pen.Color := clWhite;
-  GraphPicture.Canvas.Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
-  CurrXAxisPos := GraphPaintBox.Height div 2;
-  CurrYAxisPos := GraphPaintBox.Width div 2;
-  GraphPicture.Canvas.Pen.Color := clBlack;
-  PaintYAxis(CurrXAxisPos);
-  PaintXAxis(CurrYAxisPos);
-  GraphPaintBox.Invalidate;
-end;
-
-procedure TForm1.ClearGraphButtonClick(Sender: TObject);
-var
-  I: Integer;
-begin
-  if (GraphNumber <= 0) then
-    MessageDlg('',  mtError, [mbOK], 0)
-  else
-    Begin
-      Dec(GraphNumber);
-      GraphPicture.Canvas.Pen.Color := clWhite;
-      GraphPicture.Canvas.Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
-      GraphPicture.Canvas.Pen.Width := 3;
-      GraphPicture.Canvas.Pen.Color := clBlack;
-      CurrXAxisPos := GraphPaintBox.Height div 2;
-      CurrYAxisPos := GraphPaintBox.Width div 2;
-      PaintYAxis(CurrXAxisPos);
-      PaintXAxis(CurrYAxisPos);
-      for I := 1 to GraphNumber do
-        Begin
-          GraphPicture.Canvas.Pen.Color := ColorsArray[I];
-          PaintGraph(DotArrays[I], XOffset, YOffset);
-        End;
-      GraphPaintBox.Invalidate;
-    End;
-
 end;
 
 procedure TForm1.CosButtonClick(Sender: TObject);

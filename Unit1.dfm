@@ -41,7 +41,6 @@ object Form1: TForm1
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitHeight = 361
     object InputEdit: TEdit
       Left = 16
       Top = 36
