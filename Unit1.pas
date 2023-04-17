@@ -73,6 +73,7 @@ type
     GraphNumber: Byte;
     XOffset, YOffset: Real;
     ColorsArray: array [1..3] of TColor;
+    WidthArray: array [1..3] of Byte;
     MathInput: Boolean;
   public
     GraphPicture: TBitmap;
@@ -105,12 +106,12 @@ var
 begin
   Temp := Form1.GraphPicture.Canvas.Pen.Width;
   with Form1.GraphPicture.Canvas do
-  begin
-    Pen.Width := 3;
-    MoveTo(X, 0);
-    LineTo(X, Form1.GraphPaintBox.Height);
-    Pen.Width := Temp;
-  end;
+    begin
+      Pen.Width := 3;
+      MoveTo(X, 0);
+      LineTo(X, Form1.GraphPaintBox.Height);
+      Pen.Width := Temp;
+    end;
 end;
 
 Procedure PaintXAxis(const Y: Integer);
@@ -153,12 +154,15 @@ var
 begin
   SelectedWidth := Form1.PenWidthComboBox.Items[Form1.PenWidthComboBox.ItemIndex];
     with Form1.GraphPicture.Canvas.Pen do
-    if (SelectedWidth = 'mid') then
-      Width := 3
-    else if (SelectedWidth = 'low') then
-      Width := 1
-    else
-      Width := 5;
+    Begin
+      if (SelectedWidth = 'mid') then
+          Width := 3
+      else if (SelectedWidth = 'low') then
+        Width := 1
+      else
+        Width := 5;
+      Form1.WidthArray[Form1.GraphNumber] := Width;;
+    End;
 end;
 
 Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Real);
@@ -260,7 +264,11 @@ procedure TForm1.InputEditKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
-    ShowGraphButtonClick(Sender);
+    Begin
+      Key := 0;
+      ShowGraphButtonClick(Sender);
+    End;
+
 end;
 
 procedure TForm1.MathInputButtonClick(Sender: TObject);
@@ -328,7 +336,7 @@ begin
       CurrX := RangeFrom;
 //      MaxY := Math.NegInfinity;
 //      MinY := Math.Infinity;
-      ScaleY := 100 * GraphPaintBox.Height / IterationCount;
+      ScaleY := 500 * GraphPaintBox.Height / IterationCount;
 
 
       for I := 0 to DotNumber - 1 do
@@ -425,6 +433,7 @@ begin
       for I := 1 to GraphNumber do
         Begin
           GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+          GraphPicture.Canvas.Pen.Width := WidthArray[I];   x
           PaintGraph(DotArrays[I], XOffset, YOffset);
         End;
       GraphPaintBox.Invalidate;
