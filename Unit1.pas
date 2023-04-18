@@ -433,7 +433,7 @@ begin
       for I := 1 to GraphNumber do
         Begin
           GraphPicture.Canvas.Pen.Color := ColorsArray[I];
-          GraphPicture.Canvas.Pen.Width := WidthArray[I];   x
+          GraphPicture.Canvas.Pen.Width := WidthArray[I];
           PaintGraph(DotArrays[I], XOffset, YOffset);
         End;
       GraphPaintBox.Invalidate;
