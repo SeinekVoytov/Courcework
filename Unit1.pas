@@ -64,6 +64,7 @@ type
     procedure RangeToEditExit(Sender: TObject);
     procedure ClearGraphButtonClick(Sender: TObject);
     procedure ClearAllButtonClick(Sender: TObject);
+    procedure FormResize(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -191,6 +192,28 @@ begin
     Form1.GraphPaintBox.Invalidate;
 end;
 
+Procedure PaintXAxisPoints(const ScaleX: Real);
+begin
+
+end;
+
+Procedure PaintYAxisPoints(const ScaleY: Real);
+var
+  TempWidth: Byte;
+begin
+  TempWidth := Form1.GraphPicture.Canvas.Pen.Width;
+  with Form1.GraphPicture.Canvas do
+    Begin
+      Pen.Width := 3;
+      Pen.Color := clBlack;
+      MoveTo(Form1.GraphPaintBox.Width div 2 - 100, Trunc(ScaleY));
+      LineTo(Form1.GraphPaintBox.Width div 2 + 100, Trunc(ScaleY));
+      Pen.Width := TempWidth;
+    End;
+
+
+end;
+
 Procedure SetEditEnabled(const Value: Boolean);
 begin
   with Form1 do
@@ -241,6 +264,12 @@ procedure TForm1.FormCreate(Sender: TObject);
     PaintYAxis(CurrXAxisPos);
     PaintXAxis(CurrYAxisPos);
   end;
+
+procedure TForm1.FormResize(Sender: TObject);
+begin
+  GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
+  GraphPaintBox.Invalidate;
+end;
 
 procedure TForm1.GraphPaintBoxPaint(Sender: TObject);
   begin
@@ -336,8 +365,7 @@ begin
       CurrX := RangeFrom;
 //      MaxY := Math.NegInfinity;
 //      MinY := Math.Infinity;
-      ScaleY := 500 * GraphPaintBox.Height / IterationCount;
-
+      ScaleY := 0.05 * GraphPaintBox.Height;
 
       for I := 0 to DotNumber - 1 do
         Begin
@@ -352,24 +380,6 @@ begin
 //              End;
           CurrX := CurrX + Step;
         End;
-
-    //  YOffset := (MaxY - MinY) * GraphPaintBox.Height / 4;
-    //  ScaleX :=  GraphPaintBox.Width / (RangeTo - RangeFrom);
-    //  ScaleY :=  GraphPaintBox.Height / (MaxY - MinY);
-    //  for I := 1 to DotNumber - 1 do
-    //    Begin
-    //      if (FloatToStr(DotArray[I]) = 'NAN') then
-    //        WasNaN := True
-    //      else if (WasNan) then
-    //        Begin
-    //          GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
-    //          WasNan := False;
-    //        End
-    //      else
-    //        GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(DotArray[I] * ScaleY + YOffset));
-    //
-    //      CurrX := CurrX + XOffset;
-    //    End;
 
       GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
       ColorsArray[GraphNumber] := ColorBox.Selected;
@@ -390,6 +400,7 @@ end;
 
 procedure TForm1.ClearAllButtonClick(Sender: TObject);
 begin
+  GraphNumber := 0;
   GraphPicture.Canvas.Pen.Color := clWhite;
   GraphPicture.Canvas.Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
   CurrXAxisPos := GraphPaintBox.Height div 2;
