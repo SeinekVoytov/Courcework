@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Calculate, Converter;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Calculator, Converter;
 
 Type
   TDotArray = array of Real;
@@ -65,6 +65,7 @@ type
     procedure ClearGraphButtonClick(Sender: TObject);
     procedure ClearAllButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -82,6 +83,7 @@ type
 
 const
   IterationCount = 10000;
+  ScaleY = 28;
   ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
   ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
@@ -149,6 +151,7 @@ begin
   Form1.GraphPaintBox.Invalidate;
 end;
 
+
 Procedure SetSelectedWidth();
 var
   SelectedWidth: String;
@@ -210,8 +213,6 @@ begin
       LineTo(Form1.GraphPaintBox.Width div 2 + 100, Trunc(ScaleY));
       Pen.Width := TempWidth;
     End;
-
-
 end;
 
 Procedure SetEditEnabled(const Value: Boolean);
@@ -265,6 +266,47 @@ procedure TForm1.FormCreate(Sender: TObject);
     PaintXAxis(CurrYAxisPos);
   end;
 
+procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  I: Integer;
+begin
+  case Key of
+    VK_UP, VK_DOWN:
+      Begin
+        with GraphPicture.Canvas.Pen do
+          begin
+            KeyPreview := True;
+            with GraphPicture.Canvas do
+              Begin
+                Pen.Color := clWhite;
+                Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
+                Pen.Width := 3;
+                Pen.Color := clBlack;
+              End;
+
+            if (Key = VK_UP) then
+              begin
+                CurrXAxisPos := CurrXAxisPos + ScaleY;
+                YOffset := YOffset + ScaleY;
+              end
+            else
+              begin
+                CurrXAxisPos := CurrXAxisPos - ScaleY;
+                YOffset := YOffset - ScaleY;
+              end;
+
+            PaintXAxis(CurrXAxisPos);
+            PaintYAxis(CurrYAxisPos);
+            for I := 1 to GraphNumber do
+              PaintGraph(DotArrays[I], XOffset, YOffset);
+          end;
+        GraphPaintBox.Invalidate;
+      End;
+  end;
+
+end;
+
 procedure TForm1.FormResize(Sender: TObject);
 begin
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
@@ -296,8 +338,7 @@ begin
     Begin
       Key := 0;
       ShowGraphButtonClick(Sender);
-    End;
-
+  End;
 end;
 
 procedure TForm1.MathInputButtonClick(Sender: TObject);
@@ -350,8 +391,8 @@ end;
 
 procedure TForm1.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX, CurrY, Step, MaxY, MinY, ScaleX, ScaleY: Real;
-    DotNumber, I: Integer;
+    CurrX, Step, ScaleX, ScaleY: Real;
+    I: Integer;
     CurrExpr: String;
 begin
       Inc(GraphNumber, 1);
@@ -360,24 +401,13 @@ begin
       CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
       PolNotExprs[GraphNumber] := CurrExpr;
       Step := (RangeTo - RangeFrom) / IterationCount;
-      DotNumber := IterationCount;
-      SetLength(DotArrays[GraphNumber], DotNumber);
+      SetLength(DotArrays[GraphNumber], IterationCount);
       CurrX := RangeFrom;
-//      MaxY := Math.NegInfinity;
-//      MinY := Math.Infinity;
       ScaleY := 0.05 * GraphPaintBox.Height;
 
-      for I := 0 to DotNumber - 1 do
+      for I := 0 to IterationCount - 1 do
         Begin
-            DotArrays[GraphNumber][I] := ScaleY * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
-//            if (FloatToStr(DotArrays[GraphNumber][I]) <> 'NAN') then
-//              Begin
-//                if (DotArray[I] > MaxY) then
-//                  MaxY := DotArray[I];
-//
-//                if (DotArray[I] < MinY) then
-//                  MinY := DotArray[I];
-//              End;
+          DotArrays[GraphNumber][I] := ScaleY * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
           CurrX := CurrX + Step;
         End;
 
