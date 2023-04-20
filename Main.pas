@@ -107,29 +107,36 @@ Function CheckInput(Const s: String): Boolean;
 
 Procedure PaintYAxis(const X: Integer);
 var
-  Temp: Integer;
+  Width: Integer;
+  Color: TColor;
 begin
-  Temp := MainForm.GraphPicture.Canvas.Pen.Width;
+  Width := MainForm.GraphPicture.Canvas.Pen.Width;
   with MainForm.GraphPicture.Canvas do
     begin
       Pen.Width := 3;
+      Pen.Color := clBlack;
       MoveTo(X, 0);
       LineTo(X, MainForm.GraphPaintBox.Height);
-      Pen.Width := Temp;
+      Pen.Color := Color;
+      Pen.Width := Width;
     end;
 end;
 
 Procedure PaintXAxis(const Y: Integer);
 var
-  Temp: Integer;
+  Width: Integer;
+  Color: TColor;
 begin
-  Temp := MainForm.GraphPicture.Canvas.Pen.Width;
+  Width := MainForm.GraphPicture.Canvas.Pen.Width;
+  Color := MainForm.GraphPicture.Canvas.Pen.Color;
   with MainForm.GraphPicture.Canvas do
     begin
       Pen.Width := 3;
+      Pen.Color := clBlack;
       MoveTo(0, Y);
       LineTo(MainForm.GraphPaintBox.Width, Y);
-      Pen.Width := Temp;
+      Pen.Color := Color;
+      Pen.Width := Width;
     end;
 end;
 
@@ -193,8 +200,7 @@ begin
 
       CurrX := CurrX + Step;
     End;
-
-    MainForm.GraphPaintBox.Invalidate;
+    MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
 
 Procedure PaintXAxisPoints(const ScaleX: Real);

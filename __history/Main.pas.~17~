@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Calculator, Converter;
 
 Type
-  TDotArray = array of Real;
+  TDotArray = array [1..10000] of Real;
 type
   TMainForm = class(TForm)
     GraphPanel: TPanel;
@@ -74,7 +74,7 @@ type
     PolNotExprs: array [1..3] of String;
     GraphNumber: Byte;
     XOffset, YOffset: Real;
-    Step: Real;
+    Step, Range: Real;
     ColorsArray: array [1..3] of TColor;
     WidthArray: array [1..3] of Byte;
     MathInput: Boolean;
@@ -260,6 +260,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
     RangeTo := 10;
     GraphNumber := 0;
     Step := GraphPaintBox.Width / IterationCount;
+    Range := 20 / IterationCount;
     XOffset := 0;
     YOffset := GraphPaintBox.Height / 2;
     CurrXAxisPos := GraphPaintBox.Height div 2;
@@ -290,7 +291,8 @@ procedure TMainForm.FormCreate(Sender: TObject);
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
-  I: Integer;
+  I, J: Integer;
+  X: Real;
 begin
   case Key of
     VK_UP, VK_DOWN:
@@ -302,13 +304,13 @@ begin
 
             if (Key = VK_UP) then
               begin
-                CurrXAxisPos := CurrXAxisPos + ScaleY;
-                YOffset := YOffset + ScaleY;
+                CurrXAxisPos := CurrXAxisPos + 2 * ScaleY;
+                YOffset := YOffset + 2 * ScaleY;
               end
             else
               begin
-                CurrXAxisPos := CurrXAxisPos - ScaleY;
-                YOffset := YOffset - ScaleY;
+                CurrXAxisPos := CurrXAxisPos - 2 * ScaleY;
+                YOffset := YOffset - 2 * ScaleY;
               end;
 
             PaintXAxis(CurrXAxisPos);
@@ -316,7 +318,7 @@ begin
             for I := 1 to GraphNumber do
               PaintGraph(DotArrays[I], Step, XOffset, YOffset);
           end;
-        GraphPaintBox.Invalidate;
+        GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       End;
     VK_RIGHT, VK_LEFT:
       begin
@@ -324,24 +326,46 @@ begin
           begin
             KeyPreview := True;
             ClearPaintBox();
-
             if (Key = VK_LEFT) then
               begin
-                CurrYAxisPos := CurrYAxisPos + ScaleX;
-                XOffset := XOffset + ScaleX;
+                X := RangeFrom;
+                CurrYAxisPos := CurrYAxisPos + 2 * ScaleX;
+                for J := 1 to GraphNumber do
+                  Begin
+                    for I := 9500 downto 1 do
+                      DotArrays[J][I + 500] := DotArrays[J][I];
+                    for I := 500 downto 1 do
+                      Begin
+                        DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X) * 0.05 * GraphPaintBox.Height;
+                        X := X - Range;
+                      End;
+                  End;
+                Dec(RangeTo);
+                Dec(RangeFrom);
               end
             else
               begin
-                CurrYAxisPos := CurrYAxisPos - ScaleX;
-                XOffset := XOffset - ScaleX;
+                X := RangeTo;
+                CurrYAxisPos := CurrYAxisPos - 2 * ScaleX;
+                for J := 1 to GraphNumber do
+                  Begin
+                    for I := 501 to 10000 do
+                      DotArrays[J][I - 500] := DotArrays[J][I];
+                    for I := 9501 to 10000 do
+                      Begin
+                        DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X) * 0.05 * GraphPaintBox.Height;
+                        X := X + Range;
+                      End;
+                  End;
+                Inc(RangeTo);
+                Inc(RangeFrom);
               end;
-
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
             for I := 1 to GraphNumber do
               PaintGraph(DotArrays[I], Step, XOffset, YOffset);
           end;
-        GraphPaintBox.Invalidate;
+        GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
   end;
 end;
@@ -354,8 +378,6 @@ end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
   begin
-
-    //GraphPaintBox.Invalidate;
     GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   end;
 
@@ -375,6 +397,7 @@ procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
 begin
   if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
     Begin
+      KeyPreview := True;
       Key := 0;
       ShowGraphButtonClick(Sender);
   End;
@@ -430,21 +453,19 @@ end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX,  ScaleX, ScaleY, Range: Real;
+    CurrX,  ScaleX, ScaleY: Real;
     I: Integer;
     CurrExpr: String;
 begin
       Inc(GraphNumber);
       SetEditEnabled(False);
       SetButtonEnabled(True);
-      Range := (RangeTo - RangeFrom) / IterationCount;
       CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
       PolNotExprs[GraphNumber] := CurrExpr;
-      SetLength(DotArrays[GraphNumber], IterationCount);
       CurrX := RangeFrom;
       ScaleY := 0.05 * GraphPaintBox.Height;
 
-      for I := 0 to IterationCount - 1 do
+      for I := 1 to IterationCount do
         Begin
           DotArrays[GraphNumber][I] := ScaleY * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
           CurrX := CurrX + Range;
