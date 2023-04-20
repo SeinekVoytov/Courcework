@@ -291,7 +291,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
-  I: Integer;
+  I, J: Integer;
   X: Real;
 begin
   case Key of
@@ -304,12 +304,12 @@ begin
 
             if (Key = VK_UP) then
               begin
-                CurrXAxisPos := CurrXAxisPos + ScaleY;
+                CurrXAxisPos := CurrXAxisPos + 2 * ScaleY;
                 YOffset := YOffset + 2 * ScaleY;
               end
             else
               begin
-                CurrXAxisPos := CurrXAxisPos - ScaleY;
+                CurrXAxisPos := CurrXAxisPos - 2 * ScaleY;
                 YOffset := YOffset - 2 * ScaleY;
               end;
 
@@ -326,17 +326,19 @@ begin
           begin
             KeyPreview := True;
             ClearPaintBox();
-
             if (Key = VK_LEFT) then
               begin
                 X := RangeFrom;
                 CurrYAxisPos := CurrYAxisPos + 2 * ScaleX;
-                for I := 9500 downto 1 do
-                  DotArrays[GraphNumber][I + 500] := DotArrays[GraphNumber][I];
-                for I := 500 downto 1 do
+                for J := 1 to GraphNumber do
                   Begin
-                    DotArrays[GraphNumber][I] := -TCalculate.Calculate(PolNotExprs[GraphNumber], X) * 0.05 * GraphPaintBox.Height;
-                    X := X - Range;
+                    for I := 9500 downto 1 do
+                      DotArrays[J][I + 500] := DotArrays[J][I];
+                    for I := 500 downto 1 do
+                      Begin
+                        DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X) * 0.05 * GraphPaintBox.Height;
+                        X := X - Range;
+                      End;
                   End;
                 Dec(RangeTo);
                 Dec(RangeFrom);
@@ -345,17 +347,19 @@ begin
               begin
                 X := RangeTo;
                 CurrYAxisPos := CurrYAxisPos - 2 * ScaleX;
-                for I := 501 to 10000 do
-                  DotArrays[GraphNumber][I - 500] := DotArrays[GraphNumber][I];
-                for I := 9501 to 10000 do
+                for J := 1 to GraphNumber do
                   Begin
-                    DotArrays[GraphNumber][I] := -TCalculate.Calculate(PolNotExprs[GraphNumber], X) * 0.05 * GraphPaintBox.Height;
-                    X := X + Range;
+                    for I := 501 to 10000 do
+                      DotArrays[J][I - 500] := DotArrays[J][I];
+                    for I := 9501 to 10000 do
+                      Begin
+                        DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X) * 0.05 * GraphPaintBox.Height;
+                        X := X + Range;
+                      End;
                   End;
                 Inc(RangeTo);
                 Inc(RangeFrom);
               end;
-
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
             for I := 1 to GraphNumber do
