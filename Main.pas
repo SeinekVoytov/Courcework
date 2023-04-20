@@ -95,16 +95,6 @@ implementation
 
 {$R *.dfm}
 
-Function CheckInput(Const s: String): Boolean;
-  Begin
-    try
-      StrToInt(s);
-      Result := True;
-    except
-      Result := False;
-    end;
-  End;
-
 Procedure PaintYAxis(const X: Integer);
 var
   Width: Integer;
@@ -404,8 +394,8 @@ procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
 begin
   if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
     Begin
-      KeyPreview := True;
       ShowGraphButtonClick(Sender);
+      Key := 0;
   End;
 end;
 

@@ -1,4 +1,4 @@
-unit Main;
+﻿unit Main;
 
 interface
 
@@ -404,8 +404,8 @@ procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
 begin
   if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
     Begin
+      KeyPreview := True;
       ShowGraphButtonClick(Sender);
-      Key := 0;
   End;
 end;
 

@@ -7,7 +7,6 @@ uses System.SysUtils;
   Type
     TChecker = class
       class Function IsMathExprValid(Const Expr: String): Boolean;
-      class Function CheckInput(Const s: String): Boolean;
     end;
 
 implementation
@@ -217,15 +216,5 @@ implementation
           End;
         Inc(I);
       End;
-  End;
-
-  class Function TChecker.CheckInput(Const s: String): Boolean;
-  Begin
-    try
-      StrToInt(s);
-      Result := True;
-    except
-      Result := False;
-    end;
   End;
 end.
