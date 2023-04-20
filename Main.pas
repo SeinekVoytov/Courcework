@@ -305,12 +305,12 @@ begin
             if (Key = VK_UP) then
               begin
                 CurrXAxisPos := CurrXAxisPos + ScaleY;
-                YOffset := YOffset + ScaleY;
+                YOffset := YOffset + 2 * ScaleY;
               end
             else
               begin
                 CurrXAxisPos := CurrXAxisPos - ScaleY;
-                YOffset := YOffset - ScaleY;
+                YOffset := YOffset - 2 * ScaleY;
               end;
 
             PaintXAxis(CurrXAxisPos);
@@ -329,15 +329,22 @@ begin
 
             if (Key = VK_LEFT) then
               begin
-                CurrYAxisPos := CurrYAxisPos + ScaleX;
-                XOffset := XOffset + ScaleX;
-
+                X := RangeFrom;
+                CurrYAxisPos := CurrYAxisPos + 2 * ScaleX;
+                for I := 9500 downto 1 do
+                  DotArrays[GraphNumber][I + 500] := DotArrays[GraphNumber][I];
+                for I := 500 downto 1 do
+                  Begin
+                    DotArrays[GraphNumber][I] := -TCalculate.Calculate(PolNotExprs[GraphNumber], X) * 0.05 * GraphPaintBox.Height;
+                    X := X - Range;
+                  End;
+                Dec(RangeTo);
+                Dec(RangeFrom);
               end
             else
               begin
                 X := RangeTo;
-                CurrYAxisPos := CurrYAxisPos - ScaleX;
-                XOffset := XOffset - ScaleX;
+                CurrYAxisPos := CurrYAxisPos - 2 * ScaleX;
                 for I := 501 to 10000 do
                   DotArrays[GraphNumber][I - 500] := DotArrays[GraphNumber][I];
                 for I := 9501 to 10000 do
@@ -386,6 +393,7 @@ procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
 begin
   if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
     Begin
+      KeyPreview := True;
       Key := 0;
       ShowGraphButtonClick(Sender);
   End;
