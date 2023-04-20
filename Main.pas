@@ -276,6 +276,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
+    ShowGraphButton.Enabled := False;
     with PenWidthComboBox do
       Begin
         Items.Add('low');
@@ -338,9 +339,9 @@ begin
                 CurrYAxisPos := CurrYAxisPos + 2 * ScaleX;
                 for J := 1 to GraphNumber do
                   Begin
-                    for I := 9500 downto 1 do
+                    for I := 9500 downto Low(DotArrays[J]) do
                       DotArrays[J][I + 500] := DotArrays[J][I];
-                    for I := 500 downto 1 do
+                    for I := 500 downto Low(DotArrays[J]) do
                       Begin
                         DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X) * 0.05 * GraphPaintBox.Height;
                         X := X - Range;
@@ -355,9 +356,9 @@ begin
                 CurrYAxisPos := CurrYAxisPos - 2 * ScaleX;
                 for J := 1 to GraphNumber do
                   Begin
-                    for I := 501 to 10000 do
+                    for I := 501 to High(DotArrays[J]) do
                       DotArrays[J][I - 500] := DotArrays[J][I];
-                    for I := 9501 to 10000 do
+                    for I := 9501 to High(DotArrays[J]) do
                       Begin
                         DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X) * 0.05 * GraphPaintBox.Height;
                         X := X + Range;
@@ -404,7 +405,6 @@ begin
   if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
     Begin
       KeyPreview := True;
-      Key := 0;
       ShowGraphButtonClick(Sender);
   End;
 end;
@@ -444,7 +444,7 @@ begin
       // покраснение рамки edit и блокировка кнопки
     End
   else
-    RangeTo :=  StrToInt(RangeToEdit.Text);
+    RangeTo := StrToInt(RangeToEdit.Text);
 end;
 
 procedure TMainForm.RangeToEditExit(Sender: TObject);
@@ -463,49 +463,48 @@ procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
     I: Integer;
     CurrExpr: String;
 begin
-      Inc(GraphNumber);
-      SetEditEnabled(False);
-      SetButtonEnabled(True);
-      CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
-      PolNotExprs[GraphNumber] := CurrExpr;
-      CurrX := RangeFrom;
-      ScaleY := 0.05 * GraphPaintBox.Height;
+  Inc(GraphNumber);
+  SetEditEnabled(False);
+  SetButtonEnabled(True);
+  CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
+  PolNotExprs[GraphNumber] := CurrExpr;
+  CurrX := RangeFrom;
+  ScaleY := 0.05 * GraphPaintBox.Height;
 
-      for I := 1 to IterationCount do
-        Begin
-          DotArrays[GraphNumber][I] := ScaleY * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
-          CurrX := CurrX + Range;
-        End;
+  for I := 1 to IterationCount do
+    Begin
+      DotArrays[GraphNumber][I] := ScaleY * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
+      CurrX := CurrX + Range;
+    End;
 
-      GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
-      ColorsArray[GraphNumber] := ColorBox.Selected;
+  GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
+  ColorsArray[GraphNumber] := ColorBox.Selected;
 
-      SetSelectedWidth();
+  SetSelectedWidth();
 
-      PaintGraph(DotArrays[GraphNumber], Step, XOffset, YOffset);
+  PaintGraph(DotArrays[GraphNumber], Step, XOffset, YOffset);
 
-      if (GraphNumber = 3) then
-        Begin
-          MathInputPanel.Enabled := False;
-          InputEdit.Enabled := False;
-          ColorBox.Enabled := False;
-          PenWidthComboBox.Enabled := False;
-          ShowGraphButton.Enabled := False;
-        End;
+  if (GraphNumber = 3) then
+  Begin
+    MathInputPanel.Enabled := False;
+    InputEdit.Enabled := False;
+    ColorBox.Enabled := False;
+    PenWidthComboBox.Enabled := False;
+    ShowGraphButton.Enabled := False;
+  End;
 end;
 
 procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
   GraphNumber := 0;
-  GraphPicture.Canvas.Pen.Color := clWhite;
-  GraphPicture.Canvas.Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
+  ClearPaintBox();
 
   CurrXAxisPos := GraphPaintBox.Height div 2;
   CurrYAxisPos := GraphPaintBox.Width div 2;
-  GraphPicture.Canvas.Pen.Color := clBlack;
   PaintYAxis(CurrXAxisPos);
   PaintXAxis(CurrYAxisPos);
-  GraphPaintBox.Invalidate;
+
+  GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
   RangeFrom := -10;
   RangeTo := 10;
   RangeFromEdit.Text := IntToStr(RangeFrom);
@@ -525,32 +524,27 @@ procedure TMainForm.ClearGraphButtonClick(Sender: TObject);
 var
   I: Integer;
 begin
-      Dec(GraphNumber);
-      if (GraphNumber = 0) then
-        ClearGraphButton.Enabled := False;
-      with GraphPicture.Canvas do
-        Begin
-          Pen.Color := clWhite;
-          Rectangle(0,0,GraphPaintBox.Width,GraphPaintBox.Height);
-          Pen.Width := 3;
-          Pen.Color := clBlack;
-        End;
+  Dec(GraphNumber);
+  if (GraphNumber = 0) then
+    ClearGraphButton.Enabled := False;
 
-      PaintYAxis(CurrYAxisPos);
-      PaintXAxis(CurrXAxisPos);
-      for I := 1 to GraphNumber do
-        Begin
-          GraphPicture.Canvas.Pen.Color := ColorsArray[I];
-          GraphPicture.Canvas.Pen.Width := WidthArray[I];
-          PaintGraph(DotArrays[I], Step, XOffset, YOffset);
-        End;
-      GraphPaintBox.Invalidate;
-      InputEdit.Enabled := True;
-      ColorBox.Enabled := True;
-      PenWidthComboBox.Enabled := True;
-      MathInputPanel.Enabled := True;
-      ShowGraphButton.Enabled := True;
+  ClearPaintBox();
+  PaintYAxis(CurrYAxisPos);
+  PaintXAxis(CurrXAxisPos);
 
+  for I := 1 to GraphNumber do
+    Begin
+      GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+      GraphPicture.Canvas.Pen.Width := WidthArray[I];
+      PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+    End;
+
+  GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
+  InputEdit.Enabled := True;
+  ColorBox.Enabled := True;
+  PenWidthComboBox.Enabled := True;
+  MathInputPanel.Enabled := True;
+  ShowGraphButton.Enabled := True;
 end;
 
 procedure TMainForm.SinButtonClick(Sender: TObject);

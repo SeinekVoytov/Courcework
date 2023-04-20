@@ -99,7 +99,7 @@ implementation
   Begin
     I := 1;
     Len := Length(Expr);
-    Result := CheckParentheses();
+    Result := CheckParentheses() and (Expr <> '');
     while (I <= Len) and (Result) do
       Begin
         CurrSymbol := Expr[I];
