@@ -325,10 +325,10 @@ begin
             ClearPaintBox();
             if (Key = VK_LEFT) then
               begin
-                X := RangeFrom;
                 CurrYAxisPos := CurrYAxisPos + 2 * ScaleX;
                 for J := 1 to GraphNumber do
                   Begin
+                    X := RangeFrom;
                     for I := 9500 downto Low(DotArrays[J]) do
                       DotArrays[J][I + 500] := DotArrays[J][I];
                     for I := 500 downto Low(DotArrays[J]) do
@@ -342,10 +342,10 @@ begin
               end
             else
               begin
-                X := RangeTo;
                 CurrYAxisPos := CurrYAxisPos - 2 * ScaleX;
                 for J := 1 to GraphNumber do
                   Begin
+                    X := RangeTo;
                     for I := 501 to High(DotArrays[J]) do
                       DotArrays[J][I - 500] := DotArrays[J][I];
                     for I := 9501 to High(DotArrays[J]) do
