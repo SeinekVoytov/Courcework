@@ -2,8 +2,8 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'MainForm'
-  ClientHeight = 577
-  ClientWidth = 851
+  ClientHeight = 602
+  ClientWidth = 876
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,30 +20,34 @@ object MainForm: TMainForm
   object GraphPanel: TPanel
     Left = 274
     Top = 0
-    Width = 577
-    Height = 577
+    Width = 602
+    Height = 602
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 577
+    ExplicitHeight = 577
     object GraphPaintBox: TPaintBox
       Left = 1
       Top = 1
-      Width = 575
-      Height = 575
+      Width = 600
+      Height = 600
       Align = alClient
       OnPaint = GraphPaintBoxPaint
       ExplicitLeft = 6
       ExplicitTop = 2
       ExplicitWidth = 598
+      ExplicitHeight = 575
     end
   end
   object EditPanel: TPanel
     Left = 0
     Top = 0
     Width = 274
-    Height = 577
+    Height = 602
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitHeight = 577
     object InputEdit: TEdit
       Left = 16
       Top = 36
