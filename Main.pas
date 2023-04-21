@@ -122,6 +122,7 @@ var
 begin
   Width := MainForm.GraphPicture.Canvas.Pen.Width;
   Color := MainForm.GraphPicture.Canvas.Pen.Color;
+
   with MainForm.GraphPicture.Canvas do
     begin
       Pen.Width := 3;
@@ -129,10 +130,11 @@ begin
       MoveTo(0, Y);
       LineTo(MainForm.GraphPaintBox.Width, Y);     // axis painting
       X := 2 * ScaleY;
-      for I := 1 to 19 do                          // sticks painting
+      for I := MainForm.RangeFrom + 1 to MainForm.RangeTo - 1 do                          // sticks painting
         Begin
           MoveTo(X, MainForm.CurrXAxisPos - 3);
           LineTo(X, MainForm.CurrXAxisPos + 3);
+          TextOut(X, MainForm.CurrXAxisPos + 3, IntToStr(I));
           X := X + 2 * ScaleY;
         End;
       Pen.Color := Color;
@@ -292,7 +294,6 @@ procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     PaintYAxis(CurrXAxisPos);
     PaintXAxis(CurrYAxisPos);
-    PaintXAxisStics();
     GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   end;
 
