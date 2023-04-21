@@ -118,6 +118,7 @@ Procedure PaintXAxis(const Y: Integer);
 var
   Width: Integer;
   Color: TColor;
+  X, I: Integer;
 begin
   Width := MainForm.GraphPicture.Canvas.Pen.Width;
   Color := MainForm.GraphPicture.Canvas.Pen.Color;
@@ -126,7 +127,14 @@ begin
       Pen.Width := 3;
       Pen.Color := clBlack;
       MoveTo(0, Y);
-      LineTo(MainForm.GraphPaintBox.Width, Y);
+      LineTo(MainForm.GraphPaintBox.Width, Y);     // axis painting
+      X := 2 * ScaleY;
+      for I := 1 to 19 do                          // sticks painting
+        Begin
+          MoveTo(X, MainForm.CurrXAxisPos - 3);
+          LineTo(X, MainForm.CurrXAxisPos + 3);
+          X := X + 2 * ScaleY;
+        End;
       Pen.Color := Color;
       Pen.Width := Width;
     end;
@@ -195,23 +203,22 @@ begin
     MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
 
-Procedure PaintXAxisPoints(const ScaleX: Integer);
-begin
-
-end;
-
-Procedure PaintYAxisPoints(const ScaleY: Integer);
+Procedure PaintYAxisStics(const ScaleY: Integer);
 var
-  TempWidth: Byte;
+  Width: Byte;
+  Color: TColor;
+  Y: Integer;
 begin
-  TempWidth := MainForm.GraphPicture.Canvas.Pen.Width;
+  Width := MainForm.GraphPicture.Canvas.Pen.Width;
+  Color := MainForm.GraphPicture.Canvas.Pen.Color;
   with MainForm.GraphPicture.Canvas do
     Begin
       Pen.Width := 3;
       Pen.Color := clBlack;
       MoveTo(MainForm.GraphPaintBox.Width div 2 - 100, Trunc(ScaleY));
       LineTo(MainForm.GraphPaintBox.Width div 2 + 100, Trunc(ScaleY));
-      Pen.Width := TempWidth;
+      Pen.Color := Color;
+      Pen.Width := Width;
     End;
 end;
 
@@ -285,6 +292,8 @@ procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     PaintYAxis(CurrXAxisPos);
     PaintXAxis(CurrYAxisPos);
+    PaintXAxisStics();
+    GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   end;
 
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
