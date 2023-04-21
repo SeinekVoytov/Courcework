@@ -66,6 +66,8 @@ type
     procedure ClearAllButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
+      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -107,18 +109,21 @@ begin
       Pen.Width := 3;
       Pen.Color := clBlack;
       MoveTo(X, 0);
-      LineTo(X, MainForm.GraphPaintBox.Height);
+      LineTo(X, MainForm.GraphPaintBox.Height);                       // axis painting
       Y := ScaleY * 2;
       for I := MainForm.CurrMaxY - 1 downto MainForm.CurrMaxY - 19  do      // sticks painting
         Begin
           if (I <> 0) then
           Begin
-            MoveTo(MainForm.CurrYAxisPos - 3, Y);
-            LineTo(MainForm.CurrYAxisPos + 3, Y);
-            TextOut(MainForm.CurrYAxisPos + 3, Y, IntToStr(I));
+            MoveTo(MainForm.CurrYAxisPos - 4, Y);
+            LineTo(MainForm.CurrYAxisPos + 4, Y);
+            TextOut(MainForm.CurrYAxisPos + 4, Y, IntToStr(I));
           End;
           Y := Y + 2 * ScaleY;
         End;
+      MoveTo(MainForm.CurrYAxisPos - 10, 10);
+      LineTo(MainForm.CurrYAxisPos, 0);
+      LineTo(MainForm.CurrYAxisPos + 10, 10);
       Pen.Color := Color;
       Pen.Width := Width;
     end;
@@ -146,6 +151,9 @@ begin
           TextOut(X, MainForm.CurrXAxisPos + 3, IntToStr(I));
           X := X + 2 * ScaleX;
         End;
+      MoveTo(MainForm.GraphPaintBox.Width - 10, MainForm.CurrXAxisPos - 10);
+      LineTo(MainForm.GraphPaintBox.Width, MainForm.CurrXAxisPos);
+      LineTo(MainForm.GraphPaintBox.Width - 10, MainForm.CurrXAxisPos + 10);
       Pen.Color := Color;
       Pen.Width := Width;
     end;
@@ -356,6 +364,18 @@ begin
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
   end;
+end;
+
+procedure TMainForm.FormMouseWheel(Sender: TObject; Shift: TShiftState;
+  WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+begin
+  if (ssCtrl in Shift) then
+    Begin
+      if (WheelDelta > 0) then
+        Begin
+          ScaleBy(MousePos.X, MousePos.Y);
+        End;
+    End;
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
