@@ -39,6 +39,7 @@ type
     PenWidthComboBox: TComboBox;
     ClearGraphButton: TButton;
     ClearAllButton: TButton;
+    ClearInputButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -46,6 +47,7 @@ type
     procedure RangeToEditChange(Sender: TObject);
     procedure ShowGraphButtonClick(Sender: TObject);
     procedure MathInputButtonClick(Sender: TObject);
+    procedure ClearInputButtonClick(Sender: TObject);
     procedure SinButtonClick(Sender: TObject);
     procedure CosButtonClick(Sender: TObject);
     procedure TgButtonClick(Sender: TObject);
@@ -60,8 +62,6 @@ type
     procedure AbsButtonClick(Sender: TObject);
     procedure InputEditKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure RangeFromEditExit(Sender: TObject);
-    procedure RangeToEditExit(Sender: TObject);
     procedure ClearGraphButtonClick(Sender: TObject);
     procedure ClearAllButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -116,40 +116,29 @@ Procedure PaintXAxis(const Y: Integer);
 var
   Width: Integer;
   Color: TColor;
+  X, I: Integer;
 begin
   Width := MainForm.GraphPicture.Canvas.Pen.Width;
   Color := MainForm.GraphPicture.Canvas.Pen.Color;
+
   with MainForm.GraphPicture.Canvas do
     begin
       Pen.Width := 3;
       Pen.Color := clBlack;
       MoveTo(0, Y);
-      LineTo(MainForm.GraphPaintBox.Width, Y);
+      LineTo(MainForm.GraphPaintBox.Width, Y);     // axis painting
+      X := 2 * ScaleY;
+      for I := MainForm.RangeFrom + 1 to MainForm.RangeTo - 1 do                          // sticks painting
+        Begin
+          MoveTo(X, MainForm.CurrXAxisPos - 3);
+          LineTo(X, MainForm.CurrXAxisPos + 3);
+          TextOut(X, MainForm.CurrXAxisPos + 3, IntToStr(I));
+          X := X + 2 * ScaleY;
+        End;
       Pen.Color := Color;
       Pen.Width := Width;
     end;
 end;
-
-Procedure RewriteYAxis(var CurrYAxisPos: Integer;
-                       const RangeTo, RangeFrom, CurrXAxisPos: Integer
-                       );
-begin
-  with MainForm.GraphPicture.Canvas do
-        Begin
-          Pen.Color := clWhite;
-          Pen.Width := 3;
-          PaintYAxis(CurrYAxisPos);
-
-          CurrYAxisPos := Trunc(Abs(RangeFrom) * MainForm.GraphPaintBox.Width / (RangeTo - RangeFrom));
-
-          Pen.Color := clBlack;
-          PaintYAxis(CurrYAxisPos);
-          PaintXAxis(CurrXAxisPos);
-        End;
-
-  MainForm.GraphPaintBox.Invalidate;
-end;
-
 
 Procedure SetSelectedWidth();
 var
@@ -193,23 +182,22 @@ begin
     MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
 
-Procedure PaintXAxisPoints(const ScaleX: Integer);
-begin
-
-end;
-
-Procedure PaintYAxisPoints(const ScaleY: Integer);
+Procedure PaintYAxisStics(const ScaleY: Integer);
 var
-  TempWidth: Byte;
+  Width: Byte;
+  Color: TColor;
+  Y: Integer;
 begin
-  TempWidth := MainForm.GraphPicture.Canvas.Pen.Width;
+  Width := MainForm.GraphPicture.Canvas.Pen.Width;
+  Color := MainForm.GraphPicture.Canvas.Pen.Color;
   with MainForm.GraphPicture.Canvas do
     Begin
       Pen.Width := 3;
       Pen.Color := clBlack;
       MoveTo(MainForm.GraphPaintBox.Width div 2 - 100, Trunc(ScaleY));
       LineTo(MainForm.GraphPaintBox.Width div 2 + 100, Trunc(ScaleY));
-      Pen.Width := TempWidth;
+      Pen.Color := Color;
+      Pen.Width := Width;
     End;
 end;
 
@@ -283,6 +271,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     PaintYAxis(CurrXAxisPos);
     PaintXAxis(CurrYAxisPos);
+    GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   end;
 
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
@@ -313,7 +302,11 @@ begin
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
             for I := 1 to GraphNumber do
-              PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+              Begin
+                GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+                GraphPicture.Canvas.Pen.Width := WidthArray[I];
+                PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+              End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       End;
@@ -378,9 +371,9 @@ begin
 end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
-  begin
-    GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-  end;
+begin
+  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+end;
 
 procedure TMainForm.InputEditChange(Sender: TObject);
 Var
@@ -401,6 +394,12 @@ begin
       ShowGraphButtonClick(Sender);
       Key := 0;
   End;
+end;
+
+procedure TMainForm.ClearInputButtonClick(Sender: TObject);
+begin
+  InputEdit.Text := '';
+  InputEdit.SetFocus;
 end;
 
 procedure TMainForm.MathInputButtonClick(Sender: TObject);
@@ -439,16 +438,6 @@ begin
     End
   else
     RangeTo := StrToInt(RangeToEdit.Text);
-end;
-
-procedure TMainForm.RangeToEditExit(Sender: TObject);
-begin
-  RewriteYAxis(CurrYAxisPos, RangeTo, RangeFrom, CurrXAxisPos);
-end;
-
-procedure TMainForm.RangeFromEditExit(Sender: TObject);
-begin
-  RewriteYAxis(CurrYAxisPos, RangeTo, RangeFrom, CurrXAxisPos);
 end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
