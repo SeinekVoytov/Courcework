@@ -39,6 +39,7 @@ type
     PenWidthComboBox: TComboBox;
     ClearGraphButton: TButton;
     ClearAllButton: TButton;
+    ClearInputButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -46,6 +47,7 @@ type
     procedure RangeToEditChange(Sender: TObject);
     procedure ShowGraphButtonClick(Sender: TObject);
     procedure MathInputButtonClick(Sender: TObject);
+    procedure ClearInputButtonClick(Sender: TObject);
     procedure SinButtonClick(Sender: TObject);
     procedure CosButtonClick(Sender: TObject);
     procedure TgButtonClick(Sender: TObject);
@@ -313,7 +315,11 @@ begin
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
             for I := 1 to GraphNumber do
-              PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+              Begin
+                GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+                GraphPicture.Canvas.Pen.Width := WidthArray[I];
+                PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+              End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       End;
@@ -360,7 +366,11 @@ begin
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
             for I := 1 to GraphNumber do
-              PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+              Begin
+                GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+                GraphPicture.Canvas.Pen.Width := WidthArray[I];
+                PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+              End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
@@ -397,6 +407,12 @@ begin
       ShowGraphButtonClick(Sender);
       Key := 0;
   End;
+end;
+
+procedure TMainForm.ClearInputButtonClick(Sender: TObject);
+begin
+  InputEdit.Text := '';
+  InputEdit.SetFocus;
 end;
 
 procedure TMainForm.MathInputButtonClick(Sender: TObject);

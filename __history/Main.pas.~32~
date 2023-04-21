@@ -74,7 +74,7 @@ type
     PolNotExprs: array [1..3] of String;
     GraphNumber: Byte;
     XOffset, YOffset: Integer;
-    Step, Range: Real;
+    Range, Step: Real;
     ColorsArray: array [1..3] of TColor;
     WidthArray: array [1..3] of Byte;
     MathInput: Boolean;
@@ -84,8 +84,8 @@ type
 
 const
   IterationCount = 10000;
-  ScaleY = 28;
-  ScaleX = 28;
+  ScaleY = 30;
+  ScaleX = 30;
   ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
   ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
@@ -193,12 +193,12 @@ begin
     MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
 
-Procedure PaintXAxisPoints(const ScaleX: Real);
+Procedure PaintXAxisPoints(const ScaleX: Integer);
 begin
 
 end;
 
-Procedure PaintYAxisPoints(const ScaleY: Real);
+Procedure PaintYAxisPoints(const ScaleY: Integer);
 var
   TempWidth: Byte;
 begin
@@ -325,10 +325,10 @@ begin
             ClearPaintBox();
             if (Key = VK_LEFT) then
               begin
-                X := RangeFrom;
                 CurrYAxisPos := CurrYAxisPos + 2 * ScaleX;
                 for J := 1 to GraphNumber do
                   Begin
+                    X := RangeFrom;
                     for I := 9500 downto Low(DotArrays[J]) do
                       DotArrays[J][I + 500] := DotArrays[J][I];
                     for I := 500 downto Low(DotArrays[J]) do
@@ -342,10 +342,10 @@ begin
               end
             else
               begin
-                X := RangeTo;
                 CurrYAxisPos := CurrYAxisPos - 2 * ScaleX;
                 for J := 1 to GraphNumber do
                   Begin
+                    X := RangeTo;
                     for I := 501 to High(DotArrays[J]) do
                       DotArrays[J][I - 500] := DotArrays[J][I];
                     for I := 9501 to High(DotArrays[J]) do
@@ -449,7 +449,7 @@ end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX,  ScaleX, ScaleY: Real;
+    CurrX: Real;
     I: Integer;
     CurrExpr: String;
 begin
@@ -459,11 +459,10 @@ begin
   CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   PolNotExprs[GraphNumber] := CurrExpr;
   CurrX := RangeFrom;
-  ScaleY := 0.05 * GraphPaintBox.Height;
 
   for I := 1 to IterationCount do
     Begin
-      DotArrays[GraphNumber][I] := ScaleY * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
+      DotArrays[GraphNumber][I] := 60 * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
       CurrX := CurrX + Range;
     End;
 

@@ -291,12 +291,17 @@ object MainForm: TMainForm
       end
     end
     object ClearInputButton: TButton
+      AlignWithMargins = True
       Left = 204
       Top = 36
       Width = 21
       Height = 21
+      Hint = #1052#1072#1090#1077#1084#1072#1090#1080#1095#1077#1089#1082#1080#1081' '#1074#1074#1086#1076
+      Caption = ' '
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 4
-      OnClick = ClearInputButtonClick
+      OnClick = MathInputButtonClick
     end
   end
 end

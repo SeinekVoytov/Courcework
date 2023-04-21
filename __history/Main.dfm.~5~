@@ -290,13 +290,5 @@ object MainForm: TMainForm
         OnClick = ClearAllButtonClick
       end
     end
-    object ClearInputButton: TButton
-      Left = 204
-      Top = 36
-      Width = 21
-      Height = 21
-      TabOrder = 4
-      OnClick = ClearInputButtonClick
-    end
   end
 end
