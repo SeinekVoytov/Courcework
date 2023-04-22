@@ -178,15 +178,16 @@ end;
 
 Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Integer);
 var
-  I: Integer;
+  I, HighX: Integer;
   WasNan: Boolean;
   CurrX: Real;
 begin
    WasNan := True;
    CurrX := 0;
    I := 500 * (10 - Abs(MainForm.XFrom));
-   MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I);
-   for I := I + 1 to High(DotArray) do
+   HighX := 500 * (10 - Abs(MainForm.XTo));
+   MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I - HighX);
+   for I := I + 1 to IterationCount - HighX do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
         WasNaN := True
@@ -396,29 +397,29 @@ begin
             Begin
               Inc(XFrom);
               Dec(YTo);
-              Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-              CurrXAxisPos := (YTo) * Scale;
-              CurrYAxisPos := Abs(XFrom) * Scale;
-              PaintXAxis(CurrXAxisPos);
-              PaintYAxis(CurrYAxisPos);
-              YOffset := CurrXAxisPos;
             End
           else if (MousePos.X > 600) and (MousePos.Y <= 600) then
             Begin
               Inc(XFrom);
               Inc(YFrom);
-              Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-              CurrXAxisPos := Abs(YTo) * Scale;
-              CurrYAxisPos := Abs(XFrom) * Scale;
-              PaintXAxis(CurrXAxisPos);
-              PaintYAxis(CurrYAxisPos);
-              YOffset := CurrXAxisPos;
             End
           else if (MousePos.X <= 600) and (MousePos.Y > 600) then
             Begin
-
+              Dec(XTo);
+              Dec(YTo);
+            End
+          else
+            Begin
+              Dec(XTo);
+              Inc(YFrom);
             End;
 
+          Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+          CurrXAxisPos := Abs(YTo) * Scale;
+          CurrYAxisPos := Abs(XFrom) * Scale;
+          PaintXAxis(CurrXAxisPos);
+          PaintYAxis(CurrYAxisPos);
+          YOffset := CurrXAxisPos;
           for I := 1 to GraphNumber do
             Begin
               GraphPicture.Canvas.Pen.Color := ColorsArray[I];
