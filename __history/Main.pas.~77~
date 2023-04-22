@@ -60,8 +60,8 @@ type
     procedure LogButtonClick(Sender: TObject);
     procedure LnButtonClick(Sender: TObject);
     procedure AbsButtonClick(Sender: TObject);
-    procedure InputEditKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    {procedure InputEditKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);}
     procedure ClearGraphButtonClick(Sender: TObject);
     procedure ClearAllButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -108,7 +108,8 @@ begin
       Pen.Width := 3;
       Pen.Color := clBlack;
       MoveTo(X, 0);
-      LineTo(X, MainForm.GraphPaintBox.Height);                       // axis painting
+      LineTo(X, MainForm.GraphPaintBox.Height);
+      Mainform.GraphPaintBox.Canvas.Draw(0, 0, Mainform.GraphPicture);                      // axis painting
       Y := MainForm.Scale;
       for I := MainForm.YTo - 1 downto MainForm.YFrom + 1  do      // sticks painting
         Begin
@@ -175,17 +176,18 @@ begin
     End;
 end;
 
-Procedure PaintGraph(Const DotArray: TDotArray; Const Step: Real; Const XOffset, YOffset: Integer);
+Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Integer);
 var
-  I: Integer;
+  I, HighX: Integer;
   WasNan: Boolean;
   CurrX: Real;
 begin
    WasNan := True;
    CurrX := 0;
    I := 500 * (10 - Abs(MainForm.XFrom));
-   MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I);
-   for I := I + 1 to High(DotArray) do
+   HighX := 500 * (10 - Abs(MainForm.XTo));
+   MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I - HighX);
+   for I := I + 1 to IterationCount - HighX do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
         WasNaN := True
@@ -197,7 +199,7 @@ begin
       else
         MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX + XOffset), Trunc(MainForm.Scale * DotArray[I] + YOffset));
 
-      CurrX := CurrX + Step;
+      CurrX := CurrX + MainForm.Step;
     End;
     MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
@@ -313,7 +315,7 @@ begin
               Begin
                 GraphPicture.Canvas.Pen.Color := ColorsArray[I];
                 GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+                PaintGraph(DotArrays[I], XOffset, YOffset);
               End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -364,7 +366,7 @@ begin
               Begin
                 GraphPicture.Canvas.Pen.Color := ColorsArray[I];
                 GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+                PaintGraph(DotArrays[I], XOffset, YOffset);
               End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -387,29 +389,43 @@ begin
 //  PaintBoxRect := GraphPaintBox.ClientRect;  проверка, стоит ли курсор над paintbox
   if (ssCtrl in Shift) then
     Begin
-      if (WheelDelta > 100) then
+      if (WheelDelta > 50) then
         Begin
           ClearPaintBox();
+          Handled := True;
           if (MousePos.X > 600) and (MousePos.Y > 600) then
             Begin
               Inc(XFrom);
               Dec(YTo);
-              Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-              CurrXAxisPos := YTo * Scale;
-              CurrYAxisPos := Abs(XFrom) * Scale;
-              PaintXAxis(CurrYAxisPos);
-              PaintYAxis(CurrXAxisPos);
-              YOffset := CurrXAxisPos;
-              for I := 1 to GraphNumber do
-                Begin
-                  GraphPicture.Canvas.Pen.Color := ColorsArray[I];
-                  GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                  PaintGraph(DotArrays[I], Step, XOffset, YOffset);
-                End;
-              GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-              Handled := True;
+            End
+          else if (MousePos.X > 600) and (MousePos.Y <= 600) then
+            Begin
+              Inc(XFrom);
+              Inc(YFrom);
+            End
+          else if (MousePos.X <= 600) and (MousePos.Y > 600) then
+            Begin
+              Dec(XTo);
+              Dec(YTo);
+            End
+          else
+            Begin
+              Dec(XTo);
+              Inc(YFrom);
             End;
 
+          Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+          CurrXAxisPos := Abs(YTo) * Scale;
+          CurrYAxisPos := Abs(XFrom) * Scale;
+          PaintXAxis(CurrXAxisPos);
+          PaintYAxis(CurrYAxisPos);
+          YOffset := CurrXAxisPos;
+          for I := 1 to GraphNumber do
+            Begin
+              GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+              GraphPicture.Canvas.Pen.Width := WidthArray[I];
+              PaintGraph(DotArrays[I], XOffset, YOffset);
+            End;
           GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
         End;
     End;
@@ -437,15 +453,15 @@ begin
     ShowGraphButton.Enabled := True;
 end;
 
-procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
-    Begin
-      ShowGraphButtonClick(Sender);
-      Key := 0;
-  End;
-end;
+//procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
+//  Shift: TShiftState);
+//begin
+//  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
+//    Begin
+//      ShowGraphButtonClick(Sender);
+//      Key := 0;
+//  End;
+//end;
 
 procedure TMainForm.ClearInputButtonClick(Sender: TObject);
 begin
@@ -515,7 +531,7 @@ begin
 
   SetSelectedWidth();
 
-  PaintGraph(DotArrays[GraphNumber], Step, XOffset, YOffset);
+  PaintGraph(DotArrays[GraphNumber], XOffset, YOffset);
 
   if (GraphNumber = 3) then
   Begin
@@ -569,7 +585,7 @@ begin
     Begin
       GraphPicture.Canvas.Pen.Color := ColorsArray[I];
       GraphPicture.Canvas.Pen.Width := WidthArray[I];
-      PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+      PaintGraph(DotArrays[I], XOffset, YOffset);
     End;
 
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
