@@ -1,9 +1,9 @@
-object Form1: TForm1
+object MainForm: TMainForm
   Left = 0
   Top = 0
-  Caption = 'Form1'
-  ClientHeight = 577
-  ClientWidth = 851
+  Caption = 'MainForm'
+  ClientHeight = 602
+  ClientWidth = 876
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,33 +14,35 @@ object Form1: TForm1
   OldCreateOrder = False
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
+  OnMouseWheel = FormMouseWheel
   OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
   object GraphPanel: TPanel
     Left = 274
     Top = 0
-    Width = 577
-    Height = 577
+    Width = 602
+    Height = 602
     Align = alClient
     TabOrder = 0
     object GraphPaintBox: TPaintBox
       Left = 1
       Top = 1
-      Width = 575
-      Height = 575
+      Width = 600
+      Height = 600
       Align = alClient
       OnPaint = GraphPaintBoxPaint
       ExplicitLeft = 6
       ExplicitTop = 2
       ExplicitWidth = 598
+      ExplicitHeight = 575
     end
   end
   object EditPanel: TPanel
     Left = 0
     Top = 0
     Width = 274
-    Height = 577
+    Height = 602
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
@@ -58,7 +60,6 @@ object Form1: TForm1
       ParentFont = False
       TabOrder = 0
       OnChange = InputEditChange
-      OnKeyDown = InputEditKeyDown
     end
     object MathInputButton: TButton
       AlignWithMargins = True
@@ -232,7 +233,6 @@ object Form1: TForm1
         TabOrder = 0
         Text = '-10'
         OnChange = RangeFromEditChange
-        OnExit = RangeFromEditExit
       end
       object RangeToEdit: TEdit
         Left = 98
@@ -242,7 +242,6 @@ object Form1: TForm1
         TabOrder = 1
         Text = '10'
         OnChange = RangeToEditChange
-        OnExit = RangeToEditExit
       end
       object ShowGraphButton: TButton
         Left = 34
@@ -285,6 +284,14 @@ object Form1: TForm1
         TabOrder = 6
         OnClick = ClearAllButtonClick
       end
+    end
+    object ClearInputButton: TButton
+      Left = 204
+      Top = 36
+      Width = 21
+      Height = 21
+      TabOrder = 4
+      OnClick = ClearInputButtonClick
     end
   end
 end

@@ -60,8 +60,8 @@ type
     procedure LogButtonClick(Sender: TObject);
     procedure LnButtonClick(Sender: TObject);
     procedure AbsButtonClick(Sender: TObject);
-    procedure InputEditKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    {procedure InputEditKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);}
     procedure ClearGraphButtonClick(Sender: TObject);
     procedure ClearAllButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -72,10 +72,11 @@ type
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
     DotArrays: array [1..3] of TDotArray;
-    RangeFrom, RangeTo, CurrMaxY: Integer;
+    XFrom, XTo, YFrom, YTo: Integer;
     PolNotExprs: array [1..3] of String;
     GraphNumber: Byte;
     XOffset, YOffset: Integer;
+    Scale: Integer;
     Range, Step: Real;
     ColorsArray: array [1..3] of TColor;
     WidthArray: array [1..3] of Byte;
@@ -86,8 +87,6 @@ type
 
 const
   IterationCount = 10000;
-  ScaleY = 30;
-  ScaleX = 30;
   ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
   ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
@@ -110,16 +109,16 @@ begin
       Pen.Color := clBlack;
       MoveTo(X, 0);
       LineTo(X, MainForm.GraphPaintBox.Height);                       // axis painting
-      Y := ScaleY * 2;
-      for I := MainForm.CurrMaxY - 1 downto MainForm.CurrMaxY - 19  do      // sticks painting
+      Y := MainForm.Scale;
+      for I := MainForm.YTo - 1 downto MainForm.YFrom + 1  do      // sticks painting
         Begin
           if (I <> 0) then
-          Begin
-            MoveTo(MainForm.CurrYAxisPos - 4, Y);
-            LineTo(MainForm.CurrYAxisPos + 4, Y);
-            TextOut(MainForm.CurrYAxisPos + 4, Y, IntToStr(I));
-          End;
-          Y := Y + 2 * ScaleY;
+            Begin
+              MoveTo(MainForm.CurrYAxisPos - 4, Y);
+              LineTo(MainForm.CurrYAxisPos + 4, Y);
+              TextOut(MainForm.CurrYAxisPos + 4, Y, IntToStr(I));
+            End;
+          Y := Y + MainForm.Scale;
         End;
       MoveTo(MainForm.CurrYAxisPos - 10, 10);
       LineTo(MainForm.CurrYAxisPos, 0);
@@ -143,13 +142,13 @@ begin
       Pen.Color := clBlack;
       MoveTo(0, Y);
       LineTo(MainForm.GraphPaintBox.Width, Y);     // axis painting
-      X := 2 * ScaleY;
-      for I := MainForm.RangeFrom + 1 to MainForm.RangeTo - 1 do      // sticks painting
+      X := MainForm.Scale;
+      for I := MainForm.XFrom + 1 to MainForm.XTo - 1 do      // sticks painting
         Begin
           MoveTo(X, MainForm.CurrXAxisPos - 3);
           LineTo(X, MainForm.CurrXAxisPos + 3);
           TextOut(X, MainForm.CurrXAxisPos + 3, IntToStr(I));
-          X := X + 2 * ScaleX;
+          X := X + MainForm.Scale;
         End;
       MoveTo(MainForm.GraphPaintBox.Width - 10, MainForm.CurrXAxisPos - 10);
       LineTo(MainForm.GraphPaintBox.Width, MainForm.CurrXAxisPos);
@@ -176,7 +175,7 @@ begin
     End;
 end;
 
-Procedure PaintGraph(Const DotArray: TDotArray; Const Step: Real; Const XOffset, YOffset: Integer);
+Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Integer);
 var
   I: Integer;
   WasNan: Boolean;
@@ -184,19 +183,21 @@ var
 begin
    WasNan := True;
    CurrX := 0;
-   for I := 1 to High(DotArray) do
+   I := 500 * (10 - Abs(MainForm.XFrom));
+   MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I);
+   for I := I + 1 to High(DotArray) do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
         WasNaN := True
       else if (WasNan) then
         begin
-          MainForm.GraphPicture.Canvas.MoveTo(Trunc(CurrX) + XOffset, Trunc(DotArray[I]) + YOffset);
+          MainForm.GraphPicture.Canvas.MoveTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[I]) + YOffset);
           WasNan := False;
         End
       else
-        MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX + XOffset), Trunc(DotArray[I] + YOffset));
+        MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX + XOffset), Trunc(MainForm.Scale * DotArray[I] + YOffset));
 
-      CurrX := CurrX + Step;
+      CurrX := CurrX + MainForm.Step;
     End;
     MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
@@ -240,14 +241,16 @@ procedure TMainForm.FormCreate(Sender: TObject);
   var
     I: Integer;
   begin
-    RangeFrom := -10;
-    RangeTo := 10;
-    CurrMaxY := 10;
+    XFrom := -10;
+    XTo := 10;
+    YFrom := -10;
+    YTo := 10;
     GraphNumber := 0;
     Step := GraphPaintBox.Width / IterationCount;
     Range := 20 / IterationCount;
     XOffset := 0;
     YOffset := GraphPaintBox.Height div 2;
+    Scale := 60;
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
     MathInput := False;
@@ -256,6 +259,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
     ShowGraphButton.Enabled := False;
+
     with PenWidthComboBox do
       Begin
         Items.Add('low');
@@ -290,15 +294,17 @@ begin
             ClearPaintBox();
             if (Key = VK_UP) then
               begin
-                Inc(CurrMaxY);
-                CurrXAxisPos := CurrXAxisPos + 2 * ScaleY;
-                YOffset := YOffset + 2 * ScaleY;
+                Inc(YTo);
+                Inc(YFrom);
+                CurrXAxisPos := CurrXAxisPos + Scale;
+                YOffset := YOffset + Scale;
               end
             else
               begin
-                Dec(CurrMaxY);
-                CurrXAxisPos := CurrXAxisPos - 2 * ScaleY;
-                YOffset := YOffset - 2 * ScaleY;
+                Dec(YTo);
+                Dec(YFrom);
+                CurrXAxisPos := CurrXAxisPos - Scale;
+                YOffset := YOffset - Scale;
               end;
 
             PaintXAxis(CurrXAxisPos);
@@ -307,7 +313,7 @@ begin
               Begin
                 GraphPicture.Canvas.Pen.Color := ColorsArray[I];
                 GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+                PaintGraph(DotArrays[I], XOffset, YOffset);
               End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -320,10 +326,10 @@ begin
             ClearPaintBox();
             if (Key = VK_LEFT) then
               begin
-                CurrYAxisPos := CurrYAxisPos + 2 * ScaleX;
+                CurrYAxisPos := CurrYAxisPos + Scale;
                 for J := 1 to GraphNumber do
                   Begin
-                    X := RangeFrom;
+                    X := XFrom;
                     for I := 9500 downto Low(DotArrays[J]) do
                       DotArrays[J][I + 500] := DotArrays[J][I];
                     for I := 500 downto Low(DotArrays[J]) do
@@ -332,15 +338,15 @@ begin
                         X := X - Range;
                       End;
                   End;
-                Dec(RangeTo);
-                Dec(RangeFrom);
+                Dec(XTo);
+                Dec(XFrom);
               end
             else
               begin
-                CurrYAxisPos := CurrYAxisPos - 2 * ScaleX;
+                CurrYAxisPos := CurrYAxisPos - Scale;
                 for J := 1 to GraphNumber do
                   Begin
-                    X := RangeTo;
+                    X := XTo;
                     for I := 501 to High(DotArrays[J]) do
                       DotArrays[J][I - 500] := DotArrays[J][I];
                     for I := 9501 to High(DotArrays[J]) do
@@ -349,8 +355,8 @@ begin
                         X := X + Range;
                       End;
                   End;
-                Inc(RangeTo);
-                Inc(RangeFrom);
+                Inc(XTo);
+                Inc(XFrom);
               end;
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
@@ -358,22 +364,53 @@ begin
               Begin
                 GraphPicture.Canvas.Pen.Color := ColorsArray[I];
                 GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+                PaintGraph(DotArrays[I], XOffset, YOffset);
               End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
+    VK_RETURN:
+      Begin
+        KeyPreview := True;
+        if (ShowGraphButton.Enabled) then
+          ShowGraphButtonClick(Sender);
+      End;
   end;
 end;
 
 procedure TMainForm.FormMouseWheel(Sender: TObject; Shift: TShiftState;
   WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+var
+  I: Integer;
 begin
+  MousePos := GraphPaintBox.ScreenToClient(MousePos);
+//  PaintBoxRect := GraphPaintBox.ClientRect;  проверка, стоит ли курсор над paintbox
   if (ssCtrl in Shift) then
     Begin
-      if (WheelDelta > 0) then
+      if (WheelDelta > 50) then
         Begin
-          ScaleBy(MousePos.X, MousePos.Y);
+          ClearPaintBox();
+          if (MousePos.X > 600) and (MousePos.Y > 600) then
+            Begin
+              Inc(XFrom);
+              Dec(YTo);
+              Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+              CurrXAxisPos := YTo * Scale;
+              CurrYAxisPos := Abs(XFrom) * Scale;
+              PaintXAxis(CurrYAxisPos);
+              PaintYAxis(CurrXAxisPos);
+              YOffset := CurrXAxisPos;
+              for I := 1 to GraphNumber do
+                Begin
+                  GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+                  GraphPicture.Canvas.Pen.Width := WidthArray[I];
+                  PaintGraph(DotArrays[I], XOffset, YOffset);
+                End;
+              GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+              Handled := True;
+            End;
+
+          GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
         End;
     End;
 end;
@@ -400,15 +437,15 @@ begin
     ShowGraphButton.Enabled := True;
 end;
 
-procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
-    Begin
-      ShowGraphButtonClick(Sender);
-      Key := 0;
-  End;
-end;
+//procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
+//  Shift: TShiftState);
+//begin
+//  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
+//    Begin
+//      ShowGraphButtonClick(Sender);
+//      Key := 0;
+//  End;
+//end;
 
 procedure TMainForm.ClearInputButtonClick(Sender: TObject);
 begin
@@ -436,22 +473,22 @@ end;
 
 procedure TMainForm.RangeFromEditChange(Sender: TObject);
 begin
-  if (not TChecker.CheckInput(RangeFromEdit.Text) or (RangeTo <= RangeFrom)) then
+  if (not TChecker.CheckInput(RangeFromEdit.Text) or (XTo <= XFrom)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
     End
   else
-    RangeFrom := StrToInt(RangeFromEdit.Text);
+    XFrom := StrToInt(RangeFromEdit.Text);
 end;
 
 procedure TMainForm.RangeToEditChange(Sender: TObject);
 begin
-  if (not TChecker.CheckInput(RangeToEdit.Text) or (RangeTo <= RangeFrom)) then
+  if (not TChecker.CheckInput(RangeToEdit.Text) or (XTo <= XFrom)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
     End
   else
-    RangeTo := StrToInt(RangeToEdit.Text);
+    XTo := StrToInt(RangeToEdit.Text);
 end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
@@ -465,11 +502,11 @@ begin
   SetButtonEnabled(True);
   CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   PolNotExprs[GraphNumber] := CurrExpr;
-  CurrX := RangeFrom;
+  CurrX := XFrom;
 
   for I := 1 to IterationCount do
     Begin
-      DotArrays[GraphNumber][I] := 60 * (-TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX));
+      DotArrays[GraphNumber][I] := -TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX);
       CurrX := CurrX + Range;
     End;
 
@@ -478,7 +515,7 @@ begin
 
   SetSelectedWidth();
 
-  PaintGraph(DotArrays[GraphNumber], Step, XOffset, YOffset);
+  PaintGraph(DotArrays[GraphNumber], XOffset, YOffset);
 
   if (GraphNumber = 3) then
   Begin
@@ -501,10 +538,10 @@ begin
   PaintXAxis(CurrYAxisPos);
 
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
-  RangeFrom := -10;
-  RangeTo := 10;
-  RangeFromEdit.Text := IntToStr(RangeFrom);
-  RangeToEdit.Text := IntToStr(RangeTo);
+  XFrom := -10;
+  XTo := 10;
+  RangeFromEdit.Text := IntToStr(XFrom);
+  RangeToEdit.Text := IntToStr(XTo);
   SetEditEnabled(True);
   SetButtonEnabled(False);
   InputEdit.Enabled := True;
@@ -532,7 +569,7 @@ begin
     Begin
       GraphPicture.Canvas.Pen.Color := ColorsArray[I];
       GraphPicture.Canvas.Pen.Width := WidthArray[I];
-      PaintGraph(DotArrays[I], Step, XOffset, YOffset);
+      PaintGraph(DotArrays[I], XOffset, YOffset);
     End;
 
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
