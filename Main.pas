@@ -108,7 +108,8 @@ begin
       Pen.Width := 3;
       Pen.Color := clBlack;
       MoveTo(X, 0);
-      LineTo(X, MainForm.GraphPaintBox.Height);                       // axis painting
+      LineTo(X, MainForm.GraphPaintBox.Height);
+      Mainform.GraphPaintBox.Canvas.Draw(0, 0, Mainform.GraphPicture);                      // axis painting
       Y := MainForm.Scale;
       for I := MainForm.YTo - 1 downto MainForm.YFrom + 1  do      // sticks painting
         Begin
@@ -390,26 +391,40 @@ begin
       if (WheelDelta > 50) then
         Begin
           ClearPaintBox();
+          Handled := True;
           if (MousePos.X > 600) and (MousePos.Y > 600) then
             Begin
               Inc(XFrom);
               Dec(YTo);
               Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-              CurrXAxisPos := YTo * Scale;
+              CurrXAxisPos := (YTo) * Scale;
               CurrYAxisPos := Abs(XFrom) * Scale;
-              PaintXAxis(CurrYAxisPos);
-              PaintYAxis(CurrXAxisPos);
+              PaintXAxis(CurrXAxisPos);
+              PaintYAxis(CurrYAxisPos);
               YOffset := CurrXAxisPos;
-              for I := 1 to GraphNumber do
-                Begin
-                  GraphPicture.Canvas.Pen.Color := ColorsArray[I];
-                  GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                  PaintGraph(DotArrays[I], XOffset, YOffset);
-                End;
-              GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-              Handled := True;
+            End
+          else if (MousePos.X > 600) and (MousePos.Y <= 600) then
+            Begin
+              Inc(XFrom);
+              Inc(YFrom);
+              Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+              CurrXAxisPos := Abs(YTo) * Scale;
+              CurrYAxisPos := Abs(XFrom) * Scale;
+              PaintXAxis(CurrXAxisPos);
+              PaintYAxis(CurrYAxisPos);
+              YOffset := CurrXAxisPos;
+            End
+          else if (MousePos.X <= 600) and (MousePos.Y > 600) then
+            Begin
+
             End;
 
+          for I := 1 to GraphNumber do
+            Begin
+              GraphPicture.Canvas.Pen.Color := ColorsArray[I];
+              GraphPicture.Canvas.Pen.Width := WidthArray[I];
+              PaintGraph(DotArrays[I], XOffset, YOffset);
+            End;
           GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
         End;
     End;
