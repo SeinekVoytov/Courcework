@@ -75,7 +75,7 @@ type
     XFrom, XTo, YFrom, YTo: Integer;
     PolNotExprs: array [1..3] of String;
     GraphNumber: Byte;
-    YOffset: Integer;
+    YOffset, XOffset: Integer;
     Scale: Integer;
     Range, Step: Real;
     ColorsArray: array [1..3] of TColor;
@@ -91,6 +91,7 @@ const
   ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
   MainForm: TMainForm;
+  ZoomFactor: Byte;
 
 implementation
 
@@ -176,7 +177,7 @@ begin
     End;
 end;
 
-Procedure PaintGraph(Const DotArray: TDotArray; Const YOffset: Integer; Const IsZoom: Boolean);
+Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Integer; Const IsZoom: Boolean);
 var
   I, HighX: Integer;
   WasNan: Boolean;
@@ -194,7 +195,7 @@ begin
     Begin
       I := 0;
       HighX := 0;
-      MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I - HighX);
+      //MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I - HighX);
     End;
    for I := I + 1 to IterationCount - HighX do
     Begin
@@ -202,11 +203,11 @@ begin
         WasNaN := True
       else if (WasNan) then
         begin
-          MainForm.GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(MainForm.Scale * DotArray[I]) + YOffset);
+          MainForm.GraphPicture.Canvas.MoveTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[I]) + YOffset);
           WasNan := False;
         End
       else
-        MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(MainForm.Scale * DotArray[I] + YOffset));
+        MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[I] + YOffset));
 
       CurrX := CurrX + MainForm.Step;
     End;
@@ -260,6 +261,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
     Step := GraphPaintBox.Width / IterationCount;
     Range := 20 / IterationCount;
     YOffset := GraphPaintBox.Height div 2;
+    XOffset := 0;
     Scale := 60;
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
@@ -323,7 +325,7 @@ begin
               Begin
                 GraphPicture.Canvas.Pen.Color := ColorsArray[I];
                 GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                PaintGraph(DotArrays[I], YOffset, False);
+                PaintGraph(DotArrays[I], XOffset, YOffset, False);
               End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -374,7 +376,7 @@ begin
               Begin
                 GraphPicture.Canvas.Pen.Color := ColorsArray[I];
                 GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                PaintGraph(DotArrays[I], YOffset, False);
+                PaintGraph(DotArrays[I], XOffset, YOffset, False);
               End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -397,8 +399,9 @@ begin
 //  PaintBoxRect := GraphPaintBox.ClientRect;  проверка, стоит ли курсор над paintbox
   if (ssCtrl in Shift) then
     Begin
-      if (WheelDelta > 50) then
+      if (WheelDelta > 50) and (ZoomFactor < 9) then
         Begin
+          Inc(ZoomFactor);
           ClearPaintBox();
           Handled := True;
           if (MousePos.X > 600) and (MousePos.Y > 600) then
@@ -422,8 +425,9 @@ begin
               Inc(YFrom);
             End;
         End
-      else if (WheelDelta < -50) then
+      else if (WheelDelta < -50) and (ZoomFactor > 0) then
         Begin
+          Dec(ZoomFactor);
           ClearPaintBox();
           Handled := True;
           if (MousePos.X > 600) and (MousePos.Y > 600) then
@@ -457,8 +461,9 @@ begin
         Begin
           GraphPicture.Canvas.Pen.Color := ColorsArray[I];
           GraphPicture.Canvas.Pen.Width := WidthArray[I];
-          PaintGraph(DotArrays[I], YOffset, True);
+          PaintGraph(DotArrays[I], XOffset, YOffset, True);
         End;
+      //Dec(XOffset, Scale);
       GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
     End;
 end;
@@ -563,7 +568,7 @@ begin
 
   SetSelectedWidth();
 
-  PaintGraph(DotArrays[GraphNumber], YOffset, False);
+  PaintGraph(DotArrays[GraphNumber], XOffset, YOffset, False);
 
   if (GraphNumber = 3) then
   Begin
@@ -617,7 +622,7 @@ begin
     Begin
       GraphPicture.Canvas.Pen.Color := ColorsArray[I];
       GraphPicture.Canvas.Pen.Width := WidthArray[I];
-      PaintGraph(DotArrays[I], YOffset, False);
+      PaintGraph(DotArrays[I], XOffset, YOffset, False);
     End;
 
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
