@@ -91,6 +91,7 @@ const
   ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
   MainForm: TMainForm;
+  ZoomFactor: Byte;
 
 implementation
 
@@ -159,6 +160,36 @@ begin
     end;
 end;
 
+Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Integer; Const IsZoom: Boolean);
+var
+  LowX, HighX: Integer;
+  WasNan: Boolean;
+  CurrX: Real;
+begin
+   WasNan := True;
+   CurrX := 0;
+//   LowX := 500 * Abs(10 - Abs(MainForm.XFrom));
+//   HighX := 500 * Abs(10 - Abs(MainForm.XTo));
+   lowx := 0;
+   highx := 0;
+   //MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - LowX - HighX);
+   for LowX := LowX + 1 to IterationCount - HighX do
+    Begin
+      if (FloatToStr(DotArray[LowX]) = 'NAN') then
+        WasNaN := True
+      else if (WasNan) then
+        begin
+          MainForm.GraphPicture.Canvas.MoveTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[LowX]) + YOffset);
+          WasNan := False;
+        End
+      else
+        MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[LowX] + YOffset));
+
+      CurrX := CurrX + MainForm.Step;
+    End;
+   MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
+end;
+
 Procedure SetSelectedWidth();
 var
   SelectedWidth: String;
@@ -174,43 +205,6 @@ begin
         Width := 5;
       MainForm.WidthArray[MainForm.GraphNumber] := Width;;
     End;
-end;
-
-Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Integer; Const IsZoom: Boolean);
-var
-  I, HighX: Integer;
-  WasNan: Boolean;
-  CurrX: Real;
-begin
-   WasNan := True;
-   CurrX := 0;
-   if (IsZoom) then
-    Begin
-       I := 500 * Abs(10 - Abs(MainForm.XFrom));
-       HighX := 500 * Abs(10 - Abs(MainForm.XTo));
-       MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I - HighX);
-    End
-   else
-    Begin
-      I := 0;
-      HighX := 0;
-      //MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - I - HighX);
-    End;
-   for I := I + 1 to IterationCount - HighX do
-    Begin
-      if (FloatToStr(DotArray[I]) = 'NAN') then
-        WasNaN := True
-      else if (WasNan) then
-        begin
-          MainForm.GraphPicture.Canvas.MoveTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[I]) + YOffset);
-          WasNan := False;
-        End
-      else
-        MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[I] + YOffset));
-
-      CurrX := CurrX + MainForm.Step;
-    End;
-    MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
 
 Procedure SetEditEnabled(const Value: Boolean);
@@ -295,6 +289,7 @@ procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
 var
   I, J: Integer;
   X: Real;
+  LowX, HighX: Integer;
 begin
   case Key of
     VK_UP, VK_DOWN:
@@ -354,20 +349,22 @@ begin
               end
             else
               begin
+                Inc(XTo);
+                Inc(XFrom);
                 CurrYAxisPos := CurrYAxisPos - Scale;
                 for J := 1 to GraphNumber do
                   Begin
-                    X := XTo;
-                    for I := 501 to High(DotArrays[J]) do
-                      DotArrays[J][I - 500] := DotArrays[J][I];
-                    for I := 9501 to High(DotArrays[J]) do
+                    X := XTo - 1;
+                    LowX := 500 * Abs(MainForm.XFrom div 10);
+                    HighX := 500 * Abs(MainForm.XTo div 10);
+                    for I := LowX + 1 to IterationCount - HighX do
+                      DotArrays[J][I] := DotArrays[J][I + 500];
+                    for I := IterationCount - HighX + 1 to IterationCount - HighX + 500 do
                       Begin
                         DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
                         X := X + Range;
                       End;
                   End;
-                Inc(XTo);
-                Inc(XFrom);
               end;
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
@@ -398,8 +395,9 @@ begin
 //  PaintBoxRect := GraphPaintBox.ClientRect;  проверка, стоит ли курсор над paintbox
   if (ssCtrl in Shift) then
     Begin
-      if (WheelDelta > 50) then
+      if (WheelDelta > 50) and (ZoomFactor < 9) then
         Begin
+          Inc(ZoomFactor);
           ClearPaintBox();
           Handled := True;
           if (MousePos.X > 600) and (MousePos.Y > 600) then
@@ -423,8 +421,9 @@ begin
               Inc(YFrom);
             End;
         End
-      else if (WheelDelta < -50) then
+      else if (WheelDelta < -50) and (ZoomFactor > 0) then
         Begin
+          Dec(ZoomFactor);
           ClearPaintBox();
           Handled := True;
           if (MousePos.X > 600) and (MousePos.Y > 600) then
@@ -460,7 +459,7 @@ begin
           GraphPicture.Canvas.Pen.Width := WidthArray[I];
           PaintGraph(DotArrays[I], XOffset, YOffset, True);
         End;
-      Dec(XOffset, Scale);
+      //Dec(XOffset, Scale);
       GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
     End;
 end;
