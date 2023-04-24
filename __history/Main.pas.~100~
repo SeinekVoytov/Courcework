@@ -81,12 +81,13 @@ type
     ColorsArray: array [1..3] of TColor;
     WidthArray: array [1..3] of Byte;
     MathInput: Boolean;
+    LBorder, RBorder: Integer;
   public
     GraphPicture: TBitmap;
   end;
 
 const
-  IterationCount = 10000;
+  ITERATION_COUNT = 10000;
   ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
   ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
@@ -160,6 +161,51 @@ begin
     end;
 end;
 
+Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset, FromIndex, ToIndex: Integer);
+var
+  WasNan: Boolean;
+  CurrX: Real;
+  I: Integer;
+begin
+   WasNan := True;
+   CurrX := 0;
+   for I := FromIndex + 1 to ToIndex do
+    Begin
+      if (FloatToStr(DotArray[I]) = 'NAN') then
+        WasNaN := True
+      else if (WasNan) then
+        begin
+          MainForm.GraphPicture.Canvas.MoveTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[I]) + YOffset);
+          WasNan := False;
+        End
+      else
+        MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[I] + YOffset));
+
+      CurrX := CurrX + MainForm.Step;
+    End;
+   MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
+end;
+
+Procedure ShiftArrayLeft(var Arr: TDotArray);
+const
+  SHIFTING_SIZE = 500;
+var
+  I: Integer;
+begin
+  for I := SHIFTING_SIZE + 1 to High(Arr) do
+    Arr[I - SHIFTING_SIZE] := Arr[I];
+end;
+
+Procedure ShiftArrayRight(var Arr: TDotArray);
+const
+  SHIFTING_SIZE = 500;
+var
+  I: Integer;
+begin
+  for I := High(Arr) - SHIFTING_SIZE downto Low(Arr) do
+    Arr[I + SHIFTING_SIZE] := Arr[I];
+end;
+
 Procedure SetSelectedWidth();
 var
   SelectedWidth: String;
@@ -175,39 +221,6 @@ begin
         Width := 5;
       MainForm.WidthArray[MainForm.GraphNumber] := Width;;
     End;
-end;
-
-Procedure PaintGraph(Const DotArray: TDotArray; Const XOffset, YOffset: Integer; Const IsZoom: Boolean);
-var
-  LowX, HighX: Integer;
-  WasNan: Boolean;
-  CurrX: Real;
-begin
-   WasNan := True;
-   CurrX := 0;
-   LowX := 0;
-   HighX := 0;
-   if IsZoom then
-     Begin
-       LowX := 500 * Abs(10 - Abs(MainForm.XFrom));
-       HighX := 500 * Abs(10 - Abs(MainForm.XTo));
-       MainForm.Step := MainForm.GraphPaintBox.Width / (IterationCount - LowX - HighX);
-     End;
-   for LowX := LowX + 1 to IterationCount - HighX do
-    Begin
-      if (FloatToStr(DotArray[LowX]) = 'NAN') then
-        WasNaN := True
-      else if (WasNan) then
-        begin
-          MainForm.GraphPicture.Canvas.MoveTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[LowX]) + YOffset);
-          WasNan := False;
-        End
-      else
-        MainForm.GraphPicture.Canvas.LineTo(Trunc(CurrX) + XOffset, Trunc(MainForm.Scale * DotArray[LowX] + YOffset));
-
-      CurrX := CurrX + MainForm.Step;
-    End;
-    MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
 
 Procedure SetEditEnabled(const Value: Boolean);
@@ -254,13 +267,15 @@ procedure TMainForm.FormCreate(Sender: TObject);
     YFrom := -10;
     YTo := 10;
     GraphNumber := 0;
-    Step := GraphPaintBox.Width / IterationCount;
-    Range := 20 / IterationCount;
+    Step := GraphPaintBox.Width / ITERATION_COUNT;
+    Range := 20 / ITERATION_COUNT;
     YOffset := GraphPaintBox.Height div 2;
     XOffset := 0;
     Scale := 60;
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
+    LBorder := 0;
+    RBorder := ITERATION_COUNT;
     MathInput := False;
     SetButtonEnabled(False);
     GraphPicture := TBitmap.Create;
@@ -321,7 +336,7 @@ begin
               Begin
                 GraphPicture.Canvas.Pen.Color := ColorsArray[I];
                 GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                PaintGraph(DotArrays[I], XOffset, YOffset, False);
+                PaintGraph(DotArrays[I], XOffset, YOffset, LBorder, RBorder);
               End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -338,12 +353,19 @@ begin
                 for J := 1 to GraphNumber do
                   Begin
                     X := XFrom;
-                    for I := 9500 downto Low(DotArrays[J]) do
-                      DotArrays[J][I + 500] := DotArrays[J][I];
-                    for I := 500 downto Low(DotArrays[J]) do
+                    if (RBorder < ITERATION_COUNT) then
                       Begin
-                        DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
-                        X := X - Range;
+                        Inc(RBorder, 500);
+                        Inc(LBorder, 500);
+                      End
+                    else
+                      Begin
+                        ShiftArrayRight(DotArrays[J]);
+                        for I := 500 downto Low(DotArrays[J]) do
+                          Begin
+                            DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
+                            X := X - Range;
+                          End;
                       End;
                   End;
                 Dec(XTo);
@@ -354,13 +376,20 @@ begin
                 CurrYAxisPos := CurrYAxisPos - Scale;
                 for J := 1 to GraphNumber do
                   Begin
-                    X := XTo;
-                    for I := 501 to High(DotArrays[J]) do
-                      DotArrays[J][I - 500] := DotArrays[J][I];
-                    for I := 9501 to High(DotArrays[J]) do
+                    if (LBorder > 0) then
                       Begin
-                        DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
-                        X := X + Range;
+                        Dec(LBorder, 500);
+                        Dec(RBorder, 500);
+                      End
+                    else
+                      Begin
+                        X := XTo;
+                        ShiftArrayLeft(DotArrays[J]);
+                        for I := ITERATION_COUNT - 499 to ITERATION_COUNT do
+                          Begin
+                            DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
+                            X := X + Range;
+                          End;
                       End;
                   End;
                 Inc(XTo);
@@ -372,7 +401,7 @@ begin
               Begin
                 GraphPicture.Canvas.Pen.Color := ColorsArray[I];
                 GraphPicture.Canvas.Pen.Width := WidthArray[I];
-                PaintGraph(DotArrays[I], XOffset, YOffset, False);
+                PaintGraph(DotArrays[I], XOffset, YOffset, LBorder, RBorder);
               End;
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -404,21 +433,25 @@ begin
             Begin
               Inc(XFrom);
               Dec(YTo);
+              Inc(LBorder, 500);
             End
           else if (MousePos.X > 600) and (MousePos.Y <= 600) then
             Begin
               Inc(XFrom);
               Inc(YFrom);
+              Inc(LBorder, 500);
             End
           else if (MousePos.X <= 600) and (MousePos.Y > 600) then
             Begin
               Dec(XTo);
               Dec(YTo);
+              Dec(RBorder, 500);
             End
           else
             Begin
               Dec(XTo);
               Inc(YFrom);
+              Dec(RBorder, 500);
             End;
         End
       else if (WheelDelta < -50) and (ZoomFactor > 0) then
@@ -430,21 +463,25 @@ begin
             Begin
               Dec(XFrom);
               Inc(YTo);
+              Dec(LBorder, 500);
             End
           else if (MousePos.X > 600) and (MousePos.Y <= 600) then
             Begin
               Dec(XFrom);
               Dec(YFrom);
+              Dec(LBorder, 500);
             End
           else if (MousePos.X <= 600) and (MousePos.Y > 600) then
             Begin
               Inc(XTo);
               Inc(YTo);
+              Inc(RBorder, 500);
             End
           else
             Begin
               Inc(XTo);
               Dec(YFrom);
+              Inc(RBorder, 500);
             End;
         End;
       Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
@@ -457,9 +494,8 @@ begin
         Begin
           GraphPicture.Canvas.Pen.Color := ColorsArray[I];
           GraphPicture.Canvas.Pen.Width := WidthArray[I];
-          PaintGraph(DotArrays[I], XOffset, YOffset, True);
+          PaintGraph(DotArrays[I], XOffset, YOffset, LBorder, RBorder);
         End;
-      //Dec(XOffset, Scale);
       GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
     End;
 end;
@@ -553,7 +589,7 @@ begin
   PolNotExprs[GraphNumber] := CurrExpr;
   CurrX := XFrom;
 
-  for I := 1 to IterationCount do
+  for I := 1 to ITERATION_COUNT do
     Begin
       DotArrays[GraphNumber][I] := -TCalculate.Calculate(PolNotExprs[GraphNumber], CurrX);
       CurrX := CurrX + Range;
@@ -564,7 +600,7 @@ begin
 
   SetSelectedWidth();
 
-  PaintGraph(DotArrays[GraphNumber], XOffset, YOffset, False);
+  PaintGraph(DotArrays[GraphNumber], XOffset, YOffset, LBorder, RBorder);
 
   if (GraphNumber = 3) then
   Begin
@@ -618,7 +654,7 @@ begin
     Begin
       GraphPicture.Canvas.Pen.Color := ColorsArray[I];
       GraphPicture.Canvas.Pen.Width := WidthArray[I];
-      PaintGraph(DotArrays[I], XOffset, YOffset, False);
+      PaintGraph(DotArrays[I], XOffset, YOffset, LBorder, RBorder);
     End;
 
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
