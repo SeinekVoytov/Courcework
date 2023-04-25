@@ -46,10 +46,12 @@ object MainForm: TMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitLeft = 8
+    ExplicitTop = 8
     object InputEdit: TEdit
       Left = 16
       Top = 36
-      Width = 209
+      Width = 193
       Height = 20
       BorderStyle = bsNone
       Font.Charset = DEFAULT_CHARSET
@@ -68,6 +70,8 @@ object MainForm: TMainForm
       Width = 21
       Height = 21
       Hint = #1052#1072#1090#1077#1084#1072#1090#1080#1095#1077#1089#1082#1080#1081' '#1074#1074#1086#1076
+      Cancel = True
+      Caption = #55357#56507
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
@@ -290,6 +294,7 @@ object MainForm: TMainForm
       Top = 36
       Width = 21
       Height = 21
+      Caption = #10006
       TabOrder = 4
       OnClick = ClearInputButtonClick
     end

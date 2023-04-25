@@ -335,7 +335,7 @@ begin
   case Key of
     VK_UP, VK_DOWN:
       Begin
-        if (not InputEdit.Focused) then
+//        if (not InputEdit.Focused) then
           with GraphPicture.Canvas.Pen do
             begin
               KeyPreview := True;
@@ -363,7 +363,7 @@ begin
       End;
     VK_RIGHT, VK_LEFT:
       begin
-        if (not InputEdit.Focused) then
+//        if (not InputEdit.Focused) then
         with GraphPicture.Canvas.Pen do
           begin
             KeyPreview := True;
