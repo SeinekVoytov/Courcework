@@ -69,6 +69,9 @@ type
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     Procedure PaintYAxis(const X: Integer);
+    Procedure PaintXAxis(const Y: Integer);
+    Procedure ClearPaintBox();
+    Procedure SetSelectedWidth();
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -91,6 +94,7 @@ const
   ITERATION_COUNT = 10000;
   ITERATIONS_PER_UNIT = 500;
   MAX_GRAPH_AMOUNT = 3;
+  STANDART_WIDTH = 3;
   ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
   ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
@@ -101,66 +105,84 @@ implementation
 
 {$R *.dfm}
 
+Procedure ShiftArrayLeft(var Arr: TDotArray);
+const
+  SHIFTING_SIZE = 500;
+var
+  I: Integer;
+begin
+  for I := SHIFTING_SIZE + 1 to High(Arr) do
+    Arr[I - SHIFTING_SIZE] := Arr[I];
+end;
+
+Procedure ShiftArrayRight(var Arr: TDotArray);
+const
+  SHIFTING_SIZE = 500;
+var
+  I: Integer;
+begin
+  for I := High(Arr) - SHIFTING_SIZE downto Low(Arr) do
+    Arr[I + SHIFTING_SIZE] := Arr[I];
+end;
+
 Procedure TMainForm.PaintYAxis(const X: Integer);
 var
   Width: Integer;
   Color: TColor;
   Y, I: Integer;
 begin
-  Width := GraphPicture.Canvas.Pen.Width;
-  with GraphPicture.Canvas do
+  Width := Self.GraphPicture.Canvas.Pen.Width;
+  Color := Self.GraphPicture.Canvas.Pen.Color;
+  with Self.GraphPicture.Canvas do
     begin
-      Width := Pen.Width;
-      Color := Pen.Color;
-      Pen.Width := 3;
+      Pen.Width := STANDART_WIDTH;
       Pen.Color := clBlack;
       MoveTo(X, 0);
-      LineTo(X, GraphPaintBox.Height);
-      GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);                      // axis painting
-      Y := Scale;
-      for I := YTo - 1 downto YFrom + 1  do      // sticks painting
+      LineTo(X, Self.GraphPaintBox.Height);       // axis painting
+      Y := Self.Scale;
+      for I := Self.YTo - 1 downto Self.YFrom + 1  do      // sticks painting
         Begin
           if (I <> 0) then
             Begin
-              MoveTo(CurrYAxisPos - 4, Y);
-              LineTo(CurrYAxisPos + 4, Y);
-              TextOut(CurrYAxisPos + 4, Y, IntToStr(I));
+              MoveTo(Self.CurrYAxisPos - 4, Y);
+              LineTo(Self.CurrYAxisPos + 4, Y);
+              TextOut(Self.CurrYAxisPos + 4, Y, IntToStr(I));
             End;
-          Y := Y + MainForm.Scale;
+          Y := Y + Self.Scale;
         End;
-      MoveTo(CurrYAxisPos - 10, 10);
-      LineTo(CurrYAxisPos, 0);
-      LineTo(CurrYAxisPos + 10, 10);
+      MoveTo(Self.CurrYAxisPos - 10, 10);
+      LineTo(Self.CurrYAxisPos, 0);
+      LineTo(Self.CurrYAxisPos + 10, 10);
       Pen.Color := Color;
       Pen.Width := Width;
     end;
 end;
 
-Procedure PaintXAxis(const Y: Integer);
+Procedure TMainForm.PaintXAxis(const Y: Integer);
 var
   Width: Integer;
   Color: TColor;
   X, I: Integer;
 begin
-  Width := MainForm.GraphPicture.Canvas.Pen.Width;
-  Color := MainForm.GraphPicture.Canvas.Pen.Color;
-  with MainForm.GraphPicture.Canvas do
+  with Self.GraphPicture.Canvas do
     begin
-      Pen.Width := 3;
+      Width := Pen.Width;
+      Color := Pen.Color;
+      Pen.Width := STANDART_WIDTH;
       Pen.Color := clBlack;
       MoveTo(0, Y);
-      LineTo(MainForm.GraphPaintBox.Width, Y);     // axis painting
-      X := MainForm.Scale;
-      for I := MainForm.XFrom + 1 to MainForm.XTo - 1 do      // sticks painting
+      LineTo(Self.GraphPaintBox.Width, Y);     // axis painting
+      X := Scale;
+      for I := Self.XFrom + 1 to Self.XTo - 1 do      // sticks painting
         Begin
-          MoveTo(X, MainForm.CurrXAxisPos - 3);
-          LineTo(X, MainForm.CurrXAxisPos + 3);
-          TextOut(X, MainForm.CurrXAxisPos + 3, IntToStr(I));
-          X := X + MainForm.Scale;
+          MoveTo(X, Self.CurrXAxisPos - 3);
+          LineTo(X, Self.CurrXAxisPos + 3);
+          TextOut(X, Self.CurrXAxisPos + 3, IntToStr(I));
+          X := X + Self.Scale;
         End;
-      MoveTo(MainForm.GraphPaintBox.Width - 10, MainForm.CurrXAxisPos - 10);
-      LineTo(MainForm.GraphPaintBox.Width, MainForm.CurrXAxisPos);
-      LineTo(MainForm.GraphPaintBox.Width - 10, MainForm.CurrXAxisPos + 10);
+      MoveTo(Self.GraphPaintBox.Width - 10, Self.CurrXAxisPos - 10);
+      LineTo(Self.GraphPaintBox.Width, Self.CurrXAxisPos);
+      LineTo(Self.GraphPaintBox.Width - 10, Self.CurrXAxisPos + 10);
       Pen.Color := Color;
       Pen.Width := Width;
     end;
@@ -197,32 +219,12 @@ Begin
 
 End;
 
-Procedure ShiftArrayLeft(var Arr: TDotArray);
-const
-  SHIFTING_SIZE = 500;
-var
-  I: Integer;
-begin
-  for I := SHIFTING_SIZE + 1 to High(Arr) do
-    Arr[I - SHIFTING_SIZE] := Arr[I];
-end;
-
-Procedure ShiftArrayRight(var Arr: TDotArray);
-const
-  SHIFTING_SIZE = 500;
-var
-  I: Integer;
-begin
-  for I := High(Arr) - SHIFTING_SIZE downto Low(Arr) do
-    Arr[I + SHIFTING_SIZE] := Arr[I];
-end;
-
-Procedure SetSelectedWidth();
+Procedure TMainForm.SetSelectedWidth();
 var
   SelectedWidth: String;
 begin
-  SelectedWidth := MainForm.PenWidthComboBox.Items[MainForm.PenWidthComboBox.ItemIndex];
-    with MainForm.GraphPicture.Canvas.Pen do
+  SelectedWidth := Self.PenWidthComboBox.Items[Self.PenWidthComboBox.ItemIndex];
+    with Self.GraphPicture.Canvas.Pen do
     Begin
       if (SelectedWidth = 'mid') then
           Width := 3
@@ -230,7 +232,7 @@ begin
         Width := 1
       else
         Width := 5;
-      MainForm.WidthArray[MainForm.GraphNumber] := Width;;
+      Self.WidthArray[MainForm.GraphNumber] := Width;;
     End;
 end;
 
@@ -243,7 +245,7 @@ begin
     End;
 end;
 
-Procedure SetButtonEnabled(const Value: Boolean);
+Procedure SetClearButtonEnabled(const Value: Boolean);
 begin
   with MainForm do
     Begin
@@ -252,20 +254,16 @@ begin
     End;
 end;
 
-Procedure ClearPaintBox();
+Procedure TMainForm.ClearPaintBox();
 var
   Color: TColor;
-  Width: Byte;
 begin
-  with MainForm.GraphPicture.Canvas do
+  with Self.GraphPicture.Canvas do
     Begin
       Color := Pen.Color;
-      Width := Pen.Width;
       Pen.Color := clWhite;
-      Rectangle(0,0,MainForm.GraphPaintBox.Width,MainForm.GraphPaintBox.Height);
-      Pen.Width := 3;
+      Rectangle(0, 0, Self.GraphPaintBox.Width, Self.GraphPaintBox.Height);
       Pen.Color := Color;
-      Pen.Width := Width;
     End;
 end;
 
@@ -288,7 +286,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
     LBorder := 0;
     RBorder := ITERATION_COUNT;
     MathInput := False;
-    SetButtonEnabled(False);
+    SetClearButtonEnabled(False);
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
@@ -433,9 +431,11 @@ var
 begin
   MousePos := GraphPaintBox.ScreenToClient(MousePos);
 //  PaintBoxRect := GraphPaintBox.ClientRect;  проверка, стоит ли курсор над paintbox
-  if (ssCtrl in Shift) then
+  if (ssCtrl in Shift) and
+     (MousePos.X >= 0) and (MousePos.Y >= 0) and
+     (MousePos.X <= GraphPaintBox.Width) and (MousePos.Y <= GraphPaintBox.Height) then
     Begin
-      if (WheelDelta > 50) and (ZoomFactor < 9) then
+      if (WheelDelta > 50) and (ZoomFactor < 10)  then
         Begin
           Inc(ZoomFactor);
           ClearPaintBox();
@@ -603,10 +603,10 @@ procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
 begin
   Inc(GraphNumber);
   SetEditEnabled(False);
-  SetButtonEnabled(True);
+  SetClearButtonEnabled(True);
   CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   PolNotExprs[GraphNumber] := CurrExpr;
-  CurrX := XFrom;
+  CurrX := XFrom - LBorder div 500;
 
   for I := 1 to ITERATION_COUNT do
     Begin
@@ -647,7 +647,7 @@ begin
   RangeFromEdit.Text := IntToStr(XFrom);
   RangeToEdit.Text := IntToStr(XTo);
   SetEditEnabled(True);
-  SetButtonEnabled(False);
+  SetClearButtonEnabled(False);
   InputEdit.Enabled := True;
   InputEdit.Clear;
   ColorBox.Enabled := True;
