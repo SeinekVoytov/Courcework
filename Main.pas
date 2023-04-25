@@ -430,9 +430,11 @@ var
 begin
   MousePos := GraphPaintBox.ScreenToClient(MousePos);
 //  PaintBoxRect := GraphPaintBox.ClientRect;  проверка, стоит ли курсор над paintbox
-  if (ssCtrl in Shift) then
+  if (ssCtrl in Shift) and
+     (MousePos.X >= 0) and (MousePos.Y >= 0) and
+     (MousePos.X <= GraphPaintBox.Width) and (MousePos.Y <= GraphPaintBox.Height) then
     Begin
-      if (WheelDelta > 50) and (ZoomFactor < 9) then
+      if (WheelDelta > 50) and (ZoomFactor < 10)  then
         Begin
           Inc(ZoomFactor);
           ClearPaintBox();
@@ -603,7 +605,7 @@ begin
   SetButtonEnabled(True);
   CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
   PolNotExprs[GraphNumber] := CurrExpr;
-  CurrX := XFrom;
+  CurrX := XFrom - LBorder div 500;
 
   for I := 1 to ITERATION_COUNT do
     Begin
