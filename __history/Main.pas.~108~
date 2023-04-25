@@ -88,6 +88,8 @@ type
 
 const
   ITERATION_COUNT = 10000;
+  ITERATIONS_PER_UNIT = 500;
+  MAX_GRAPH_AMOUNT = 3;
   ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
   ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
@@ -169,6 +171,7 @@ var
 begin
    WasNan := True;
    CurrX := 0;
+   MainForm.Step := MainForm.GraphPaintBox.Width / (MainForm.RBorder - MainForm.LBorder);
    for I := FromIndex + 1 to ToIndex do
     Begin
       if (FloatToStr(DotArray[I]) = 'NAN') then
@@ -292,7 +295,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
       End;
 
     ColorBox.Clear;
-    for I := 0 to High(ColorValues) do
+    for I := Low(ColorValues) to High(ColorValues) do
       ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
 
     ColorBox.Selected := clBlack;
@@ -350,42 +353,42 @@ begin
             if (Key = VK_LEFT) then
               begin
                 CurrYAxisPos := CurrYAxisPos + Scale;
-                for J := 1 to GraphNumber do
+                if (LBorder > 0) then
                   Begin
-                    X := XFrom;
-                    if (RBorder < ITERATION_COUNT) then
-                      Begin
-                        Inc(RBorder, 500);
-                        Inc(LBorder, 500);
-                      End
-                    else
-                      Begin
-                        ShiftArrayRight(DotArrays[J]);
-                        for I := 500 downto Low(DotArrays[J]) do
-                          Begin
-                            DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
-                            X := X - Range;
-                          End;
-                      End;
-                  End;
+                    Dec(RBorder, ITERATIONS_PER_UNIT);
+                    Dec(LBorder, ITERATIONS_PER_UNIT);
+                  End
+                else
+                  for J := 1 to GraphNumber do
+                    Begin
+                      X := XFrom;
+                        Begin
+                          ShiftArrayRight(DotArrays[J]);
+                          for I := ITERATIONS_PER_UNIT downto Low(DotArrays[J]) do
+                            Begin
+                              DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
+                              X := X - Range;
+                            End;
+                        End;
+                    End;
                 Dec(XTo);
                 Dec(XFrom);
               end
             else
               begin
                 CurrYAxisPos := CurrYAxisPos - Scale;
+                 if (RBorder < ITERATION_COUNT) then
+                  Begin
+                    Inc(LBorder, ITERATIONS_PER_UNIT);
+                    Inc(RBorder, ITERATIONS_PER_UNIT);
+                  End
+                 else
                 for J := 1 to GraphNumber do
                   Begin
-                    if (LBorder > 0) then
-                      Begin
-                        Dec(LBorder, 500);
-                        Dec(RBorder, 500);
-                      End
-                    else
                       Begin
                         X := XTo;
                         ShiftArrayLeft(DotArrays[J]);
-                        for I := ITERATION_COUNT - 499 to ITERATION_COUNT do
+                        for I := ITERATION_COUNT - ITERATIONS_PER_UNIT + 1 to ITERATION_COUNT do
                           Begin
                             DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
                             X := X + Range;
@@ -429,25 +432,35 @@ begin
           Inc(ZoomFactor);
           ClearPaintBox();
           Handled := True;
-          if (MousePos.X > 600) and (MousePos.Y > 600) then
+          if (MousePos.X > CurrYAxisPos) then
             Begin
-              Inc(XFrom);
-              Dec(YTo);
+              if (MousePos.Y > CurrXAxisPos) then
+                Begin
+                  Inc(XFrom);
+                  Dec(YTo);
+                  Inc(LBorder, ITERATIONS_PER_UNIT);
+                End
+              else
+                Begin
+                  Inc(XFrom);
+                  Inc(YFrom);
+                  Inc(LBorder, ITERATIONS_PER_UNIT);
+                End
             End
-          else if (MousePos.X > 600) and (MousePos.Y <= 600) then
+          else if (MousePos.X <= CurrYAxisPos) then
             Begin
-              Inc(XFrom);
-              Inc(YFrom);
-            End
-          else if (MousePos.X <= 600) and (MousePos.Y > 600) then
-            Begin
-              Dec(XTo);
-              Dec(YTo);
-            End
-          else
-            Begin
-              Dec(XTo);
-              Inc(YFrom);
+              if ((MousePos.Y > CurrXAxisPos)) then
+                Begin
+                  Dec(XTo);
+                  Dec(YTo);
+                  Dec(RBorder, ITERATIONS_PER_UNIT);
+                End
+              else
+                Begin
+                  Dec(XTo);
+                  Inc(YFrom);
+                  Dec(RBorder, ITERATIONS_PER_UNIT);
+                End;
             End;
         End
       else if (WheelDelta < -50) and (ZoomFactor > 0) then
@@ -455,25 +468,29 @@ begin
           Dec(ZoomFactor);
           ClearPaintBox();
           Handled := True;
-          if (MousePos.X > 600) and (MousePos.Y > 600) then
+          if (MousePos.X > CurrYAxisPos) and (MousePos.Y > CurrXAxisPos) then
             Begin
               Dec(XFrom);
               Inc(YTo);
+              Dec(LBorder, ITERATIONS_PER_UNIT);
             End
-          else if (MousePos.X > 600) and (MousePos.Y <= 600) then
+          else if (MousePos.X > CurrYAxisPos) and (MousePos.Y <= CurrXAxisPos) then
             Begin
               Dec(XFrom);
               Dec(YFrom);
+              Dec(LBorder, ITERATIONS_PER_UNIT);
             End
-          else if (MousePos.X <= 600) and (MousePos.Y > 600) then
+          else if (MousePos.X <= CurrYAxisPos) and (MousePos.Y > CurrXAxisPos) then
             Begin
               Inc(XTo);
               Inc(YTo);
+              Inc(RBorder, ITERATIONS_PER_UNIT);
             End
           else
             Begin
               Inc(XTo);
               Dec(YFrom);
+              Inc(RBorder, ITERATIONS_PER_UNIT);
             End;
         End;
       Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
@@ -594,7 +611,7 @@ begin
 
   PaintGraph(DotArrays[GraphNumber], XOffset, YOffset, LBorder, RBorder);
 
-  if (GraphNumber = 3) then
+  if (GraphNumber = MAX_GRAPH_AMOUNT) then
   Begin
     MathInputPanel.Enabled := False;
     InputEdit.Enabled := False;
