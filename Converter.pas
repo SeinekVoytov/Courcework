@@ -3,13 +3,10 @@ unit Converter;
 interface
   uses Stack, System.SysUtils;
 
-  Type
-    TConverter = class
-      class Function ConvertToPolishNotation(Expr: String): String;
-    end;
+ Function ConvertToPolishNotation(Expr: String): String;
 
 implementation
-  class Function TConverter.ConvertToPolishNotation(Expr: String): String;
+  Function ConvertToPolishNotation(Expr: String): String;
 
   Type
     TSign = (Uno_Minus, Uno_Plus, Sin, Cos, Tg, Ctg, ArcSin, ArcCos, ArcTg, ArcCtg, Ln, Log10, Abs, Sqrt, Caret, Minus, Plus, Star, Slash, Open, Close);

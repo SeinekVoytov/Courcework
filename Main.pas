@@ -78,6 +78,7 @@ type
     Procedure InitPenColorComboBox();
     Procedure PaintGraph(const GraphNumber: Integer);
     Procedure PaintAllGraphs();
+    procedure InputEditKeyPress(Sender: TObject; var Key: Char);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -302,8 +303,6 @@ begin
 end;
 
 Procedure TMainForm.FormCreate(Sender: TObject);
-  var
-    I: Integer;
   begin
     XFrom := -10;
     XTo := 10;
@@ -542,10 +541,17 @@ Var
     Text: String;
 begin
   Text := Lowercase(InputEdit.Text);
-  if (not TChecker.IsMathExprValid(Text)) then
+  if (not IsMathExprValid(Text)) then
     ShowGraphButton.Enabled := False
   else
     ShowGraphButton.Enabled := True;
+end;
+
+procedure TMainForm.InputEditKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key = #13) then
+    KeyPreview := True;
+
 end;
 
 //procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
@@ -584,7 +590,7 @@ end;
 
 procedure TMainForm.RangeFromEditChange(Sender: TObject);
 begin
-  if (not TChecker.CheckInput(RangeFromEdit.Text) or (XTo <= XFrom)) then
+  if (not CheckInput(RangeFromEdit.Text) or (XTo <= XFrom)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
     End
@@ -594,7 +600,7 @@ end;
 
 procedure TMainForm.RangeToEditChange(Sender: TObject);
 begin
-  if (not TChecker.CheckInput(RangeToEdit.Text) or (XTo <= XFrom)) then
+  if (not CheckInput(RangeToEdit.Text) or (XTo <= XFrom)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
     End
@@ -611,7 +617,7 @@ begin
   Inc(GraphAmount);
   SetEditEnabled(False);
   SetClearButtonEnabled(True);
-  CurrExpr := TConverter.ConvertToPolishNotation(InputEdit.Text);
+  CurrExpr := ConvertToPolishNotation(InputEdit.Text);
   PolNotExprs[GraphAmount] := CurrExpr;
   CurrX := XFrom - LBorder div 500;
 

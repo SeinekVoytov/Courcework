@@ -5,14 +5,11 @@ interface
 
 uses System.SysUtils, Stack, Math;
 
-  Type
-    TCalculate = class
-      class Function Calculate(const Expr: String; X: Extended): Extended;
-    end;
+  Function Calculate(const Expr: String; X: Extended): Extended;
 
 implementation
 
-  class Function TCalculate.Calculate(const Expr: String; X: Extended): Extended;
+  Function Calculate(const Expr: String; X: Extended): Extended;
 
   Function FindOperandReversed(Const Expr: String; var Index: Integer): Extended;
   Var

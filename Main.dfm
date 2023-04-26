@@ -12,6 +12,7 @@ object MainForm: TMainForm
   Font.Style = []
   KeyPreview = True
   OldCreateOrder = False
+  Position = poScreenCenter
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnMouseWheel = FormMouseWheel
@@ -60,6 +61,7 @@ object MainForm: TMainForm
       ParentFont = False
       TabOrder = 0
       OnChange = InputEditChange
+      OnKeyPress = InputEditKeyPress
     end
     object MathInputButton: TButton
       AlignWithMargins = True
@@ -266,6 +268,7 @@ object MainForm: TMainForm
         Top = 97
         Width = 145
         Height = 21
+        Style = csDropDownList
         TabOrder = 4
       end
       object ClearGraphButton: TButton

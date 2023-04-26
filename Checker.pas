@@ -4,15 +4,12 @@ interface
 
 uses System.SysUtils;
 
-  Type
-    TChecker = class
-      class Function IsMathExprValid(Const Expr: String): Boolean;
-      class Function CheckInput(Const s: String): Boolean;
-    end;
+  Function IsMathExprValid(Const Expr: String): Boolean;
+  Function CheckInput(Const s: String): Boolean;
 
 implementation
 
-  class Function TChecker.IsMathExprValid(Const Expr: String): Boolean;
+  Function IsMathExprValid(Const Expr: String): Boolean;
 
   Function IsCharValid(Const Symbol: Char): Boolean;
     Begin
@@ -219,7 +216,7 @@ implementation
       End;
   End;
 
-  class Function TChecker.CheckInput(Const s: String): Boolean;
+  Function CheckInput(Const s: String): Boolean;
   Begin
     try
       StrToInt(s);
