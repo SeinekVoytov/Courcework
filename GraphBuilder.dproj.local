@@ -2,8 +2,8 @@
 <BorlandProject>
 	<Transactions>
     <Transaction>2023/03/28 20:36:35.000.060,=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2023/03/28 20:36:49.000.598,\\Mac\Home\Documents\kursachF\Unit1.dfm=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
     <Transaction>2023/03/28 20:36:49.000.598,\\Mac\Home\Documents\kursachF\Unit1.pas=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2023/03/28 20:36:49.000.598,\\Mac\Home\Documents\kursachF\Unit1.dfm=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
     <Transaction>2023/03/28 20:36:57.000.774,\\Mac\Home\Documents\kursachF\Project1.dproj=\\Mac\Home\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
     <Transaction>2023/04/12 20:49:35.000.896,=\\Mac\Home\Documents\kursachF\Unit2.pas</Transaction>
     <Transaction>2023/04/12 20:50:15.000.521,\\Mac\Home\Documents\kursachF\Converter.pas=\\Mac\Home\Documents\kursachF\Unit2.pas</Transaction>
@@ -19,5 +19,7 @@
     <Transaction>2023/04/18 23:39:15.000.872,\\Mac\Home\Documents\kursachF\Calculate.pas=\\Mac\Home\Documents\kursachF\Calculator.pas</Transaction>
     <Transaction>2023/04/19 16:39:25.000.786,\\Mac\Home\Documents\kursachF\MainForm.pas=\\Mac\Home\Documents\kursachF\Main.pas</Transaction>
     <Transaction>2023/04/19 16:39:25.000.786,\\Mac\Home\Documents\kursachF\MainForm.dfm=\\Mac\Home\Documents\kursachF\Main.dfm</Transaction>
+    <Transaction>2023/04/25 12:14:38.000.432,\\Mac\Home\Documents\kursachF\Converter.pas=\\Mac\Home\Documents\kursachF\TConverter.pas</Transaction>
+    <Transaction>2023/04/25 12:15:13.000.947,\\Mac\Home\Documents\kursachF\TConverter.pas=\\Mac\Home\Documents\kursachF\Converter.pas</Transaction>
   </Transactions>
 </BorlandProject>

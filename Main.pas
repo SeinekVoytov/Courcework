@@ -75,6 +75,7 @@ type
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
     Procedure InitPenWidthComboBox();
+    Procedure InitPenColorComboBox();
     Procedure PaintGraph(const GraphNumber: Integer);
     Procedure PaintAllGraphs();
 
@@ -100,8 +101,6 @@ const
   ITERATIONS_PER_UNIT = 500;
   MAX_GRAPH_AMOUNT = 3;
   STANDART_WIDTH = 3;
-  ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
-  ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
 var
   MainForm: TMainForm;
   ZoomFactor: Byte;
@@ -216,7 +215,7 @@ begin
 
       CurrX := CurrX + MainForm.Step;
     End;
-   MainForm.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
+   Self.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
 end;
 
 Procedure TMainForm.PaintAllGraphs();
@@ -250,7 +249,7 @@ end;
 
 Procedure TMainForm.SetEditEnabled(const Value: Boolean);
 begin
-  with MainForm do
+  with Self do
     Begin
       RangeToEdit.Enabled := Value;
       RangeFromEdit.Enabled := Value;
@@ -259,7 +258,7 @@ end;
 
 Procedure TMainForm.SetClearButtonEnabled(const Value: Boolean);
 begin
-  with MainForm do
+  with Self do
     Begin
       ClearAllButton.Enabled := Value;
       ClearGraphButton.Enabled := Value;
@@ -281,7 +280,7 @@ end;
 
 Procedure TMainForm.InitPenWidthComboBox();
 Begin
-  with PenWidthComboBox do
+  with Self.PenWidthComboBox do
     Begin
       Items.Add('low');
       Items.Add('mid');
@@ -289,6 +288,18 @@ Begin
       ItemIndex := 1;
     End;
 End;
+
+Procedure TMainForm.InitPenColorComboBox();
+Const
+  ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
+  ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
+Var
+  I: Integer;
+begin
+  Self.ColorBox.Clear;
+  for I := Low(ColorValues) to High(ColorValues) do
+    Self.ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
+end;
 
 Procedure TMainForm.FormCreate(Sender: TObject);
   var
@@ -315,10 +326,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     MathInputPanel.Visible := False;
     ShowGraphButton.Enabled := False;
     InitPenWidthComboBox();
-    ColorBox.Clear;
-    for I := Low(ColorValues) to High(ColorValues) do
-      ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
-
+    InitPenColorComboBox();
     ColorBox.Selected := clBlack;
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
     PaintYAxis(CurrXAxisPos);
@@ -433,8 +441,6 @@ end;
 
 procedure TMainForm.FormMouseWheel(Sender: TObject; Shift: TShiftState;
   WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
-var
-  I: Integer;
 begin
   MousePos := GraphPaintBox.ScreenToClient(MousePos);
   if (ssCtrl in Shift) and
@@ -511,7 +517,7 @@ begin
         End;
       Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
       CurrXAxisPos := Abs(YTo) * Scale;
-      CurrYAxisPos := Abs(XFrom) * Scale;
+      CurrYAxisPos := -XFrom * Scale;
       PaintXAxis(CurrXAxisPos);
       PaintYAxis(CurrYAxisPos);
       YOffset := CurrXAxisPos;
@@ -659,8 +665,6 @@ begin
 end;
 
 procedure TMainForm.ClearGraphButtonClick(Sender: TObject);
-var
-  I: Integer;
 begin
   Dec(GraphAmount);
   if (GraphAmount = 0) then
