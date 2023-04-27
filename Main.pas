@@ -164,12 +164,34 @@ end;
 
 procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
 begin
-  Dec(XTo);
-  Inc(XFrom);
-  Dec(YTo);
-  Inc(YFrom);
-  Inc(LBorder, IterationsPerUnit);
-  Dec(RBorder, IterationsPerUnit);
+  if (Abs(XTo) > Abs(XFrom)) then
+    Begin
+      Dec(XTo);
+      Dec(RBorder, IterationsPerUnit);
+      if (Abs(YTo) > Abs(YFrom)) then
+        Dec(YTo)
+      else
+        Inc(YFrom)
+    End
+  else if (Abs(XTo) < Abs(XFrom)) then
+    Begin
+      Inc(XFrom);
+      Inc(LBorder, IterationsPerUnit);
+      if (Abs(YTo) > Abs(YFrom)) then
+        Dec(YTo)
+      else
+        Inc(YFrom)
+    End
+  else
+    Begin
+      Inc(XFrom);
+      Dec(XTo);
+      Inc(YFrom);
+      Dec(YTo);
+      Inc(LBorder, IterationsPerUnit);
+      Dec(RBorder, IterationsPerUnit);
+    End;
+
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;
   CurrYAxisPos := -XFrom * Scale;
@@ -186,12 +208,33 @@ procedure TMainForm.MinusScaleButtonClick(Sender: TObject);
 var
   Delta: Integer;
 begin
-  Inc(XTo);
-  Dec(XFrom);
-  Inc(YTo);
-  Dec(YFrom);
-  Dec(LBorder, IterationsPerUnit);
-  Inc(RBorder, IterationsPerUnit);
+    if (Abs(XTo) > Abs(XFrom)) then
+    Begin
+      Inc(XFrom);
+      Inc(LBorder, IterationsPerUnit);
+      if (Abs(YTo) > Abs(YFrom)) then
+        Inc(YTo)
+      else
+        Dec(YFrom)
+    End
+  else if (Abs(XTo) < Abs(XFrom)) then
+    Begin
+      Inc(XTo);
+      Dec(RBorder, IterationsPerUnit);
+      if (Abs(YTo) > Abs(YFrom)) then
+        Inc(YTo)
+      else
+        Dec(YFrom);
+    End
+  else
+    Begin
+      Dec(XFrom);
+      Inc(XTo);
+      Dec(YFrom);
+      Inc(YTo);
+      Dec(LBorder, IterationsPerUnit);
+      Inc(RBorder, IterationsPerUnit);
+    End;
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;
   CurrYAxisPos := -XFrom * Scale;
