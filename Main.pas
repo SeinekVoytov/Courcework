@@ -210,8 +210,6 @@ begin
       Inc(XTo);
       Inc(RBorder, IterationsPerUnit);
     End;
-
-
   Dec(YFrom);
   Inc(YTo);
 
@@ -627,7 +625,7 @@ end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX: Real;
+    CurrX, CurrY, MinY, MaxY: Real;
     I: Integer;
     CurrExpr: String;
 begin
@@ -637,10 +635,17 @@ begin
   CurrExpr := ConvertToPolishNotation(InputEdit.Text);
   PolNotExprs[GraphAmount] := CurrExpr;
   CurrX := XFrom - LBorder div 500;
+  MaxY := Single.MaxValue;
+  MinY := Single.MinValue;
 
   for I := 1 to ITERATION_COUNT do
     Begin
-      DotArrays[GraphAmount][I] := -Calculate(PolNotExprs[GraphAmount], CurrX);
+      CurrY := -Calculate(PolNotExprs[GraphAmount], CurrX);
+      if (CurrY < MaxY) then
+        MaxY := CurrY;
+      if (CurrY > MinY) then
+        MinY := CurrY;
+      DotArrays[GraphAmount][I] := CurrY;
       CurrX := CurrX + Range;
     End;
 
@@ -648,7 +653,25 @@ begin
   ColorsArray[GraphAmount] := ColorBox.Selected;
 
   SetSelectedWidth();
+  if (GraphAmount = 1) then
+    Begin
+      if (-MinY < YFrom) then
+        Begin
+          YTo := -Trunc(MaxY);
+          YFrom := YTo - (XTo - XFrom);
+        End;
 
+      if (Abs(MaxY) > Abs(YTo)) then
+        Begin
+          YFrom := -Trunc(MinY);
+          YTo := YFrom + (XTo - XFrom);
+        End;
+      ClearPaintBox();
+      CurrXAxisPos := YTo * Scale;
+      YOffset := CurrXAxisPos;
+      PaintXAxis(CurrXAxisPos);
+      PaintYAxis(CurrYAxisPos);
+    End;
   PaintGraph(GraphAmount);
 
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
