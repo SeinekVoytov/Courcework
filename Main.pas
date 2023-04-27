@@ -164,33 +164,12 @@ end;
 
 procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
 begin
-  if (Abs(XTo) > Abs(XFrom)) then
-    Begin
-      Dec(XTo);
-      Dec(RBorder, IterationsPerUnit);
-      if (Abs(YTo) > Abs(YFrom)) then
-        Dec(YTo)
-      else
-        Inc(YFrom)
-    End
-  else if (Abs(XTo) < Abs(XFrom)) then
-    Begin
-      Inc(XFrom);
-      Inc(LBorder, IterationsPerUnit);
-      if (Abs(YTo) > Abs(YFrom)) then
-        Dec(YTo)
-      else
-        Inc(YFrom)
-    End
-  else
-    Begin
-      Inc(XFrom);
-      Dec(XTo);
-      Inc(YFrom);
-      Dec(YTo);
-      Inc(LBorder, IterationsPerUnit);
-      Dec(RBorder, IterationsPerUnit);
-    End;
+  Inc(XFrom);
+  Dec(XTo);
+  Inc(YFrom);
+  Dec(YTo);
+  Inc(LBorder, IterationsPerUnit);
+  Dec(RBorder, IterationsPerUnit);
 
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;
@@ -202,39 +181,39 @@ begin
   PaintAllGraphs();
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   MinusScaleButton.Enabled := True;
+  if (XTo - XFrom = 2) then
+    PlusScaleButton.Enabled := False;
+
 end;
 
 procedure TMainForm.MinusScaleButtonClick(Sender: TObject);
 var
-  Delta: Integer;
+  L, R: Integer;
+  X: Extended;
 begin
-    if (Abs(XTo) > Abs(XFrom)) then
+  L := StrToInt(RangeFromEdit.Text);
+  R := StrToInt(RangeToEdit.Text);
+  if (LBorder = 0) then
     Begin
-      Dec(XFrom);
-      Dec(LBorder, IterationsPerUnit);
-      if (Abs(YTo) > Abs(YFrom)) then
-        Dec(YFrom)
-      else
-        Inc(YTo)
+      Inc(XTo, 2);
+      Inc(RBorder, 2*IterationsPerUnit);
     End
-  else if (Abs(XTo) < Abs(XFrom)) then
+  else if (RBorder = ITERATION_COUNT) then
     Begin
-      Inc(XTo);
-      Inc(RBorder, IterationsPerUnit);
-      if (Abs(YTo) > Abs(YFrom)) then
-        Dec(YFrom)
-      else
-        Inc(YTo)
+      Dec(XFrom, 2);
+      Dec(LBorder, 2*IterationsPerUnit);
     End
   else
     Begin
       Dec(XFrom);
-      Inc(XTo);
-      Dec(YFrom);
-      Inc(YTo);
       Dec(LBorder, IterationsPerUnit);
+      Inc(XTo);
       Inc(RBorder, IterationsPerUnit);
     End;
+
+
+  Dec(YFrom);
+  Inc(YTo);
 
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;
@@ -245,10 +224,9 @@ begin
   YOffset := CurrXAxisPos;
   PaintAllGraphs();
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-  Delta := StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text);
-  if (Delta = XTo - XFrom) then
+  PlusScaleButton.Enabled := True;
+  if (R - L = XTo - XFrom) then
     MinusScaleButton.Enabled := False;
-
 end;
 
 Procedure TMainForm.PaintXAxis(const Y: Integer);
