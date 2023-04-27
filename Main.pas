@@ -653,7 +653,7 @@ begin
   ColorsArray[GraphAmount] := ColorBox.Selected;
 
   SetSelectedWidth();
-  if (GraphAmount = 1) then
+  if (GraphAmount = 1) and not ((-MinY < YFrom) and (Abs(MaxY) > Abs(YTo))) then
     Begin
       if (-MinY < YFrom) then
         Begin
@@ -675,13 +675,16 @@ begin
   PaintGraph(GraphAmount);
 
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
-  Begin
-    MathInputPanel.Enabled := False;
-    InputEdit.Enabled := False;
-    ColorBox.Enabled := False;
-    PenWidthComboBox.Enabled := False;
-    ShowGraphButton.Enabled := False;
-  End;
+    Begin
+      MathInputPanel.Enabled := False;
+      InputEdit.Enabled := False;
+      ColorBox.Enabled := False;
+      PenWidthComboBox.Enabled := False;
+      ShowGraphButton.Enabled := False;
+      PenWidthComboBox.Enabled := False;
+      ColorBox.Enabled := False;
+      ClearInputButton.Enabled := False;
+    End;
 end;
 
 procedure TMainForm.ClearAllButtonClick(Sender: TObject);
@@ -711,6 +714,9 @@ begin
   MathInputPanel.Enabled := True;
   PenWidthComboBox.ItemIndex := 1;
   ShowGraphButton.Enabled := True;
+  PenWidthComboBox.Enabled := True;
+  ColorBox.Enabled := True;
+  ClearInputButton.Enabled := True;
 end;
 
 procedure TMainForm.ClearGraphButtonClick(Sender: TObject);
