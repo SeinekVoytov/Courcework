@@ -210,21 +210,21 @@ var
 begin
     if (Abs(XTo) > Abs(XFrom)) then
     Begin
-      Inc(XFrom);
-      Inc(LBorder, IterationsPerUnit);
+      Dec(XFrom);
+      Dec(LBorder, IterationsPerUnit);
       if (Abs(YTo) > Abs(YFrom)) then
-        Inc(YTo)
-      else
         Dec(YFrom)
+      else
+        Inc(YTo)
     End
   else if (Abs(XTo) < Abs(XFrom)) then
     Begin
       Inc(XTo);
-      Dec(RBorder, IterationsPerUnit);
+      Inc(RBorder, IterationsPerUnit);
       if (Abs(YTo) > Abs(YFrom)) then
-        Inc(YTo)
+        Dec(YFrom)
       else
-        Dec(YFrom);
+        Inc(YTo)
     End
   else
     Begin
@@ -235,6 +235,7 @@ begin
       Dec(LBorder, IterationsPerUnit);
       Inc(RBorder, IterationsPerUnit);
     End;
+
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;
   CurrYAxisPos := -XFrom * Scale;
@@ -686,15 +687,18 @@ procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
   GraphAmount := 0;
   ClearPaintBox();
-
+  XFrom := -10;
+  XTo := 10;
+  YTo := 10;
+  YFrom := -10;
+  YOffset := GraphPaintBox.Height div 2;
+  LBorder := 0;
+  RBorder := 10000;
   CurrXAxisPos := GraphPaintBox.Height div 2;
   CurrYAxisPos := GraphPaintBox.Width div 2;
   PaintYAxis(CurrXAxisPos);
   PaintXAxis(CurrYAxisPos);
-
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
-  XFrom := -10;
-  XTo := 10;
   RangeFromEdit.Text := IntToStr(XFrom);
   RangeToEdit.Text := IntToStr(XTo);
   SetEditEnabled(True);
