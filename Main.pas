@@ -40,6 +40,8 @@ type
     ClearGraphButton: TButton;
     ClearAllButton: TButton;
     ClearInputButton: TButton;
+    MinusScaleButton: TButton;
+    PlusScaleButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -79,6 +81,8 @@ type
     Procedure PaintGraph(const GraphNumber: Integer);
     Procedure PaintAllGraphs();
     procedure InputEditKeyPress(Sender: TObject; var Key: Char);
+    procedure PlusScaleButtonClick(Sender: TObject);
+    procedure MinusScaleButtonClick(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -86,13 +90,14 @@ type
     XFrom, XTo, YFrom, YTo: Integer;
     PolNotExprs: array [1..3] of String;
     GraphAmount: Byte;
-    YOffset, XOffset: Integer;
+    YOffset: Integer;
     Scale: Integer;
     Range, Step: Real;
     ColorsArray: array [1..3] of TColor;
     WidthArray: array [1..3] of Byte;
     MathInput: Boolean;
     LBorder, RBorder: Integer;
+    LZoomBorder, RZoomBorder: Integer;
   public
     GraphPicture: TBitmap;
   end;
@@ -161,6 +166,44 @@ begin
       Pen.Color := Color;
       Pen.Width := Width;
     end;
+end;
+
+procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
+begin
+  Dec(XTo);
+  Inc(XFrom);
+  Dec(YTo);
+  Inc(YFrom);
+  Inc(LBorder, ITERATIONS_PER_UNIT);
+  Dec(RBorder, ITERATIONS_PER_UNIT);
+  Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrYAxisPos := -XFrom * Scale;
+  ClearPaintBox();
+  PaintXAxis(CurrXAxisPos);
+  PaintYAxis(CurrYAxisPos);
+  YOffset := CurrXAxisPos;
+  PaintAllGraphs();
+  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+end;
+
+procedure TMainForm.MinusScaleButtonClick(Sender: TObject);
+begin
+  Inc(XTo);
+  Dec(XFrom);
+  Inc(YTo);
+  Dec(YFrom);
+  Dec(LBorder, ITERATIONS_PER_UNIT);
+  Inc(RBorder, ITERATIONS_PER_UNIT);
+  Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrYAxisPos := -XFrom * Scale;
+  ClearPaintBox();
+  PaintXAxis(CurrXAxisPos);
+  PaintYAxis(CurrYAxisPos);
+  YOffset := CurrXAxisPos;
+  PaintAllGraphs();
+  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
 end;
 
 Procedure TMainForm.PaintXAxis(const Y: Integer);
@@ -312,12 +355,13 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     Step := GraphPaintBox.Width / ITERATION_COUNT;
     Range := 20 / ITERATION_COUNT;
     YOffset := GraphPaintBox.Height div 2;
-    XOffset := 0;
     Scale := 60;
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
     LBorder := 0;
     RBorder := ITERATION_COUNT;
+    LZoomBorder := -10;
+    RZoomBorder := 10;
     MathInput := False;
     SetClearButtonEnabled(False);
     GraphPicture := TBitmap.Create;
@@ -391,13 +435,15 @@ begin
                           ShiftArrayRight(DotArrays[J]);
                           for I := ITERATIONS_PER_UNIT downto Low(DotArrays[J]) do
                             Begin
-                              DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
+                              DotArrays[J][I] := -Calculate(PolNotExprs[J], X);
                               X := X - Range;
                             End;
                         End;
                     End;
                 Dec(XTo);
                 Dec(XFrom);
+                Dec(LZoomBorder);
+                Dec(RZoomBorder);
               end
             else
               begin
@@ -415,13 +461,15 @@ begin
                         ShiftArrayLeft(DotArrays[J]);
                         for I := ITERATION_COUNT - ITERATIONS_PER_UNIT + 1 to ITERATION_COUNT do
                           Begin
-                            DotArrays[J][I] := -TCalculate.Calculate(PolNotExprs[J], X);
+                            DotArrays[J][I] := -Calculate(PolNotExprs[J], X);
                             X := X + Range;
                           End;
                       End;
                   End;
                 Inc(XTo);
                 Inc(XFrom);
+                Inc(LZoomBorder);
+                Inc(RZoomBorder);
               end;
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
@@ -485,7 +533,7 @@ begin
           Dec(ZoomFactor);
           ClearPaintBox();
           Handled := True;
-          if (MousePos.X > CurrYAxisPos) then
+          if (MousePos.X > CurrYAxisPos) and (LZoomBorder < XFrom) then
             Begin
               Dec(XFrom);
               if (MousePos.Y > CurrXAxisPos) then
@@ -499,7 +547,7 @@ begin
                   Dec(LBorder, ITERATIONS_PER_UNIT);
                 End
             End
-          else
+          else if (RZoomBorder > XTo) then
             Begin
               Inc(XTo);
               if (MousePos.Y > CurrXAxisPos) then
@@ -623,7 +671,7 @@ begin
 
   for I := 1 to ITERATION_COUNT do
     Begin
-      DotArrays[GraphAmount][I] := -TCalculate.Calculate(PolNotExprs[GraphAmount], CurrX);
+      DotArrays[GraphAmount][I] := -Calculate(PolNotExprs[GraphAmount], CurrX);
       CurrX := CurrX + Range;
     End;
 

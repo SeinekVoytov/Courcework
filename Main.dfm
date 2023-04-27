@@ -299,5 +299,23 @@ object MainForm: TMainForm
       TabOrder = 4
       OnClick = ClearInputButtonClick
     end
+    object MinusScaleButton: TButton
+      Left = 97
+      Top = 472
+      Width = 25
+      Height = 25
+      Caption = '-'
+      TabOrder = 5
+      OnClick = MinusScaleButtonClick
+    end
+    object PlusScaleButton: TButton
+      Left = 150
+      Top = 472
+      Width = 20
+      Height = 25
+      Caption = '+'
+      TabOrder = 6
+      OnClick = PlusScaleButtonClick
+    end
   end
 end
