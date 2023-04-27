@@ -401,7 +401,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     Step := GraphPaintBox.Width / ITERATION_COUNT;
     Range := (XTo - XFrom) / ITERATION_COUNT;
     YOffset := GraphPaintBox.Height div 2;
-    Scale := 60;
+    Scale := GraphPaintBox.Width div (XTo - XFrom);
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
     LBorder := 0;
@@ -693,7 +693,7 @@ begin
   YFrom := -10;
   YOffset := GraphPaintBox.Height div 2;
   LBorder := 0;
-  RBorder := 10000;
+  RBorder := ITERATION_COUNT;
   CurrXAxisPos := GraphPaintBox.Height div 2;
   CurrYAxisPos := GraphPaintBox.Width div 2;
   PaintYAxis(CurrXAxisPos);

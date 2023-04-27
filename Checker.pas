@@ -15,7 +15,7 @@ implementation
     Begin
       Result := CharInSet(Symbol, ['0'..'9', '+', '-', '*', '/', '^', '(', '.',
                                    ')', 's', 'c', 't', 'l', 'x', ' ', 'a', 'p',
-                                   'g', 'q', 'r']);
+                                   'g', 'q', 'r', 'e']);
     End;
 
   Function IsNumber(Const Item: Char): Boolean;

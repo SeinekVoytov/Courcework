@@ -169,21 +169,19 @@ implementation
     while (I <= Len) do
       Begin
         CurrSymbol := Expr[I];
-        if (IsOperand(CurrSymbol)) or (Expr[I] = 'p') then
+        if (IsOperand(CurrSymbol)) or (Expr[I] = 'p') or (Expr[I] = 'e') then
           Begin
             if (CurrSymbol = 'x') then
-              Begin
-                Operand := CurrSymbol;
-              End
+              Operand := CurrSymbol
             else if (CurrSymbol = 'p') then
               Begin
                 Operand := '~';
                 Inc(I);
               End
+            else if (CurrSymbol = 'e') then
+              Operand := 'e'
             else
-              Begin
-                Operand := FindOperand(Expr, I);
-              End;
+              Operand := FindOperand(Expr, I);
 
             OperandStack.Push(Operand);
           End

@@ -68,8 +68,6 @@ type
     procedure ClearAllButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
-      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     Procedure PaintYAxis(const X: Integer);
     Procedure PaintXAxis(const Y: Integer);
     Procedure ClearPaintBox();
@@ -98,13 +96,13 @@ type
     MathInput: Boolean;
     LBorder, RBorder: Integer;
     LZoomBorder, RZoomBorder: Integer;
+    IterationsPerUnit: Integer;
   public
     GraphPicture: TBitmap;
   end;
 
 const
   ITERATION_COUNT = 10000;
-  ITERATIONS_PER_UNIT = 500;
   MAX_GRAPH_AMOUNT = 3;
   STANDART_WIDTH = 3;
 var
@@ -115,24 +113,20 @@ implementation
 
 {$R *.dfm}
 
-Procedure ShiftArrayLeft(var Arr: TDotArray);
-const
-  SHIFTING_SIZE = 500;
+Procedure ShiftArrayLeft(var Arr: TDotArray; ShiftingSize: Integer);
 var
   I: Integer;
 begin
-  for I := SHIFTING_SIZE + 1 to High(Arr) do
-    Arr[I - SHIFTING_SIZE] := Arr[I];
+  for I := ShiftingSize + 1 to High(Arr) do
+    Arr[I - ShiftingSize] := Arr[I];
 end;
 
-Procedure ShiftArrayRight(var Arr: TDotArray);
-const
-  SHIFTING_SIZE = 500;
+Procedure ShiftArrayRight(var Arr: TDotArray; ShiftingSize: Integer);
 var
   I: Integer;
 begin
-  for I := High(Arr) - SHIFTING_SIZE downto Low(Arr) do
-    Arr[I + SHIFTING_SIZE] := Arr[I];
+  for I := High(Arr) - ShiftingSize downto Low(Arr) do
+    Arr[I + ShiftingSize] := Arr[I];
 end;
 
 Procedure TMainForm.PaintYAxis(const X: Integer);
@@ -170,12 +164,34 @@ end;
 
 procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
 begin
-  Dec(XTo);
-  Inc(XFrom);
-  Dec(YTo);
-  Inc(YFrom);
-  Inc(LBorder, ITERATIONS_PER_UNIT);
-  Dec(RBorder, ITERATIONS_PER_UNIT);
+  if (Abs(XTo) > Abs(XFrom)) then
+    Begin
+      Dec(XTo);
+      Dec(RBorder, IterationsPerUnit);
+      if (Abs(YTo) > Abs(YFrom)) then
+        Dec(YTo)
+      else
+        Inc(YFrom)
+    End
+  else if (Abs(XTo) < Abs(XFrom)) then
+    Begin
+      Inc(XFrom);
+      Inc(LBorder, IterationsPerUnit);
+      if (Abs(YTo) > Abs(YFrom)) then
+        Dec(YTo)
+      else
+        Inc(YFrom)
+    End
+  else
+    Begin
+      Inc(XFrom);
+      Dec(XTo);
+      Inc(YFrom);
+      Dec(YTo);
+      Inc(LBorder, IterationsPerUnit);
+      Dec(RBorder, IterationsPerUnit);
+    End;
+
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;
   CurrYAxisPos := -XFrom * Scale;
@@ -189,13 +205,37 @@ begin
 end;
 
 procedure TMainForm.MinusScaleButtonClick(Sender: TObject);
+var
+  Delta: Integer;
 begin
-  Inc(XTo);
-  Dec(XFrom);
-  Inc(YTo);
-  Dec(YFrom);
-  Dec(LBorder, ITERATIONS_PER_UNIT);
-  Inc(RBorder, ITERATIONS_PER_UNIT);
+    if (Abs(XTo) > Abs(XFrom)) then
+    Begin
+      Dec(XFrom);
+      Dec(LBorder, IterationsPerUnit);
+      if (Abs(YTo) > Abs(YFrom)) then
+        Dec(YFrom)
+      else
+        Inc(YTo)
+    End
+  else if (Abs(XTo) < Abs(XFrom)) then
+    Begin
+      Inc(XTo);
+      Inc(RBorder, IterationsPerUnit);
+      if (Abs(YTo) > Abs(YFrom)) then
+        Dec(YFrom)
+      else
+        Inc(YTo)
+    End
+  else
+    Begin
+      Dec(XFrom);
+      Inc(XTo);
+      Dec(YFrom);
+      Inc(YTo);
+      Dec(LBorder, IterationsPerUnit);
+      Inc(RBorder, IterationsPerUnit);
+    End;
+
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;
   CurrYAxisPos := -XFrom * Scale;
@@ -205,6 +245,10 @@ begin
   YOffset := CurrXAxisPos;
   PaintAllGraphs();
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+  Delta := StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text);
+  if (Delta = XTo - XFrom) then
+    MinusScaleButton.Enabled := False;
+
 end;
 
 Procedure TMainForm.PaintXAxis(const Y: Integer);
@@ -355,19 +399,21 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     YTo := 10;
     GraphAmount := 0;
     Step := GraphPaintBox.Width / ITERATION_COUNT;
-    Range := 20 / ITERATION_COUNT;
+    Range := (XTo - XFrom) / ITERATION_COUNT;
     YOffset := GraphPaintBox.Height div 2;
     Scale := 60;
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
     LBorder := 0;
     RBorder := ITERATION_COUNT;
+    IterationsPerUnit := ITERATION_COUNT div (XTo - XFrom);
     MathInput := False;
     SetClearButtonEnabled(False);
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
     ShowGraphButton.Enabled := False;
+    MinusScaleButton.Enabled := False;
     InitPenWidthComboBox();
     InitPenColorComboBox();
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
@@ -423,16 +469,16 @@ begin
                 CurrYAxisPos := CurrYAxisPos + Scale;
                 if (LBorder > 0) then
                   Begin
-                    Dec(RBorder, ITERATIONS_PER_UNIT);
-                    Dec(LBorder, ITERATIONS_PER_UNIT);
+                    Dec(RBorder, IterationsPerUnit);
+                    Dec(LBorder, IterationsPerUnit);
                   End
                 else
                   for J := 1 to GraphAmount do
                     Begin
                       X := XFrom;
                         Begin
-                          ShiftArrayRight(DotArrays[J]);
-                          for I := ITERATIONS_PER_UNIT downto Low(DotArrays[J]) do
+                          ShiftArrayRight(DotArrays[J], IterationsPerUnit);
+                          for I := IterationsPerUnit downto Low(DotArrays[J]) do
                             Begin
                               DotArrays[J][I] := -Calculate(PolNotExprs[J], X);
                               X := X - Range;
@@ -447,16 +493,16 @@ begin
                 CurrYAxisPos := CurrYAxisPos - Scale;
                  if (RBorder < ITERATION_COUNT) then
                   Begin
-                    Inc(LBorder, ITERATIONS_PER_UNIT);
-                    Inc(RBorder, ITERATIONS_PER_UNIT);
+                    Inc(LBorder, IterationsPerUnit);
+                    Inc(RBorder, IterationsPerUnit);
                   End
                  else
                 for J := 1 to GraphAmount do
                   Begin
                       Begin
                         X := XTo;
-                        ShiftArrayLeft(DotArrays[J]);
-                        for I := ITERATION_COUNT - ITERATIONS_PER_UNIT + 1 to ITERATION_COUNT do
+                        ShiftArrayLeft(DotArrays[J], IterationsPerUnit);
+                        for I := ITERATION_COUNT - IterationsPerUnit + 1 to ITERATION_COUNT do
                           Begin
                             DotArrays[J][I] := -Calculate(PolNotExprs[J], X);
                             X := X + Range;
@@ -479,93 +525,6 @@ begin
           ShowGraphButtonClick(Sender);
       End;
   end;
-end;
-
-procedure TMainForm.FormMouseWheel(Sender: TObject; Shift: TShiftState;
-  WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
-begin
-  MousePos := GraphPaintBox.ScreenToClient(MousePos);
-  if (ssCtrl in Shift) and
-     (MousePos.X >= 0) and (MousePos.Y >= 0) and
-     (MousePos.X <= GraphPaintBox.Width) and (MousePos.Y <= GraphPaintBox.Height) then
-    Begin
-      if (WheelDelta > 50) and (ZoomFactor < 10)  then
-        Begin
-          Inc(ZoomFactor);
-          ClearPaintBox();
-          Handled := True;
-          if (MousePos.X > CurrYAxisPos) then
-            Begin
-              Inc(XFrom);
-              if (MousePos.Y > CurrXAxisPos) then
-                Begin
-                  Dec(YTo);
-                  Inc(LBorder, ITERATIONS_PER_UNIT);
-                End
-              else
-                Begin
-                  Inc(YFrom);
-                  Inc(LBorder, ITERATIONS_PER_UNIT);
-                End
-            End
-          else if (MousePos.X <= CurrYAxisPos) then
-            Begin
-              Dec(XTo);
-              if (MousePos.Y > CurrXAxisPos) then
-                Begin
-                  Dec(YTo);
-                  Dec(RBorder, ITERATIONS_PER_UNIT);
-                End
-              else
-                Begin
-                  Inc(YFrom);
-                  Dec(RBorder, ITERATIONS_PER_UNIT);
-                End;
-            End;
-        End
-      else if (WheelDelta < -50) and (ZoomFactor > 0) then
-        Begin
-          Dec(ZoomFactor);
-          ClearPaintBox();
-          Handled := True;
-          if (MousePos.X > CurrYAxisPos) and (LZoomBorder < XFrom) then
-            Begin
-              Dec(XFrom);
-              if (MousePos.Y > CurrXAxisPos) then
-                Begin
-                  Inc(YTo);
-                  Dec(LBorder, ITERATIONS_PER_UNIT);
-                End
-              else
-                Begin
-                  Dec(YFrom);
-                  Dec(LBorder, ITERATIONS_PER_UNIT);
-                End
-            End
-          else if (RZoomBorder > XTo) then
-            Begin
-              Inc(XTo);
-              if (MousePos.Y > CurrXAxisPos) then
-                Begin
-                  Inc(YTo);
-                  Inc(RBorder, ITERATIONS_PER_UNIT);
-                End
-              else
-                Begin
-                  Dec(YFrom);
-                  Inc(RBorder, ITERATIONS_PER_UNIT);
-                End;
-            End;
-        End;
-      Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-      CurrXAxisPos := Abs(YTo) * Scale;
-      CurrYAxisPos := -XFrom * Scale;
-      PaintXAxis(CurrXAxisPos);
-      PaintYAxis(CurrYAxisPos);
-      YOffset := CurrXAxisPos;
-      PaintAllGraphs();
-      GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-    End;
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
@@ -594,7 +553,6 @@ procedure TMainForm.InputEditKeyPress(Sender: TObject; var Key: Char);
 begin
   if (Key = #13) then
     KeyPreview := True;
-
 end;
 
 //procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
@@ -633,30 +591,60 @@ end;
 
 procedure TMainForm.RangeFromEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeFromEdit.Text) or (XTo <= XFrom)) then
+  if (not CheckInput(RangeFromEdit.Text) or (XTo <= StrToInt(RangeFromEdit.Text))) then
     Begin
       // покраснение рамки edit и блокировка кнопки
+      ShowGraphButton.Enabled := False;
     End
   else
     Begin
+      ShowGraphButton.Enabled := True;
       ClearPaintBox();
       XFrom := StrToInt(RangeFromEdit.Text);
       Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+      YTo := Abs((XTo - XFrom) div 2);
+      if ((XTo - XFrom) mod 2 = 1) then
+        YFrom := -YTo - 1
+      else
+        YFrom := -YTo;
+      CurrXAxisPos := Abs(YTo) * Scale;
       CurrYAxisPos := -XFrom * Scale;
+      YOffset := CurrXAxisPos;
       PaintXAxis(CurrXAxisPos);
       PaintYAxis(CurrYAxisPos);
+      Range := (XTo - XFrom) / ITERATION_COUNT;
+      IterationsPerUnit := ITERATION_COUNT div (XTo - XFrom);
       GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
     End;
 end;
 
 procedure TMainForm.RangeToEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeToEdit.Text) or (XTo <= XFrom)) then
+  if (not CheckInput(RangeToEdit.Text) or (XFrom >= StrToInt(RangeToEdit.Text))) then
     Begin
       // покраснение рамки edit и блокировка кнопки
+      ShowGraphButton.Enabled := False;
     End
   else
-    XTo := StrToInt(RangeToEdit.Text);
+    Begin
+      ShowGraphButton.Enabled := True;
+      ClearPaintBox();
+      XTo := StrToInt(RangeToEdit.Text);
+      Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+      YTo := Abs((XTo - XFrom) div 2);
+      if ((XTo - XFrom) mod 2 = 1) then
+        YFrom := -YTo - 1
+      else
+        YFrom := -YTo;
+      CurrXAxisPos := Abs(YTo) * Scale;
+      CurrYAxisPos := -XFrom * Scale;
+      YOffset := CurrXAxisPos;
+      PaintXAxis(CurrXAxisPos);
+      PaintYAxis(CurrYAxisPos);
+      Range := (XTo - XFrom) / ITERATION_COUNT;
+      IterationsPerUnit := ITERATION_COUNT div (XTo - XFrom);
+      GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+    End;
 end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
@@ -699,15 +687,18 @@ procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
   GraphAmount := 0;
   ClearPaintBox();
-
+  XFrom := -10;
+  XTo := 10;
+  YTo := 10;
+  YFrom := -10;
+  YOffset := GraphPaintBox.Height div 2;
+  LBorder := 0;
+  RBorder := 10000;
   CurrXAxisPos := GraphPaintBox.Height div 2;
   CurrYAxisPos := GraphPaintBox.Width div 2;
   PaintYAxis(CurrXAxisPos);
   PaintXAxis(CurrYAxisPos);
-
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
-  XFrom := -10;
-  XTo := 10;
   RangeFromEdit.Text := IntToStr(XFrom);
   RangeToEdit.Text := IntToStr(XTo);
   SetEditEnabled(True);
