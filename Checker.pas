@@ -4,12 +4,12 @@ interface
 
 uses System.SysUtils;
 
-  Function IsMathExprValid(Const Expr: String): Boolean;
+  Function IsMathExprValid(Expr: String): Boolean;
   Function CheckInput(Const s: String): Boolean;
 
 implementation
 
-  Function IsMathExprValid(Const Expr: String): Boolean;
+  Function IsMathExprValid(Expr: String): Boolean;
 
   Function IsCharValid(Const Symbol: Char): Boolean;
     Begin
@@ -97,6 +97,7 @@ implementation
   Begin
     I := 1;
     Len := Length(Expr);
+    Expr := Lowercase(Expr);
     Result := CheckParentheses() and (Expr <> '');
     while (I <= Len) and (Result) do
       Begin

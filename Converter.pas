@@ -159,9 +159,9 @@ implementation
     CurrSymbol: Char;
   Begin
     InitPriority(Priority);
+    DeleteSpaces(Expr);
+    Expr := '(' + Lowercase(Expr) + ')';
     ReplaceFunctions(Expr);
-     DeleteSpaces(Expr);
-    Expr := '(' + Expr + ')';
     Len := Length(Expr);
     OperandStack := TStack<String>.Create(Len);
     SignStack := TStack<TSign>.Create(Len);
