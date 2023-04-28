@@ -46,6 +46,8 @@ object MainForm: TMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitLeft = -5
+    ExplicitTop = -8
     object InputEdit: TEdit
       Left = 16
       Top = 36
@@ -80,7 +82,7 @@ object MainForm: TMainForm
       Left = 5
       Top = 259
       Width = 269
-      Height = 95
+      Height = 118
       BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -198,6 +200,34 @@ object MainForm: TMainForm
         Caption = '|  |'
         TabOrder = 11
         OnClick = AbsButtonClick
+      end
+      object SquareButton: TButton
+        Left = 42
+        Top = 86
+        Width = 30
+        Height = 25
+        Caption = #9633#178
+        TabOrder = 12
+        TabStop = False
+        OnClick = SquareButtonClick
+      end
+      object XSquareButton: TButton
+        Left = 73
+        Top = 86
+        Width = 30
+        Height = 25
+        Caption = 'x'#178
+        TabOrder = 13
+        OnClick = XSquareButtonClick
+      end
+      object PiButton: TButton
+        Left = 104
+        Top = 86
+        Width = 30
+        Height = 25
+        Caption = #960
+        TabOrder = 14
+        OnClick = PiButtonClick
       end
     end
     object RangeAndBuildPanel: TPanel

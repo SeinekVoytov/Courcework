@@ -42,6 +42,9 @@ type
     ClearInputButton: TButton;
     MinusScaleButton: TButton;
     PlusScaleButton: TButton;
+    SquareButton: TButton;
+    XSquareButton: TButton;
+    PiButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -81,6 +84,9 @@ type
     procedure InputEditKeyPress(Sender: TObject; var Key: Char);
     procedure PlusScaleButtonClick(Sender: TObject);
     procedure MinusScaleButtonClick(Sender: TObject);
+    procedure SquareButtonClick(Sender: TObject);
+    procedure XSquareButtonClick(Sender: TObject);
+    procedure PiButtonClick(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -272,11 +278,11 @@ begin
         WasNaN := True
       else if (WasNan) then
         begin
-          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(Self.Scale * DotArrays[GraphNumber][I]) + YOffset);
+          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset);
           WasNan := False;
         End
       else
-        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(Self.Scale * DotArrays[GraphNumber][I] + YOffset));
+        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I] + YOffset));
 
       CurrX := CurrX + MainForm.Step;
     End;
@@ -456,7 +462,7 @@ begin
                           ShiftArrayRight(DotArrays[J], IterationsPerUnit);
                           for I := IterationsPerUnit downto Low(DotArrays[J]) do
                             Begin
-                              DotArrays[J][I] := -Calculate(PolNotExprs[J], X);
+                              DotArrays[J][I] := Calculate(PolNotExprs[J], X);
                               X := X - Range;
                             End;
                         End;
@@ -480,7 +486,7 @@ begin
                         ShiftArrayLeft(DotArrays[J], IterationsPerUnit);
                         for I := ITERATION_COUNT - IterationsPerUnit + 1 to ITERATION_COUNT do
                           Begin
-                            DotArrays[J][I] := -Calculate(PolNotExprs[J], X);
+                            DotArrays[J][I] := Calculate(PolNotExprs[J], X);
                             X := X + Range;
                           End;
                       End;
@@ -635,15 +641,15 @@ begin
   CurrExpr := ConvertToPolishNotation(InputEdit.Text);
   PolNotExprs[GraphAmount] := CurrExpr;
   CurrX := XFrom - LBorder div 500;
-  MaxY := Single.MaxValue;
-  MinY := Single.MinValue;
+  MaxY := Single.MinValue;
+  MinY := Single.MaxValue;
 
   for I := 1 to ITERATION_COUNT do
     Begin
-      CurrY := -Calculate(PolNotExprs[GraphAmount], CurrX);
-      if (CurrY < MaxY) then
+      CurrY := Calculate(PolNotExprs[GraphAmount], CurrX);
+      if (CurrY > MaxY) then
         MaxY := CurrY;
-      if (CurrY > MinY) then
+      if (CurrY < MinY) then
         MinY := CurrY;
       DotArrays[GraphAmount][I] := CurrY;
       CurrX := CurrX + Range;
@@ -653,18 +659,19 @@ begin
   ColorsArray[GraphAmount] := ColorBox.Selected;
 
   SetSelectedWidth();
-  if (GraphAmount = 1) and not ((-MinY < YFrom) and (Abs(MaxY) > Abs(YTo))) then
+  if (GraphAmount = 1) and not ((MaxY <= YFrom) and (MinY >= YTo)) then
     Begin
-      if (-MinY < YFrom) then
+      var Delta := (XTo - XFrom) div 2;
+      if (MaxY <= YFrom) then
         Begin
-          YTo := -Trunc(MaxY);
-          YFrom := YTo - (XTo - XFrom);
+          YTo := Trunc(MaxY) + Delta;
+          YFrom := Trunc(MaxY) - Delta;
         End;
 
-      if (Abs(MaxY) > Abs(YTo)) then
+      if (MinY >= YTo) then
         Begin
-          YFrom := -Trunc(MinY);
-          YTo := YFrom + (XTo - XFrom);
+          YTo := Trunc(MinY) + Delta;
+          YFrom := Trunc(MinY) - Delta;
         End;
       ClearPaintBox();
       CurrXAxisPos := YTo * Scale;
@@ -892,4 +899,44 @@ begin
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 4;
 end;
+
+procedure TMainForm.SquareButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('()^2', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 1;
+end;
+
+procedure TMainForm.XSquareButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('x^2', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 3;
+end;
+
+procedure TMainForm.PiButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('Pi', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 2;
+end;
+
 end.
