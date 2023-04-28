@@ -267,22 +267,25 @@ Procedure TMainForm.PaintGraph(const GraphNumber: Integer);
 var
   WasNan: Boolean;
   CurrX: Real;
-  I: Integer;
+  I, CurrY: LongInt;
 begin
    WasNan := True;
    CurrX := 0;
    Self.Step := Self.GraphPaintBox.Width / (Self.RBorder - Self.LBorder);
    for I := LBorder + 1 to RBorder do
     Begin
-      if (FloatToStr(DotArrays[GraphNumber][I]) = 'NAN') then
+      CurrY := Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset;
+      if (FloatToStr(DotArrays[GraphNumber][I]) = 'NAN') or
+         (DotArrays[GraphNumber][I] > 4375000) or
+         (DotArrays[GraphNumber][I] < -4375000) then
         WasNaN := True
       else if (WasNan) then
         begin
-          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset);
+          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), CurrY);
           WasNan := False;
         End
       else
-        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I] + YOffset));
+        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), CurrY);
 
       CurrX := CurrX + MainForm.Step;
     End;
@@ -938,5 +941,7 @@ begin
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 2;
 end;
+
+
 
 end.

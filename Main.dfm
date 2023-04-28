@@ -46,8 +46,6 @@ object MainForm: TMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitLeft = -5
-    ExplicitTop = -8
     object InputEdit: TEdit
       Left = 16
       Top = 36

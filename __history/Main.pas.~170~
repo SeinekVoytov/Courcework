@@ -1,4 +1,4 @@
-unit Main;
+﻿unit Main;
 
 interface
 
@@ -267,7 +267,7 @@ Procedure TMainForm.PaintGraph(const GraphNumber: Integer);
 var
   WasNan: Boolean;
   CurrX: Real;
-  I: Integer;
+  I, CurrY: Integer;
 begin
    WasNan := True;
    CurrX := 0;
@@ -278,7 +278,8 @@ begin
         WasNaN := True
       else if (WasNan) then
         begin
-          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset);
+          CurrY := Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset);
+          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), CurrY);
           WasNan := False;
         End
       else
