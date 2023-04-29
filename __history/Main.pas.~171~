@@ -1,4 +1,4 @@
-unit Main;
+﻿unit Main;
 
 interface
 
@@ -513,21 +513,7 @@ begin
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
-var
-  WidthDelta: Integer;
-  CursorPos: TPoint;
 begin
-//  WidthDelta := Self.Width - Self.EditPanel.Width;
-//  if (WidthDelta > Self.Height) then
-//    Self.Height := WidthDelta
-//  else if (WidthDelta < Self.Height) then
-//    Self.Width := Self.Height + Self.EditPanel.Width;
-//  if (Self.GraphPaintBox.Width <> Self.GraphPaintBox.Height) then
-//    Begin
-//
-//    End;
-  GetCursorPos(CursorPos);
-
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
   GraphPaintBox.Invalidate;
 end;

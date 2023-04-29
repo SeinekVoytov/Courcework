@@ -513,9 +513,30 @@ begin
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
+var
+  WidthDelta: Integer;
+  CursorPos: TPoint;
 begin
+//  WidthDelta := Self.Width - Self.EditPanel.Width;
+//  if (WidthDelta > Self.Height) then
+//    Self.Height := WidthDelta
+//  else if (WidthDelta < Self.Height) then
+//    Self.Width := Self.Height + Self.EditPanel.Width;
+//  if (Self.GraphPaintBox.Width <> Self.GraphPaintBox.Height) then
+//    Begin
+//
+//    End;
+  GetCursorPos(CursorPos);
+  if (GraphPaintbox.Width <> GraphPaintBox.Height) then
+    Begin
+      if (GraphPaintbox.Width > GraphPaintBox.Height) then
+        Self.Height := GraphPaintBox.Width
+      else
+        Self.Width := GraphPaintBox.Height + EditPanel.Width;
+
+    End;
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
-  GraphPaintBox.Invalidate;
+  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
 end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
