@@ -187,7 +187,7 @@ begin
   PaintAllGraphs();
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   MinusScaleButton.Enabled := True;
-  if (XTo - XFrom = 2) then
+  if (XTo - XFrom = 4) then
     PlusScaleButton.Enabled := False;
 
 end;
