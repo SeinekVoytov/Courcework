@@ -42,6 +42,9 @@ type
     ClearInputButton: TButton;
     MinusScaleButton: TButton;
     PlusScaleButton: TButton;
+    SquareButton: TButton;
+    XSquareButton: TButton;
+    PiButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -81,6 +84,9 @@ type
     procedure InputEditKeyPress(Sender: TObject; var Key: Char);
     procedure PlusScaleButtonClick(Sender: TObject);
     procedure MinusScaleButtonClick(Sender: TObject);
+    procedure SquareButtonClick(Sender: TObject);
+    procedure XSquareButtonClick(Sender: TObject);
+    procedure PiButtonClick(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -181,7 +187,7 @@ begin
   PaintAllGraphs();
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   MinusScaleButton.Enabled := True;
-  if (XTo - XFrom = 2) then
+  if (XTo - XFrom = 4) then
     PlusScaleButton.Enabled := False;
 
 end;
@@ -261,22 +267,25 @@ Procedure TMainForm.PaintGraph(const GraphNumber: Integer);
 var
   WasNan: Boolean;
   CurrX: Real;
-  I: Integer;
+  I, CurrY: LongInt;
 begin
    WasNan := True;
    CurrX := 0;
    Self.Step := Self.GraphPaintBox.Width / (Self.RBorder - Self.LBorder);
    for I := LBorder + 1 to RBorder do
     Begin
-      if (FloatToStr(DotArrays[GraphNumber][I]) = 'NAN') then
+      CurrY := Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset;
+      if (FloatToStr(DotArrays[GraphNumber][I]) = 'NAN') or
+         (DotArrays[GraphNumber][I] > 4375000) or
+         (DotArrays[GraphNumber][I] < -4375000) then
         WasNaN := True
       else if (WasNan) then
         begin
-          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset);
+          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), CurrY);
           WasNan := False;
         End
       else
-        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I] + YOffset));
+        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), CurrY);
 
       CurrX := CurrX + MainForm.Step;
     End;
@@ -504,9 +513,30 @@ begin
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
+var
+  WidthDelta: Integer;
+  CursorPos: TPoint;
 begin
+//  WidthDelta := Self.Width - Self.EditPanel.Width;
+//  if (WidthDelta > Self.Height) then
+//    Self.Height := WidthDelta
+//  else if (WidthDelta < Self.Height) then
+//    Self.Width := Self.Height + Self.EditPanel.Width;
+//  if (Self.GraphPaintBox.Width <> Self.GraphPaintBox.Height) then
+//    Begin
+//
+//    End;
+  GetCursorPos(CursorPos);
+  if (GraphPaintbox.Width <> GraphPaintBox.Height) then
+    Begin
+      if (GraphPaintbox.Width > GraphPaintBox.Height) then
+        Self.Height := GraphPaintBox.Width
+      else
+        Self.Width := GraphPaintBox.Height + EditPanel.Width;
+
+    End;
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
-  GraphPaintBox.Invalidate;
+  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
 end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
@@ -893,4 +923,46 @@ begin
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 4;
 end;
+
+procedure TMainForm.SquareButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('()^2', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 1;
+end;
+
+procedure TMainForm.XSquareButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('x^2', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 3;
+end;
+
+procedure TMainForm.PiButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('Pi', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 2;
+end;
+
+
+
 end.

@@ -48,6 +48,26 @@ object MainForm: TMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    object Label1: TLabel
+      Left = 40
+      Top = 573
+      Width = 29
+      Height = 13
+      Caption = '100%'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+    end
+    object InfoScaleLabel: TLabel
+      Left = 15
+      Top = 552
+      Width = 45
+      Height = 13
+      Caption = #1052#1072#1089#1096#1090#1072#1073
+    end
     object InputEdit: TEdit
       Left = 16
       Top = 36
@@ -329,8 +349,8 @@ object MainForm: TMainForm
       OnClick = ClearInputButtonClick
     end
     object MinusScaleButton: TButton
-      Left = 97
-      Top = 472
+      Left = 15
+      Top = 568
       Width = 25
       Height = 25
       Caption = '-'
@@ -338,9 +358,9 @@ object MainForm: TMainForm
       OnClick = MinusScaleButtonClick
     end
     object PlusScaleButton: TButton
-      Left = 150
-      Top = 472
-      Width = 20
+      Left = 69
+      Top = 568
+      Width = 25
       Height = 25
       Caption = '+'
       TabOrder = 6

@@ -45,6 +45,8 @@ type
     SquareButton: TButton;
     XSquareButton: TButton;
     PiButton: TButton;
+    Label1: TLabel;
+    InfoScaleLabel: TLabel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -103,6 +105,7 @@ type
     LBorder, RBorder: Integer;
     LZoomBorder, RZoomBorder: Integer;
     IterationsPerUnit: Integer;
+    PrevWidth, PrevHeight: Integer;
   public
     GraphPicture: TBitmap;
   end;
@@ -178,7 +181,7 @@ begin
   Dec(RBorder, IterationsPerUnit);
 
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
   ClearPaintBox();
   PaintXAxis(CurrXAxisPos);
@@ -187,7 +190,7 @@ begin
   PaintAllGraphs();
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   MinusScaleButton.Enabled := True;
-  if (XTo - XFrom = 2) then
+  if (XTo - XFrom = 4) then
     PlusScaleButton.Enabled := False;
 
 end;
@@ -220,7 +223,7 @@ begin
   Inc(YTo);
 
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
   ClearPaintBox();
   PaintXAxis(CurrXAxisPos);
@@ -267,22 +270,25 @@ Procedure TMainForm.PaintGraph(const GraphNumber: Integer);
 var
   WasNan: Boolean;
   CurrX: Real;
-  I: Integer;
+  I, CurrY: LongInt;
 begin
    WasNan := True;
    CurrX := 0;
    Self.Step := Self.GraphPaintBox.Width / (Self.RBorder - Self.LBorder);
    for I := LBorder + 1 to RBorder do
     Begin
-      if (FloatToStr(DotArrays[GraphNumber][I]) = 'NAN') then
+      CurrY := Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset;
+      if (FloatToStr(DotArrays[GraphNumber][I]) = 'NAN') or
+         (DotArrays[GraphNumber][I] > 4375000) or
+         (DotArrays[GraphNumber][I] < -4375000) then
         WasNaN := True
       else if (WasNan) then
         begin
-          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset);
+          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), CurrY);
           WasNan := False;
         End
       else
-        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), Trunc(-Self.Scale * DotArrays[GraphNumber][I] + YOffset));
+        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), CurrY);
 
       CurrX := CurrX + MainForm.Step;
     End;
@@ -388,6 +394,8 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     CurrYAxisPos := GraphPaintBox.Width div 2;
     LBorder := 0;
     RBorder := ITERATION_COUNT;
+    PrevWidth := ClientWidth;
+    PrevHeight := ClientHeight;
     IterationsPerUnit := ITERATION_COUNT div (XTo - XFrom);
     MathInput := False;
     SetClearButtonEnabled(False);
@@ -511,8 +519,21 @@ end;
 
 procedure TMainForm.FormResize(Sender: TObject);
 begin
+  if (ClientWidth <> PrevWidth) then
+    Begin
+      Self.ClientHeight := ClientWidth - EditPanel.Width;
+      PrevWidth := ClientWidth;
+    End
+  else if (ClientHeight <> PrevHeight) then
+    Begin
+      Width := ClientHeight + EditPanel.Width;
+      PrevHeight := ClientHeight;
+    End;
+  Scale := GraphPaintBox.Width div (XTo - XFrom);
+  CurrXAxisPos :=
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
-  GraphPaintBox.Invalidate;
+  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+
 end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
@@ -938,5 +959,7 @@ begin
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 2;
 end;
+
+
 
 end.

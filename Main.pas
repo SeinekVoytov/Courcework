@@ -45,6 +45,8 @@ type
     SquareButton: TButton;
     XSquareButton: TButton;
     PiButton: TButton;
+    Label1: TLabel;
+    InfoScaleLabel: TLabel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -77,8 +79,6 @@ type
     Procedure SetSelectedWidth();
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
-    Procedure InitPenWidthComboBox();
-    Procedure InitPenColorComboBox();
     Procedure PaintGraph(const GraphNumber: Integer);
     Procedure PaintAllGraphs();
     procedure InputEditKeyPress(Sender: TObject; var Key: Char);
@@ -103,6 +103,7 @@ type
     LBorder, RBorder: Integer;
     LZoomBorder, RZoomBorder: Integer;
     IterationsPerUnit: Integer;
+    PrevWidth, PrevHeight: Integer;
   public
     GraphPicture: TBitmap;
   end;
@@ -178,7 +179,7 @@ begin
   Dec(RBorder, IterationsPerUnit);
 
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
   ClearPaintBox();
   PaintXAxis(CurrXAxisPos);
@@ -220,7 +221,7 @@ begin
   Inc(YTo);
 
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
   ClearPaintBox();
   PaintXAxis(CurrXAxisPos);
@@ -352,31 +353,36 @@ begin
     End;
 end;
 
-Procedure TMainForm.InitPenWidthComboBox();
-Begin
-  with Self.PenWidthComboBox do
-    Begin
-      Items.Add('low');
-      Items.Add('mid');
-      Items.Add('high');
-      ItemIndex := 1;
-    End;
-End;
-
-Procedure TMainForm.InitPenColorComboBox();
-Const
-  ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
-  ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
-Var
-  I: Integer;
-begin
-  Self.ColorBox.Clear;
-  for I := Low(ColorValues) to High(ColorValues) do
-    Self.ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
-  ColorBox.Selected := clBlack;
-end;
-
 Procedure TMainForm.FormCreate(Sender: TObject);
+  Procedure SetFormMaxHeight();
+    Begin
+      var ScreenHeight := GetSystemMetrics(SM_CYSCREEN);
+      Self.Constraints.MaxHeight := ScreenHeight - (Self.Height - Self.ClientHeight);;
+    End;
+
+  Procedure InitPenColorComboBox();
+    Const
+      ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
+      ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
+    Var
+      I: Integer;
+    begin
+      Self.ColorBox.Clear;
+      for I := Low(ColorValues) to High(ColorValues) do
+        Self.ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
+      ColorBox.Selected := clBlack;
+    end;
+
+    Procedure InitPenWidthComboBox();
+      Begin
+        with Self.PenWidthComboBox do
+          Begin
+            Items.Add('low');
+            Items.Add('mid');
+            Items.Add('high');
+            ItemIndex := 1;
+          End;
+      End;
   begin
     XFrom := -10;
     XTo := 10;
@@ -391,9 +397,12 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     CurrYAxisPos := GraphPaintBox.Width div 2;
     LBorder := 0;
     RBorder := ITERATION_COUNT;
+    PrevWidth := ClientWidth;
+    PrevHeight := ClientHeight;
     IterationsPerUnit := ITERATION_COUNT div (XTo - XFrom);
     MathInput := False;
     SetClearButtonEnabled(False);
+    SetFormMaxHeight();
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
@@ -513,30 +522,28 @@ begin
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
-var
-  WidthDelta: Integer;
-  CursorPos: TPoint;
 begin
-//  WidthDelta := Self.Width - Self.EditPanel.Width;
-//  if (WidthDelta > Self.Height) then
-//    Self.Height := WidthDelta
-//  else if (WidthDelta < Self.Height) then
-//    Self.Width := Self.Height + Self.EditPanel.Width;
-//  if (Self.GraphPaintBox.Width <> Self.GraphPaintBox.Height) then
-//    Begin
-//
-//    End;
-  GetCursorPos(CursorPos);
-  if (GraphPaintbox.Width <> GraphPaintBox.Height) then
+  if (ClientWidth <> PrevWidth) and (Height < Self.Constraints.MaxHeight) then
     Begin
-      if (GraphPaintbox.Width > GraphPaintBox.Height) then
-        Self.Height := GraphPaintBox.Width
-      else
-        Self.Width := GraphPaintBox.Height + EditPanel.Width;
-
+      Self.ClientHeight := ClientWidth - EditPanel.Width;
+      PrevWidth := ClientWidth;
+    End
+  else if (ClientHeight <> PrevHeight) then
+    Begin
+      Width := ClientHeight + EditPanel.Width;
+      PrevHeight := ClientHeight;
     End;
+  ClearPaintBox();
+  Scale := GraphPaintBox.Width div (XTo - XFrom);
+  CurrXAxisPos := YTo * Scale;
+  CurrYAxisPos := -XFrom * Scale;
+  PaintXAxis(CurrXAxisPos);
+  PaintYAxis(CurrYAxisPos);
+  YOffset := CurrXAxisPos;
+  PaintAllGraphs();
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+
 end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
