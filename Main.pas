@@ -795,173 +795,82 @@ begin
   ShowGraphButton.Enabled := True;
 end;
 
-procedure TMainForm.SinButtonClick(Sender: TObject);
+procedure MathInputEditor(var InputEdit: TEdit; const Text: String);
 var
   CurrInput: String;
   CurrCursorPos: Integer;
 begin
   CurrInput := InputEdit.Text;
   CurrCursorPos := InputEdit.SelStart;
-  Insert('sin()', CurrInput, CurrCursorPos + 1);
+  Insert(Text, CurrInput, CurrCursorPos + 1);
   InputEdit.Text := CurrInput;
   InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
+  InputEdit.SelStart := CurrCursorPos + Pos('(', Text);
+end;
+
+procedure TMainForm.SinButtonClick(Sender: TObject);
+begin
+  MathInputEditor(Self.InputEdit, 'sin()');
 end;
 
 procedure TMainForm.CosButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('cos()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
+  MathInputEditor(Self.InputEdit, 'cos()');
 end;
 
 procedure TMainForm.TgButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('tg()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 3;
+  MathInputEditor(Self.InputEdit, 'tg()');
 end;
 
 procedure TMainForm.CtgButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('ctg()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
+  MathInputEditor(Self.InputEdit, 'ctg()');
 end;
 
 procedure TMainForm.ASinButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('arcsin()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 7;
+  MathInputEditor(Self.InputEdit, 'arcsin()');
 end;
 
 procedure TMainForm.ACosButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('arccos()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 7;
+  MathInputEditor(Self.InputEdit, 'arccos()');
 end;
 
 procedure TMainForm.ATgButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('arctg()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 6;
+  MathInputEditor(Self.InputEdit, 'arctg()');
 end;
 
 procedure TMainForm.ACtgButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('arcctg()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 7;
+  MathInputEditor(Self.InputEdit, 'arcctg()');
 end;
 
 procedure TMainForm.SqrtButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('sqrt()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 5;
+  MathInputEditor(Self.InputEdit, 'sqrt()');
 end;
 
 procedure TMainForm.LogButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('log10()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 6;
+  MathInputEditor(Self.InputEdit, 'log10()');
 end;
 
 procedure TMainForm.LnButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('ln()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 3;
+  MathInputEditor(Self.InputEdit, 'ln()');
 end;
 
 procedure TMainForm.AbsButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('abs()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
+  MathInputEditor(Self.InputEdit, 'abs()');
 end;
 
 procedure TMainForm.SquareButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('()^2', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 1;
+  MathInputEditor(Self.InputEdit, '()^2');
 end;
 
 procedure TMainForm.XSquareButtonClick(Sender: TObject);
