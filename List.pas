@@ -9,7 +9,8 @@ Type
   PNode = ^TListNode;
 
   TListNode = record
-    Data: Real;
+    X: Real;
+    Y: Real;
     Next: PNode;
   end;
 
@@ -18,7 +19,7 @@ Type
     private
       Head: PNode;
     public
-      procedure Add(Data: Real);
+      procedure Add(X, Y: Real);
       function IsEmpty(): Boolean;
       constructor Create();
       destructor Destroy();
@@ -26,7 +27,7 @@ Type
 
 implementation
 
-  procedure TList.Add(Data: Real);
+  procedure TList.Add(X, Y: Real);
     var
       CurrNode: PNode;
     Begin
@@ -35,7 +36,8 @@ implementation
         CurrNode := CurrNode.Next;
       New(CurrNode.Next);
       CurrNode := CurrNode.Next;
-      CurrNode^.Data := Data;
+      CurrNode^.X := X;
+      CurrNode^.Y := Y;
       CurrNode^.Next := nil;
     End;
 
@@ -47,6 +49,7 @@ implementation
   constructor TList.Create();
     Begin
       New(Head);
+      Head.Next := nil;
     End;
 
   destructor TList.Destroy();

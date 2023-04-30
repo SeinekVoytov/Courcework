@@ -3,7 +3,7 @@ unit Calculator;
 
 interface
 
-uses System.SysUtils, Stack, Math;
+uses System.SysUtils, TStack, Math;
 
   Function Calculate(const Expr: String; X: Extended): Extended;
 
@@ -74,9 +74,9 @@ implementation
                   Operand1 := OperandStack.Pop();
                   case CurrSymbol of
                     '!':
-                      OperandStack.Push(System.Math.RoundTo(System.Sin(Operand1), -3));
+                      OperandStack.Push(System.Sin(Operand1));
                     '@':
-                      OperandStack.Push(System.Math.RoundTo(System.Cos(Operand1), -3));
+                      OperandStack.Push(System.Cos(Operand1));
                     '#':
                       Begin
                         TempValue := Operand1 / Pi;

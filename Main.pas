@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
-  Checker, Calculator, Converter, ExtremaChecker, List;
+  Checker, Calculator, Converter, ExtremaFinder, List;
 
 Type
   TMainForm = class(TForm)
@@ -369,7 +369,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
   Procedure InitPenColorComboBox();
     Const
       ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
-      ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
+      ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00CCFF', '$00A5FF', '$FF00FF');
     Var
       I: Integer;
     begin
@@ -671,7 +671,7 @@ procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
     CurrX, CurrY, MinY, MaxY: Real;
     I: Integer;
     CurrExpr: String;
-    var arr : array [1..10] of Real;
+    MinExtrList, MaxExtrList: TList;
 begin
   Inc(GraphAmount);
   SetEditEnabled(False);
@@ -681,9 +681,6 @@ begin
   CurrX := XFrom - LBorder div 500;
   MaxY := Single.MinValue;
   MinY := Single.MaxValue;
-  var k := 1;
-  for i := 1 to 10 do
-    arr[i] := 0;
 
   for I := 1 to ITERATION_COUNT do
     Begin
@@ -693,16 +690,20 @@ begin
       if (CurrY < MinY) then
         MinY := CurrY;
       DotArrays[GraphAmount][I] := CurrY;
-      var YPlusDelta := Calculate(PolNotExprs[GraphAmount], CurrX + 0.002);
-      var YminusDelta := Calculate(PolNotExprs[GraphAmount], CurrX - 0.002);
-      if ((YminusDelta < CurrY) and (YPlusDelta < CurrY)) or
-         ((YminusDelta > CurrY) and (YPlusDelta > CurrY)) then
-         Begin
-           arr[k] := CurrX;
-           inc(k);
-         End;
 
       CurrX := CurrX + Range;
+    End;
+
+  if (ExtremaCheckBox.Checked) then
+    Begin
+      MinExtrList := TList.Create;
+      MaxExtrList := TList.Create;
+      FindExtremums(DotArrays[GraphAmount],
+                    MinExtrList,
+                    MaxExtrList,
+                    Self.XFrom,
+                    Self.Range
+                    );
     End;
 
   GraphPicture.Canvas.Pen.Color := ColorBox.Selected;

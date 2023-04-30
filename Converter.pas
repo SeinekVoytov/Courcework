@@ -1,7 +1,7 @@
 unit Converter;
 
 interface
-  uses Stack, System.SysUtils;
+  uses TStack, System.SysUtils;
 
  Function ConvertToPolishNotation(Expr: String): String;
 
