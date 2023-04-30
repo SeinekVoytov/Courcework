@@ -48,7 +48,7 @@ object MainForm: TMainForm
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
-    object ScaleLabel: TLabel
+    object Label1: TLabel
       Left = 40
       Top = 573
       Width = 29

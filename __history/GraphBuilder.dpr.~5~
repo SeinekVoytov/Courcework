@@ -6,8 +6,7 @@ uses
   Converter in 'Converter.pas',
   Checker in 'Checker.pas',
   Stack in 'Stack.pas',
-  Calculator in 'Calculator.pas',
-  ExtremaChecker in 'ExtremaChecker.pas';
+  Calculator in 'Calculator.pas';
 
 {$R *.res}
 

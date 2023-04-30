@@ -14,7 +14,7 @@ object MainForm: TMainForm
   Font.Style = []
   KeyPreview = True
   OldCreateOrder = False
-  Position = poScreenCenter
+  Position = poDesigned
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnResize = FormResize
@@ -46,13 +46,18 @@ object MainForm: TMainForm
     Width = 274
     Height = 602
     Align = alLeft
+    Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
-    object Label1: TLabel
+    DesignSize = (
+      274
+      602)
+    object ScaleLabel: TLabel
       Left = 40
       Top = 573
       Width = 29
       Height = 13
+      Anchors = [akLeft, akBottom]
       Caption = '100%'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -66,6 +71,7 @@ object MainForm: TMainForm
       Top = 552
       Width = 45
       Height = 13
+      Anchors = [akLeft, akBottom]
       Caption = #1052#1072#1089#1096#1090#1072#1073
     end
     object InputEdit: TEdit
@@ -353,6 +359,7 @@ object MainForm: TMainForm
       Top = 568
       Width = 25
       Height = 25
+      Anchors = [akLeft, akBottom]
       Caption = '-'
       TabOrder = 5
       OnClick = MinusScaleButtonClick
@@ -362,6 +369,7 @@ object MainForm: TMainForm
       Top = 568
       Width = 25
       Height = 25
+      Anchors = [akLeft, akBottom]
       Caption = '+'
       TabOrder = 6
       OnClick = PlusScaleButtonClick

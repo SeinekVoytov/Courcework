@@ -45,7 +45,7 @@ type
     SquareButton: TButton;
     XSquareButton: TButton;
     PiButton: TButton;
-    Label1: TLabel;
+    ScaleLabel: TLabel;
     InfoScaleLabel: TLabel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
@@ -169,8 +169,18 @@ begin
     end;
 end;
 
+procedure EditScaleLabel(var ScaleLabel: TLabel; const Delta: Short);
+var
+  CurrScale: Byte;
+begin
+  CurrScale := StrToInt(Copy(ScaleLabel.Caption, 1, Length(ScaleLabel.Caption) - 1));
+  Inc(CurrScale, Delta);
+  ScaleLabel.Caption := IntToStr(CurrScale) + '%';
+end;
+
 procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
 begin
+  EditScaleLabel(ScaleLabel, 10);
   Inc(XFrom);
   Dec(XTo);
   Inc(YFrom);
@@ -198,6 +208,7 @@ var
   L, R: Integer;
   X: Extended;
 begin
+  EditScaleLabel(ScaleLabel, -10);
   L := StrToInt(RangeFromEdit.Text);
   R := StrToInt(RangeToEdit.Text);
   if (LBorder = 0) then
@@ -354,6 +365,7 @@ begin
 end;
 
 Procedure TMainForm.FormCreate(Sender: TObject);
+
   Procedure SetFormMaxHeight();
     Begin
       var ScreenHeight := GetSystemMetrics(SM_CYSCREEN);
@@ -969,7 +981,4 @@ begin
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 2;
 end;
-
-
-
 end.
