@@ -34,10 +34,8 @@ object MainForm: TMainForm
       Height = 600
       Align = alClient
       OnPaint = GraphPaintBoxPaint
-      ExplicitLeft = 6
-      ExplicitTop = 2
-      ExplicitWidth = 598
-      ExplicitHeight = 575
+      ExplicitLeft = -10
+      ExplicitTop = -47
     end
   end
   object EditPanel: TPanel
@@ -105,8 +103,8 @@ object MainForm: TMainForm
       OnClick = MathInputButtonClick
     end
     object MathInputPanel: TPanel
-      Left = 5
-      Top = 259
+      Left = 0
+      Top = 307
       Width = 269
       Height = 118
       BevelOuter = bvNone
@@ -260,7 +258,7 @@ object MainForm: TMainForm
       Left = -1
       Top = 65
       Width = 269
-      Height = 188
+      Height = 224
       BevelOuter = bvNone
       TabOrder = 3
       object RangeLabel: TLabel
@@ -343,6 +341,14 @@ object MainForm: TMainForm
         Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
         TabOrder = 6
         OnClick = ClearAllButtonClick
+      end
+      object ExtremaCheckBox: TCheckBox
+        Left = 16
+        Top = 184
+        Width = 119
+        Height = 17
+        Caption = #1048#1089#1082#1072#1090#1100' '#1101#1082#1089#1090#1088#1077#1084#1091#1084#1099
+        TabOrder = 7
       end
     end
     object ClearInputButton: TButton

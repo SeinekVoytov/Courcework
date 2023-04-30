@@ -4,11 +4,10 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Calculator, Converter;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
+  Checker, Calculator, Converter, ExtremaChecker, List;
 
 Type
-  TDotArray = array [1..10000] of Real;
-type
   TMainForm = class(TForm)
     GraphPanel: TPanel;
     EditPanel: TPanel;
@@ -47,6 +46,7 @@ type
     PiButton: TButton;
     ScaleLabel: TLabel;
     InfoScaleLabel: TLabel;
+    ExtremaCheckBox: TCheckBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -101,7 +101,6 @@ type
     WidthArray: array [1..3] of Byte;
     MathInput: Boolean;
     LBorder, RBorder: Integer;
-    LZoomBorder, RZoomBorder: Integer;
     IterationsPerUnit: Integer;
     PrevWidth, PrevHeight: Integer;
   public
@@ -204,13 +203,8 @@ begin
 end;
 
 procedure TMainForm.MinusScaleButtonClick(Sender: TObject);
-var
-  L, R: Integer;
-  X: Extended;
 begin
   EditScaleLabel(ScaleLabel, -10);
-  L := StrToInt(RangeFromEdit.Text);
-  R := StrToInt(RangeToEdit.Text);
   if (LBorder = 0) then
     Begin
       Inc(XTo, 2);
@@ -241,7 +235,7 @@ begin
   PaintAllGraphs();
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   PlusScaleButton.Enabled := True;
-  if (R - L = XTo - XFrom) then
+  if (StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text) = XTo - XFrom) then
     MinusScaleButton.Enabled := False;
 end;
 
@@ -677,6 +671,7 @@ procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
     CurrX, CurrY, MinY, MaxY: Real;
     I: Integer;
     CurrExpr: String;
+    var arr : array [1..10] of Real;
 begin
   Inc(GraphAmount);
   SetEditEnabled(False);
@@ -686,6 +681,9 @@ begin
   CurrX := XFrom - LBorder div 500;
   MaxY := Single.MinValue;
   MinY := Single.MaxValue;
+  var k := 1;
+  for i := 1 to 10 do
+    arr[i] := 0;
 
   for I := 1 to ITERATION_COUNT do
     Begin
@@ -695,6 +693,15 @@ begin
       if (CurrY < MinY) then
         MinY := CurrY;
       DotArrays[GraphAmount][I] := CurrY;
+      var YPlusDelta := Calculate(PolNotExprs[GraphAmount], CurrX + 0.002);
+      var YminusDelta := Calculate(PolNotExprs[GraphAmount], CurrX - 0.002);
+      if ((YminusDelta < CurrY) and (YPlusDelta < CurrY)) or
+         ((YminusDelta > CurrY) and (YPlusDelta > CurrY)) then
+         Begin
+           arr[k] := CurrX;
+           inc(k);
+         End;
+
       CurrX := CurrX + Range;
     End;
 
@@ -981,4 +988,5 @@ begin
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 2;
 end;
+
 end.
