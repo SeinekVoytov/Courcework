@@ -110,7 +110,8 @@ Type
 const
   ITERATION_COUNT = 10000;
   MAX_GRAPH_AMOUNT = 3;
-  STANDART_WIDTH = 3;
+  STANDART_PEN_WIDTH = 3;
+
 var
   MainForm: TMainForm;
   ZoomFactor: Byte;
@@ -136,6 +137,9 @@ begin
 end;
 
 Procedure TMainForm.PaintYAxis(const X: Integer);
+const
+  ARROW_WIDTH = 10;
+  STICK_WIDTH = 4;
 var
   Width: Integer;
   Color: TColor;
@@ -145,7 +149,7 @@ begin
   Color := Self.GraphPicture.Canvas.Pen.Color;
   with Self.GraphPicture.Canvas do
     begin
-      Pen.Width := STANDART_WIDTH;
+      Pen.Width := STANDART_PEN_WIDTH;
       Pen.Color := clBlack;
       MoveTo(X, 0);
       LineTo(X, Self.GraphPaintBox.Height);       // axis painting
@@ -154,15 +158,15 @@ begin
         Begin
           if (I <> 0) then
             Begin
-              MoveTo(Self.CurrYAxisPos - 4, Y);
-              LineTo(Self.CurrYAxisPos + 4, Y);
-              TextOut(Self.CurrYAxisPos + 4, Y, IntToStr(I));
+              MoveTo(Self.CurrYAxisPos - STICK_WIDTH, Y);
+              LineTo(Self.CurrYAxisPos + STICK_WIDTH, Y);
+              TextOut(Self.CurrYAxisPos + STICK_WIDTH, Y, IntToStr(I));
             End;
           Y := Y + Self.Scale;
         End;
-      MoveTo(Self.CurrYAxisPos - 10, 10);
+      MoveTo(Self.CurrYAxisPos - ARROW_WIDTH, ARROW_WIDTH);
       LineTo(Self.CurrYAxisPos, 0);
-      LineTo(Self.CurrYAxisPos + 10, 10);
+      LineTo(Self.CurrYAxisPos + ARROW_WIDTH, ARROW_WIDTH);
       Pen.Color := Color;
       Pen.Width := Width;
     end;
@@ -240,6 +244,9 @@ begin
 end;
 
 Procedure TMainForm.PaintXAxis(const Y: Integer);
+const
+  ARROW_WIDTH = 10;
+  STICK_WIDTH = 4;
 var
   Width: Integer;
   Color: TColor;
@@ -249,21 +256,21 @@ begin
     begin
       Width := Pen.Width;
       Color := Pen.Color;
-      Pen.Width := STANDART_WIDTH;
+      Pen.Width := STANDART_PEN_WIDTH;
       Pen.Color := clBlack;
       MoveTo(0, Y);
       LineTo(Self.GraphPaintBox.Width, Y);     // axis painting
       X := Scale;
       for I := Self.XFrom + 1 to Self.XTo - 1 do      // sticks painting
         Begin
-          MoveTo(X, Self.CurrXAxisPos - 3);
-          LineTo(X, Self.CurrXAxisPos + 3);
-          TextOut(X, Self.CurrXAxisPos + 3, IntToStr(I));
+          MoveTo(X, Self.CurrXAxisPos - STICK_WIDTH);
+          LineTo(X, Self.CurrXAxisPos + STICK_WIDTH);
+          TextOut(X, Self.CurrXAxisPos + STICK_WIDTH, IntToStr(I));
           X := X + Self.Scale;
         End;
-      MoveTo(Self.GraphPaintBox.Width - 10, Self.CurrXAxisPos - 10);
+      MoveTo(Self.GraphPaintBox.Width - ARROW_WIDTH, Self.CurrXAxisPos - ARROW_WIDTH);
       LineTo(Self.GraphPaintBox.Width, Self.CurrXAxisPos);
-      LineTo(Self.GraphPaintBox.Width - 10, Self.CurrXAxisPos + 10);
+      LineTo(Self.GraphPaintBox.Width - ARROW_WIDTH, Self.CurrXAxisPos + ARROW_WIDTH);
       Pen.Color := Color;
       Pen.Width := Width;
     end;

@@ -4,11 +4,10 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math, Checker, Calculator, Converter;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
+  Checker, Calculator, Converter, ExtremaFinder, List;
 
 Type
-  TDotArray = array [1..10000] of Real;
-type
   TMainForm = class(TForm)
     GraphPanel: TPanel;
     EditPanel: TPanel;
@@ -45,6 +44,9 @@ type
     SquareButton: TButton;
     XSquareButton: TButton;
     PiButton: TButton;
+    ScaleLabel: TLabel;
+    InfoScaleLabel: TLabel;
+    ExtremaCheckBox: TCheckBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -77,8 +79,6 @@ type
     Procedure SetSelectedWidth();
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
-    Procedure InitPenWidthComboBox();
-    Procedure InitPenColorComboBox();
     Procedure PaintGraph(const GraphNumber: Integer);
     Procedure PaintAllGraphs();
     procedure InputEditKeyPress(Sender: TObject; var Key: Char);
@@ -101,9 +101,8 @@ type
     WidthArray: array [1..3] of Byte;
     MathInput: Boolean;
     LBorder, RBorder: Integer;
-    LZoomBorder, RZoomBorder: Integer;
     IterationsPerUnit: Integer;
-    CurrWidth, CurrHeight: Integer;
+    PrevWidth, PrevHeight: Integer;
   public
     GraphPicture: TBitmap;
   end;
@@ -169,8 +168,18 @@ begin
     end;
 end;
 
+procedure EditScaleLabel(var ScaleLabel: TLabel; const Delta: Short);
+var
+  CurrScale: Byte;
+begin
+  CurrScale := StrToInt(Copy(ScaleLabel.Caption, 1, Length(ScaleLabel.Caption) - 1));
+  Inc(CurrScale, Delta);
+  ScaleLabel.Caption := IntToStr(CurrScale) + '%';
+end;
+
 procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
 begin
+  EditScaleLabel(ScaleLabel, 10);
   Inc(XFrom);
   Dec(XTo);
   Inc(YFrom);
@@ -179,7 +188,7 @@ begin
   Dec(RBorder, IterationsPerUnit);
 
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := YTo* Scale;
+  CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
   ClearPaintBox();
   PaintXAxis(CurrXAxisPos);
@@ -194,12 +203,8 @@ begin
 end;
 
 procedure TMainForm.MinusScaleButtonClick(Sender: TObject);
-var
-  L, R: Integer;
-  X: Extended;
 begin
-  L := StrToInt(RangeFromEdit.Text);
-  R := StrToInt(RangeToEdit.Text);
+  EditScaleLabel(ScaleLabel, -10);
   if (LBorder = 0) then
     Begin
       Inc(XTo, 2);
@@ -221,7 +226,7 @@ begin
   Inc(YTo);
 
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
   ClearPaintBox();
   PaintXAxis(CurrXAxisPos);
@@ -230,7 +235,7 @@ begin
   PaintAllGraphs();
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   PlusScaleButton.Enabled := True;
-  if (R - L = XTo - XFrom) then
+  if (StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text) = XTo - XFrom) then
     MinusScaleButton.Enabled := False;
 end;
 
@@ -353,31 +358,37 @@ begin
     End;
 end;
 
-Procedure TMainForm.InitPenWidthComboBox();
-Begin
-  with Self.PenWidthComboBox do
-    Begin
-      Items.Add('low');
-      Items.Add('mid');
-      Items.Add('high');
-      ItemIndex := 1;
-    End;
-End;
-
-Procedure TMainForm.InitPenColorComboBox();
-Const
-  ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
-  ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00FFFF', '$00A5FF', '$FF00FF');
-Var
-  I: Integer;
-begin
-  Self.ColorBox.Clear;
-  for I := Low(ColorValues) to High(ColorValues) do
-    Self.ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
-  ColorBox.Selected := clBlack;
-end;
-
 Procedure TMainForm.FormCreate(Sender: TObject);
+
+  Procedure SetFormMaxHeight();
+    Begin
+      var ScreenHeight := GetSystemMetrics(SM_CYSCREEN);
+      Self.Constraints.MaxHeight := ScreenHeight - (Self.Height - Self.ClientHeight);;
+    End;
+
+  Procedure InitPenColorComboBox();
+    Const
+      ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
+      ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00CCFF', '$00A5FF', '$FF00FF');
+    Var
+      I: Integer;
+    begin
+      Self.ColorBox.Clear;
+      for I := Low(ColorValues) to High(ColorValues) do
+        Self.ColorBox.Items.AddObject(ColorNames[i], TObject(StringToColor(ColorValues[i])));
+      ColorBox.Selected := clBlack;
+    end;
+
+    Procedure InitPenWidthComboBox();
+      Begin
+        with Self.PenWidthComboBox do
+          Begin
+            Items.Add('low');
+            Items.Add('mid');
+            Items.Add('high');
+            ItemIndex := 1;
+          End;
+      End;
   begin
     XFrom := -10;
     XTo := 10;
@@ -392,11 +403,12 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     CurrYAxisPos := GraphPaintBox.Width div 2;
     LBorder := 0;
     RBorder := ITERATION_COUNT;
-    CurrWidth := Width;
-    CurrHeight := Height;
+    PrevWidth := ClientWidth;
+    PrevHeight := ClientHeight;
     IterationsPerUnit := ITERATION_COUNT div (XTo - XFrom);
     MathInput := False;
     SetClearButtonEnabled(False);
+    SetFormMaxHeight();
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
@@ -516,30 +528,28 @@ begin
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
-var
-  WidthDelta: Integer;
-  CursorPos: TPoint;
 begin
-//  WidthDelta := Self.Width - Self.EditPanel.Width;
-//  if (WidthDelta > Self.Height) then
-//    Self.Height := WidthDelta
-//  else if (WidthDelta < Self.Height) then
-//    Self.Width := Self.Height + Self.EditPanel.Width;
-//  if (Self.GraphPaintBox.Width <> Self.GraphPaintBox.Height) then
-//    Begin
-//
-//    End;
-  GetCursorPos(CursorPos);
-  if (GraphPaintbox.Width <> GraphPaintBox.Height) then
+  if (ClientWidth <> PrevWidth) and (Height < Self.Constraints.MaxHeight) then
     Begin
-      if (GraphPaintbox.Width > GraphPaintBox.Height) then
-        Self.Height := GraphPaintBox.Width
-      else
-        Self.Width := GraphPaintBox.Height + EditPanel.Width;
-
+      Self.ClientHeight := ClientWidth - EditPanel.Width;
+      PrevWidth := ClientWidth;
+    End
+  else if (ClientHeight <> PrevHeight) then
+    Begin
+      Width := ClientHeight + EditPanel.Width;
+      PrevHeight := ClientHeight;
     End;
+  ClearPaintBox();
+  Scale := GraphPaintBox.Width div (XTo - XFrom);
+  CurrXAxisPos := YTo * Scale;
+  CurrYAxisPos := -XFrom * Scale;
+  PaintXAxis(CurrXAxisPos);
+  PaintYAxis(CurrYAxisPos);
+  YOffset := CurrXAxisPos;
+  PaintAllGraphs();
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+
 end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
@@ -661,6 +671,7 @@ procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
     CurrX, CurrY, MinY, MaxY: Real;
     I: Integer;
     CurrExpr: String;
+    MinExtrList, MaxExtrList: TList;
 begin
   Inc(GraphAmount);
   SetEditEnabled(False);
@@ -679,7 +690,20 @@ begin
       if (CurrY < MinY) then
         MinY := CurrY;
       DotArrays[GraphAmount][I] := CurrY;
+
       CurrX := CurrX + Range;
+    End;
+
+  if (ExtremaCheckBox.Checked) then
+    Begin
+      MinExtrList := TList.Create;
+      MaxExtrList := TList.Create;
+      FindExtremums(DotArrays[GraphAmount],
+                    MinExtrList,
+                    MaxExtrList,
+                    Self.XFrom,
+                    Self.Range
+                    );
     End;
 
   GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
@@ -771,173 +795,82 @@ begin
   ShowGraphButton.Enabled := True;
 end;
 
-procedure TMainForm.SinButtonClick(Sender: TObject);
+procedure MathInputEditor(var InputEdit: TEdit; const Text: String);
 var
   CurrInput: String;
   CurrCursorPos: Integer;
 begin
   CurrInput := InputEdit.Text;
   CurrCursorPos := InputEdit.SelStart;
-  Insert('sin()', CurrInput, CurrCursorPos + 1);
+  Insert(Text, CurrInput, CurrCursorPos + 1);
   InputEdit.Text := CurrInput;
   InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
+  InputEdit.SelStart := CurrCursorPos + Pos('(', Text);
+end;
+
+procedure TMainForm.SinButtonClick(Sender: TObject);
+begin
+  MathInputEditor(Self.InputEdit, 'sin()');
 end;
 
 procedure TMainForm.CosButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('cos()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
+  MathInputEditor(Self.InputEdit, 'cos()');
 end;
 
 procedure TMainForm.TgButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('tg()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 3;
+  MathInputEditor(Self.InputEdit, 'tg()');
 end;
 
 procedure TMainForm.CtgButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('ctg()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
+  MathInputEditor(Self.InputEdit, 'ctg()');
 end;
 
 procedure TMainForm.ASinButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('arcsin()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 7;
+  MathInputEditor(Self.InputEdit, 'arcsin()');
 end;
 
 procedure TMainForm.ACosButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('arccos()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 7;
+  MathInputEditor(Self.InputEdit, 'arccos()');
 end;
 
 procedure TMainForm.ATgButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('arctg()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 6;
+  MathInputEditor(Self.InputEdit, 'arctg()');
 end;
 
 procedure TMainForm.ACtgButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('arcctg()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 7;
+  MathInputEditor(Self.InputEdit, 'arcctg()');
 end;
 
 procedure TMainForm.SqrtButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('sqrt()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 5;
+  MathInputEditor(Self.InputEdit, 'sqrt()');
 end;
 
 procedure TMainForm.LogButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('log10()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 6;
+  MathInputEditor(Self.InputEdit, 'log10()');
 end;
 
 procedure TMainForm.LnButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('ln()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 3;
+  MathInputEditor(Self.InputEdit, 'ln()');
 end;
 
 procedure TMainForm.AbsButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('abs()', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 4;
+  MathInputEditor(Self.InputEdit, 'abs()');
 end;
 
 procedure TMainForm.SquareButtonClick(Sender: TObject);
-var
-  CurrInput: String;
-  CurrCursorPos: Integer;
 begin
-  CurrInput := InputEdit.Text;
-  CurrCursorPos := InputEdit.SelStart;
-  Insert('()^2', CurrInput, CurrCursorPos + 1);
-  InputEdit.Text := CurrInput;
-  InputEdit.SetFocus;
-  InputEdit.SelStart := CurrCursorPos + 1;
+  MathInputEditor(Self.InputEdit, '()^2');
 end;
 
 procedure TMainForm.XSquareButtonClick(Sender: TObject);
@@ -965,7 +898,5 @@ begin
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 2;
 end;
-
-
 
 end.
