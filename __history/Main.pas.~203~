@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
-  Checker, Calculator, Converter, ExtremaFinder, List;
+  Checker, Calculator, Converter, List, Graph;
 
 Type
   TMainForm = class(TForm)
@@ -76,10 +76,9 @@ Type
     Procedure PaintYAxis(const X: Integer);
     Procedure PaintXAxis(const Y: Integer);
     Procedure ClearPaintBox();
-    Procedure SetSelectedWidth();
+    Function GetSelectedWidth(): Byte;
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
-    Procedure PaintGraph(const GraphNumber: Integer);
     Procedure PaintAllGraphs();
     procedure InputEditKeyPress(Sender: TObject; var Key: Char);
     procedure PlusScaleButtonClick(Sender: TObject);
@@ -90,15 +89,12 @@ Type
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
-    DotArrays: array [1..3] of TDotArray;
+    GraphsArray: array [1..3] of TGraph;
     XFrom, XTo, YFrom, YTo: Integer;
-    PolNotExprs: array [1..3] of String;
     GraphAmount: Byte;
     YOffset: Integer;
     Scale: Integer;
     Range, Step: Real;
-    ColorsArray: array [1..3] of TColor;
-    WidthArray: array [1..3] of Byte;
     MathInput: Boolean;
     LBorder, RBorder: Integer;
     IterationsPerUnit: Integer;
@@ -119,22 +115,6 @@ var
 implementation
 
 {$R *.dfm}
-
-Procedure ShiftArrayLeft(var Arr: TDotArray; ShiftingSize: Integer);
-var
-  I: Integer;
-begin
-  for I := ShiftingSize + 1 to High(Arr) do
-    Arr[I - ShiftingSize] := Arr[I];
-end;
-
-Procedure ShiftArrayRight(var Arr: TDotArray; ShiftingSize: Integer);
-var
-  I: Integer;
-begin
-  for I := High(Arr) - ShiftingSize downto Low(Arr) do
-    Arr[I + ShiftingSize] := Arr[I];
-end;
 
 Procedure TMainForm.PaintYAxis(const X: Integer);
 const
@@ -276,48 +256,13 @@ begin
     end;
 end;
 
-Procedure TMainForm.PaintGraph(const GraphNumber: Integer);
-var
-  WasNan: Boolean;
-  CurrX: Real;
-  I, CurrY: LongInt;
-begin
-   WasNan := True;
-   CurrX := 0;
-   Self.Step := Self.GraphPaintBox.Width / (Self.RBorder - Self.LBorder);
-   for I := LBorder + 1 to RBorder do
-    Begin
-      CurrY := Trunc(-Self.Scale * DotArrays[GraphNumber][I]) + YOffset;
-      if (FloatToStr(DotArrays[GraphNumber][I]) = 'NAN') or
-         (DotArrays[GraphNumber][I] > 4375000) or
-         (DotArrays[GraphNumber][I] < -4375000) then
-        WasNaN := True
-      else if (WasNan) then
-        begin
-          Self.GraphPicture.Canvas.MoveTo(Trunc(CurrX), CurrY);
-          WasNan := False;
-        End
-      else
-        Self.GraphPicture.Canvas.LineTo(Trunc(CurrX), CurrY);
-
-      CurrX := CurrX + MainForm.Step;
-    End;
-   Self.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
-end;
-
 Procedure TMainForm.PaintAllGraphs();
-var
-  I: Integer;
 Begin
-  for I := 1 to GraphAmount do
-    Begin
-      GraphPicture.Canvas.Pen.Color := ColorsArray[I];
-      GraphPicture.Canvas.Pen.Width := WidthArray[I];
-      PaintGraph(I);
-    End;
+  for var I := 1 to GraphAmount do
+    GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)
 End;
 
-Procedure TMainForm.SetSelectedWidth();
+Function TMainForm.GetSelectedWidth(): Byte;
 var
   SelectedWidth: String;
 begin
@@ -325,12 +270,11 @@ begin
     with Self.GraphPicture.Canvas.Pen do
     Begin
       if (SelectedWidth = 'mid') then
-          Width := 3
+        Result := 3
       else if (SelectedWidth = 'low') then
-        Width := 1
+        Result := 1
       else
-        Width := 5;
-      Self.WidthArray[Self.GraphAmount] := Width;;
+        Result := 5;
     End;
 end;
 
@@ -432,7 +376,6 @@ Procedure TMainForm.FormCreate(Sender: TObject);
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
-  I, J: Integer;
   X: Real;
 begin
   case Key of
@@ -480,18 +423,8 @@ begin
                     Dec(LBorder, IterationsPerUnit);
                   End
                 else
-                  for J := 1 to GraphAmount do
-                    Begin
-                      X := XFrom;
-                        Begin
-                          ShiftArrayRight(DotArrays[J], IterationsPerUnit);
-                          for I := IterationsPerUnit downto Low(DotArrays[J]) do
-                            Begin
-                              DotArrays[J][I] := Calculate(PolNotExprs[J], X);
-                              X := X - Range;
-                            End;
-                        End;
-                    End;
+                  for var I := 1 to GraphAmount do
+                    GraphsArray[I].ShiftArrayOfDotsRight(Self.XFrom, Self.IterationsPerUnit, Self.Range);
                 Dec(XTo);
                 Dec(XFrom);
               end
@@ -499,28 +432,19 @@ begin
               begin
                 CurrYAxisPos := CurrYAxisPos - Scale;
                  if (RBorder < ITERATION_COUNT) then
-                  Begin
-                    Inc(LBorder, IterationsPerUnit);
-                    Inc(RBorder, IterationsPerUnit);
-                  End
+                   Begin
+                     Inc(LBorder, IterationsPerUnit);
+                     Inc(RBorder, IterationsPerUnit);
+                   End
                  else
-                for J := 1 to GraphAmount do
-                  Begin
-                      Begin
-                        X := XTo;
-                        ShiftArrayLeft(DotArrays[J], IterationsPerUnit);
-                        for I := ITERATION_COUNT - IterationsPerUnit + 1 to ITERATION_COUNT do
-                          Begin
-                            DotArrays[J][I] := Calculate(PolNotExprs[J], X);
-                            X := X + Range;
-                          End;
-                      End;
-                  End;
+                   for var I := 1 to GraphAmount do
+                     GraphsArray[I].ShiftArrayOfDotsLeft(Self.XTo, Self.IterationsPerUnit, Self.Range);
                 Inc(XTo);
                 Inc(XFrom);
               end;
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
+
             PaintAllGraphs();
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -673,90 +597,22 @@ begin
     End;
 end;
 
-procedure PaintExtrema(ExtremaList: TList; Bitmap: TBitmap; Scale, YOffset: Integer);
-const
-  CIRCLE_RADIUS = 5;
-var
-  Color: TColor;
-  CurrNode: PNode;
-  X, Y, Width: Integer;
-begin
-  Color := Bitmap.Canvas.Pen.Color;
-  Width :=  Bitmap.Canvas.Pen.Width;
-
-  if (Color = clRed) then
-    Begin
-      Bitmap.Canvas.Pen.Color := clBlack;
-      Bitmap.Canvas.Brush.Color := clBlack;
-    End
-  else
-    Begin
-      Bitmap.Canvas.Pen.Color := clRed;
-      Bitmap.Canvas.Brush.Color := clRed;
-    End;
-
-  CurrNode := ExtremaList.GetHead().Next;
-  while (CurrNode <> nil) do
-    Begin
-      X := Trunc(CurrNode.X * Scale);
-      Y := Trunc(CurrNode.Y) + YOffset;
-      with Bitmap.Canvas do
-        Begin
-
-          MoveTo(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS);
-          Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
-                  X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
-          //FloodFill(
-        End;
-
-      CurrNode := CurrNode.Next;
-    End;
-end;
-
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
     CurrX, CurrY, MinY, MaxY: Real;
     I: Integer;
     CurrExpr: String;
     MinExtrList, MaxExtrList: TList;
+
 begin
   Inc(GraphAmount);
   SetEditEnabled(False);
   SetClearButtonEnabled(True);
   CurrExpr := ConvertToPolishNotation(InputEdit.Text);
-  PolNotExprs[GraphAmount] := CurrExpr;
-  CurrX := XFrom - LBorder div 500;
-  MaxY := Single.MinValue;
-  MinY := Single.MaxValue;
+  CurrX := XFrom - LBorder div IterationsPerUnit;
 
-  for I := 1 to ITERATION_COUNT do
-    Begin
-      CurrY := Calculate(PolNotExprs[GraphAmount], CurrX);
-      if (CurrY > MaxY) then
-        MaxY := CurrY;
-      if (CurrY < MinY) then
-        MinY := CurrY;
-      DotArrays[GraphAmount][I] := CurrY;
+  GraphsArray[GraphAmount] := TGraph.Create(CurrExpr, ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX);
 
-      CurrX := CurrX + Range;
-    End;
-
-  if (ExtremaCheckBox.Checked) then
-    Begin
-      MinExtrList := TList.Create;
-      MaxExtrList := TList.Create;
-      FindExtrema(DotArrays[GraphAmount],
-                    MinExtrList,
-                    MaxExtrList,
-                    Self.XFrom,
-                    Self.Range
-                    );
-    End;
-
-  GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
-  ColorsArray[GraphAmount] := ColorBox.Selected;
-
-  SetSelectedWidth();
   if (GraphAmount = 1) and not ((MaxY <= YFrom) and (MinY >= YTo)) then
     Begin
       var Delta := (XTo - XFrom) div 2;
@@ -777,21 +633,16 @@ begin
       PaintXAxis(CurrXAxisPos);
       PaintYAxis(CurrYAxisPos);
     End;
-  PaintGraph(GraphAmount);
 
-  if (not MinExtrList.IsEmpty) then
+  if (ExtremaCheckBox.Checked) then
     Begin
-      PaintExtrema(MinExtrList, GraphPicture, Scale, YOffset);
-      Self.GraphPaintBox.Canvas.Draw(0, 0, MainForm.GraphPicture);
+      GraphsArray[GraphAmount].FindExtrema(Self.XFrom, Self.Range);
+      GraphsArray[GraphAmount].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.YTo);
     End;
 
+  GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
 
-  if (not MaxExtrList.IsEmpty) then
-    Begin
-      PaintExtrema(MaxExtrList, GraphPicture, Scale, YOffset);
-      PaintExtrema(MinExtrList, GraphPicture, Scale, YOffset);
-    End;
-
+  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
     Begin
       MathInputPanel.Enabled := False;

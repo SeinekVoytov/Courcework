@@ -170,7 +170,7 @@ begin
   Dec(YTo);
   Inc(LBorder, IterationsPerUnit);
   Dec(RBorder, IterationsPerUnit);
-
+  Step := GraphPaintBox.Width / (RBorder - LBorder);
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
@@ -208,7 +208,7 @@ begin
     End;
   Dec(YFrom);
   Inc(YTo);
-
+  Step := GraphPaintBox.Width / (RBorder - LBorder);
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
@@ -599,33 +599,30 @@ end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX, CurrY, MinY, MaxY: Real;
+    CurrX, CurrY: Real;
     I: Integer;
-    CurrExpr: String;
-    MinExtrList, MaxExtrList: TList;
 
 begin
   Inc(GraphAmount);
   SetEditEnabled(False);
   SetClearButtonEnabled(True);
-  CurrExpr := ConvertToPolishNotation(InputEdit.Text);
   CurrX := XFrom - LBorder div IterationsPerUnit;
 
-  GraphsArray[GraphAmount] := TGraph.Create(CurrExpr, ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX);
+  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX);
 
-  if (GraphAmount = 1) and not ((MaxY <= YFrom) and (MinY >= YTo)) then
+  if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
     Begin
       var Delta := (XTo - XFrom) div 2;
-      if (MaxY <= YFrom) then
+      if (GraphsArray[GraphAmount].MaxY <= YFrom) then
         Begin
-          YTo := Trunc(MaxY) + Delta;
-          YFrom := Trunc(MaxY) - Delta;
+          YTo := Trunc(GraphsArray[GraphAmount].MaxY) + Delta;
+          YFrom := Trunc(GraphsArray[GraphAmount].MaxY) - Delta;
         End;
 
-      if (MinY >= YTo) then
+      if (GraphsArray[GraphAmount].MinY >= YTo) then
         Begin
-          YTo := Trunc(MinY) + Delta;
-          YFrom := Trunc(MinY) - Delta;
+          YTo := Trunc(GraphsArray[GraphAmount].MinY) + Delta;
+          YFrom := Trunc(GraphsArray[GraphAmount].MinY) - Delta;
         End;
       ClearPaintBox();
       CurrXAxisPos := YTo * Scale;
