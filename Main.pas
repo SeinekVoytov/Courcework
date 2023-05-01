@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
-  Checker, Calculator, Converter, ExtremaFinder, List, Graph;
+  Checker, Calculator, Converter, List, Graph;
 
 Type
   TMainForm = class(TForm)
@@ -259,7 +259,7 @@ end;
 Procedure TMainForm.PaintAllGraphs();
 Begin
   for var I := 1 to GraphAmount do
-    GraphsArray[I].Paint(Self.GraphPicture, Self.Range, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)
+    GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)
 End;
 
 Function TMainForm.GetSelectedWidth(): Byte;
@@ -438,12 +438,13 @@ begin
                    End
                  else
                    for var I := 1 to GraphAmount do
-                     GraphsArray[I].ShiftArrayOfDotsLeft(Self.XFrom, Self.IterationsPerUnit, Self.Range);
+                     GraphsArray[I].ShiftArrayOfDotsLeft(Self.XTo, Self.IterationsPerUnit, Self.Range);
                 Inc(XTo);
                 Inc(XFrom);
               end;
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
+
             PaintAllGraphs();
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -596,46 +597,6 @@ begin
     End;
 end;
 
-procedure PaintExtrema(ExtremaList: TList; Bitmap: TBitmap; Scale, YOffset, XFrom, YTo: Integer);
-const
-  CIRCLE_RADIUS = 5;
-var
-  PenColor, BrushColor: TColor;
-  CurrNode: PNode;
-  X, Y: Integer;
-begin
-  PenColor := Bitmap.Canvas.Pen.Color;
-  BrushColor :=  Bitmap.Canvas.Brush.Color;
-
-  with Bitmap.Canvas do
-  if (PenColor = clRed) then
-    Begin
-      Pen.Color := clBlack;
-      Brush.Color := clBlack;
-    End
-  else
-    Begin
-      Pen.Color := clRed;
-      Brush.Color := clRed;
-    End;
-
-  CurrNode := ExtremaList.GetHead().Next;
-  while (CurrNode <> nil) do
-    Begin
-      X := Trunc((CurrNode.X - XFrom) * Scale);
-      Y := Trunc((YTo - CurrNode.Y) * Scale);
-      Bitmap.Canvas.Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
-                            X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
-      CurrNode := CurrNode.Next;
-    End;
-
-    with Bitmap.Canvas do
-      Begin
-        Pen.Color := PenColor;
-        Brush.Color := BrushColor;
-      End;
-end;
-
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
     CurrX, CurrY, MinY, MaxY: Real;
@@ -651,7 +612,6 @@ begin
   CurrX := XFrom - LBorder div IterationsPerUnit;
 
   GraphsArray[GraphAmount] := TGraph.Create(CurrExpr, ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX);
-
 
   if (GraphAmount = 1) and not ((MaxY <= YFrom) and (MinY >= YTo)) then
     Begin
@@ -676,20 +636,13 @@ begin
 
   if (ExtremaCheckBox.Checked) then
     Begin
-      MinExtrList := TList.Create;
-      MaxExtrList := TList.Create;
-      FindExtrema(DotArrays[GraphAmount],
-                    MinExtrList,
-                    MaxExtrList,
-                    Self.XFrom,
-                    Self.Range
-                    );
-      PaintExtrema(MinExtrList, Self.GraphPicture, Scale, YOffset, Self.XFrom, Self.YTo);
-      PaintExtrema(MaxExtrList, Self.GraphPicture, Scale, YOffset, Self.XFrom, Self.YTo);
+      GraphsArray[GraphAmount].FindExtrema(Self.XFrom, Self.Range);
+      GraphsArray[GraphAmount].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.YTo);
     End;
 
-  PaintGraph(GraphAmount);
+  GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
 
+  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
     Begin
       MathInputPanel.Enabled := False;

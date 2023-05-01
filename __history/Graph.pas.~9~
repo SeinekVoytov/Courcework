@@ -15,7 +15,7 @@ Type
     Color: TColor;
     Width: Byte;
 
-    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real);
+    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep: Real);
     destructor Destroy();
     procedure Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
@@ -28,12 +28,11 @@ const
   ITERATION_COUNT = 10000;
 
 implementation
-  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real);
+  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep: Real);
     procedure InitArrayOfDots();
       var
-        CurrY: Real;
+        CurrY, CurrX: Real;
       Begin
-
         for var I := 1 to ITERATION_COUNT do
           Begin
             CurrY := Calculate(Expression, CurrX);
@@ -51,8 +50,6 @@ implementation
       MinExtrList := TList.Create;
       MaxExtrList := TList.Create;
       Self.Expression := Expression;
-      MaxY := Single.MinValue;
-      MinY := Single.MaxValue;
       InitArrayOfDots();
       Self.Color := Color;
       Self.Width := Width;

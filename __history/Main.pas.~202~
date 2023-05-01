@@ -1,11 +1,11 @@
-unit Main;
+﻿unit Main;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
-  Checker, Calculator, Converter, ExtremaFinder, List, Graph;
+  Checker, Calculator, Converter, List, Graph;
 
 Type
   TMainForm = class(TForm)
@@ -259,7 +259,7 @@ end;
 Procedure TMainForm.PaintAllGraphs();
 Begin
   for var I := 1 to GraphAmount do
-    GraphsArray[I].Paint(Self.GraphPicture, Self.Range, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)
+    GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)
 End;
 
 Function TMainForm.GetSelectedWidth(): Byte;
@@ -424,7 +424,7 @@ begin
                   End
                 else
                   for var I := 1 to GraphAmount do
-                    GraphsArray[I].ShiftArrayOfDotsRight(Self.XFrom, Self.IterationsPerUnit, Self.Range);
+                    GraphsArray[I].ShiftArrayOfDotsRight(Self.XFrom, Self.IterationsPerUnit, Self.Step);
                 Dec(XTo);
                 Dec(XFrom);
               end
@@ -438,12 +438,13 @@ begin
                    End
                  else
                    for var I := 1 to GraphAmount do
-                     GraphsArray[I].ShiftArrayOfDotsLeft(Self.XFrom, Self.IterationsPerUnit, Self.Range);
+                     GraphsArray[I].ShiftArrayOfDotsLeft(Self.XTo, Self.IterationsPerUnit, Self.Step);
                 Inc(XTo);
                 Inc(XFrom);
               end;
             PaintXAxis(CurrXAxisPos);
             PaintYAxis(CurrYAxisPos);
+
             PaintAllGraphs();
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
