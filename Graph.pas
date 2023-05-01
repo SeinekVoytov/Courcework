@@ -20,7 +20,7 @@ Type
     procedure Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
-    procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, YTo: Integer);
+    procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo: Integer);
     procedure FindExtrema(XFrom: Integer; Range: Real);
   end;
 
@@ -147,7 +147,7 @@ implementation
         End;
     End;
 
-  procedure TGraph.PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, YTo: Integer);
+  procedure TGraph.PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo: Integer);
   const
     CIRCLE_RADIUS = 5;
 
@@ -159,10 +159,13 @@ implementation
       CurrNode := ExtrList.GetHead().Next;
       while (CurrNode <> nil) do
         Begin
-          X := Trunc((CurrNode.X - XFrom) * Scale);
-          Y := Trunc((YTo - CurrNode.Y) * Scale);
-          Bitmap.Canvas.Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
-                                X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
+          if (CurrNode.X >= XFrom)  and (CurrNode.X <= XTo) then
+            Begin
+              X := Trunc((CurrNode.X - XFrom) * Scale);
+              Y := Trunc((YTo - CurrNode.Y) * Scale);
+              Bitmap.Canvas.Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
+                                    X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
+            End;
           CurrNode := CurrNode.Next;
         End;
     End;
