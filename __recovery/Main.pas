@@ -280,7 +280,8 @@ Procedure TMainForm.PaintGraph(const GraphNumber: Integer);
 var
   WasNan: Boolean;
   CurrX: Real;
-  I, CurrY: LongInt;
+  CurrY: LongInt;
+  I: Integer;
 begin
    WasNan := True;
    CurrX := 0;
@@ -673,7 +674,7 @@ begin
     End;
 end;
 
-procedure PaintExtrema(ExtremaList: TList; Bitmap: TBitmap; Scale, YOffset: Integer; XFrom, YTo: Real);
+procedure PaintExtrema(ExtremaList: TList; Bitmap: TBitmap; Scale, YOffset, XFrom, YTo: Integer);
 const
   CIRCLE_RADIUS = 5;
 var

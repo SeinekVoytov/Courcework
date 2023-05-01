@@ -673,9 +673,9 @@ begin
     End;
 end;
 
-procedure PaintExtrema(ExtremaList: TList; Bitmap: TBitmap; Scale, YOffset: Integer);
+procedure PaintExtrema(ExtremaList: TList; Bitmap: TBitmap; Scale, YOffset, XFrom, YTo: Integer);
 const
-  CIRCLE_RADIUS = 30;
+  CIRCLE_RADIUS = 5;
 var
   PenColor, BrushColor: TColor;
   CurrNode: PNode;
@@ -699,8 +699,8 @@ begin
   CurrNode := ExtremaList.GetHead().Next;
   while (CurrNode <> nil) do
     Begin
-      X := Trunc(CurrNode.X * Scale);
-      Y := Trunc(CurrNode.Y) + YOffset;
+      X := Trunc((CurrNode.X - XFrom) * Scale);
+      Y := Trunc((YTo - CurrNode.Y) * Scale);
       Bitmap.Canvas.Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
                             X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
       CurrNode := CurrNode.Next;
@@ -776,8 +776,8 @@ begin
                     Self.XFrom,
                     Self.Range
                     );
-      PaintExtrema(MinExtrList, GraphPicture, Scale, YOffset);
-      PaintExtrema(MaxExtrList, GraphPicture, Scale, YOffset);
+      PaintExtrema(MinExtrList, Self.GraphPicture, Scale, YOffset, Self.XFrom, Self.YTo);
+      PaintExtrema(MaxExtrList, Self.GraphPicture, Scale, YOffset, Self.XFrom, Self.YTo);
     End;
 
   PaintGraph(GraphAmount);

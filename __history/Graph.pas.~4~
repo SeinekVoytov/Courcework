@@ -1,0 +1,95 @@
+unit Graph;
+
+interface
+
+uses List, Graphics, SysUtils, Calculator;
+
+Type
+  TGraph = class
+  public
+    ArrayOfDots: TDotArray;
+    Expression: String;
+    MinY, MaxY: Real;
+    MinExtrList: TList;
+    MaxExtrList: TList;
+    Color: TColor;
+    Width: Byte;
+
+    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep: Real);
+    destructor Destroy();
+    procedure Paint(Bitmap: TBitmap; Step: Real; Scale, YOffset, LBorder, RBorder: Integer);
+
+  end;
+
+const
+  ITERATION_COUNT = 10000;
+
+implementation
+  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep: Real);
+    procedure InitArrayOfDots();
+      var
+        CurrY, CurrX: Real;
+      Begin
+        for var I := 1 to ITERATION_COUNT do
+          Begin
+            CurrY := Calculate(Expression, CurrX);
+            if (CurrY > MaxY) then
+              MaxY := CurrY;
+            if (CurrY < MinY) then
+              MinY := CurrY;
+            ArrayOfDots[I] := CurrY;
+
+            CurrX := CurrX + XStep;
+          End;
+      End;
+
+    Begin
+      MinExtrList := TList.Create;
+      MaxExtrList := TList.Create;
+      Self.Expression := Expression;
+      InitArrayOfDots();
+
+
+      with Self do
+        Begin
+
+          Color := Color;
+          Width := Width;
+        End;
+    End;
+
+  destructor TGraph.Destroy();
+    Begin
+      MinExtrList.Destroy;
+      MaxExtrList.Destroy;
+      inherited;
+    End;
+
+  procedure TGraph.Paint(Bitmap: TBitmap; Step: Real; Scale, YOffset, LBorder, RBorder: Integer);
+  var
+    WasNan: Boolean;
+    CurrX: Real;
+    CurrY: LongInt;
+    I: Integer;
+    Begin
+      WasNan := True;
+      CurrX := 0;
+      for I := LBorder + 1 to RBorder do
+        Begin
+          CurrY := Trunc(-Scale * Self.ArrayOfDots[I]) + YOffset;
+          if (FloatToStr(Self.ArrayOfDots[I]) = 'NAN') or
+             (Self.ArrayOfDots[I] > 4375000) or
+             (Self.ArrayOfDots[I] < -4375000) then
+            WasNaN := True
+          else if (WasNan) then
+            begin
+              Bitmap.Canvas.MoveTo(Trunc(CurrX), CurrY);
+              WasNan := False;
+            End
+          else
+            Bitmap.Canvas.LineTo(Trunc(CurrX), CurrY);
+
+          CurrX := CurrX + Step;
+        End;
+    End;
+end.
