@@ -14,8 +14,8 @@ Type
     MaxExtrList: TList;
     Color: TColor;
     Width: Byte;
-
-    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real);
+    LeftBound: Integer;
+    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer);
     destructor Destroy();
     procedure Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
@@ -28,7 +28,7 @@ const
   ITERATION_COUNT = 10000;
 
 implementation
-  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real);
+  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer);
     procedure InitArrayOfDots();
       var
         CurrY: Real;
@@ -54,6 +54,7 @@ implementation
       InitArrayOfDots();
       Self.Color := Color;
       Self.Width := Width;
+      LeftBound := XFrom;
     End;
 
   destructor TGraph.Destroy();
@@ -95,6 +96,7 @@ implementation
     var
       X: Real;
     Begin
+      Dec(LeftBound);
       for var I := High(ArrayOfDots) - ShiftingSize downto Low(ArrayOfDots) do
         ArrayOfDots[I + ShiftingSize] := ArrayOfDots[I];
 
@@ -110,6 +112,7 @@ implementation
   var
     X: Real;
     Begin
+      Inc(LeftBound);
       for var I := ShiftingSize + 1 to High(ArrayOfDots) do
         ArrayOfDots[I - ShiftingSize] := ArrayOfDots[I];
 
@@ -139,11 +142,11 @@ implementation
         Begin
           if (ArrayOfDots[I] > ArrayOfDots[I + 1]) and
              (ArrayOfDots[I] > ArrayOfDots[I - 1]) then
-            MaxExtrList.Add(Math.RoundTo(XFrom + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+            MaxExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
 
           if (ArrayOfDots[I] < ArrayOfDots[I + 1]) and
              (ArrayOfDots[I] < ArrayOfDots[I - 1]) then
-            MinExtrList.Add(Math.RoundTo(XFrom + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+            MinExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
         End;
     End;
 

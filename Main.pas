@@ -262,7 +262,7 @@ Begin
     Begin
       GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
       if GraphsArray[I].MaxExtrList <> nil then
-        GraphsArray[I].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.YTo);
+        GraphsArray[I].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.XTo, Self.YTo);
     End;
 End;
 
@@ -618,7 +618,7 @@ begin
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
 
-  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX);
+  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, StrToInt(Self.RangeFromEdit.Text));
 
   if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
     Begin
@@ -644,7 +644,7 @@ begin
   if (ExtremaCheckBox.Checked) then
     Begin
       GraphsArray[GraphAmount].FindExtrema(Self.XFrom, Self.Range);
-      GraphsArray[GraphAmount].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.YTo);
+      GraphsArray[GraphAmount].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.XTo, Self.YTo);
     End;
 
   GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
@@ -675,6 +675,8 @@ begin
   RBorder := ITERATION_COUNT;
   CurrXAxisPos := YTo * Scale;
   CurrYAxisPos := -XFrom * Scale;
+  for var I := 1 to GraphAmount do
+    GraphsArray[I].Destroy;
   YOffset := CurrXAxisPos;
   PaintYAxis(CurrXAxisPos);
   PaintXAxis(CurrYAxisPos);
