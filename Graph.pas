@@ -17,7 +17,7 @@ Type
 
     constructor Create(Expression: String; Color: TColor; Width: Byte; XStep: Real);
     destructor Destroy();
-    procedure Paint(var Bitmap: TBitmap; Step: Real; Scale, YOffset, LBorder, RBorder: Integer);
+    procedure Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
     procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, YTo: Integer);
@@ -62,7 +62,7 @@ implementation
       inherited;
     End;
 
-  procedure TGraph.Paint(var Bitmap: TBitmap; Step: Real; Scale, YOffset, LBorder, RBorder: Integer);
+  procedure TGraph.Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
   var
     WasNan: Boolean;
     CurrX: Real;
@@ -86,7 +86,7 @@ implementation
           else
             Bitmap.Canvas.LineTo(Trunc(CurrX), CurrY);
 
-          CurrX := CurrX + Step;
+          CurrX := CurrX + XStep;
         End;
     End;
 
