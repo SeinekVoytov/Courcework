@@ -2,7 +2,7 @@ unit Graph;
 
 interface
 
-uses List, Graphics, SysUtils, Calculator, Math;
+uses List, Graphics, SysUtils, Calculator;
 
 Type
   TGraph = class
@@ -21,7 +21,7 @@ Type
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
     procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, YTo: Integer);
-    procedure FindExtrema(XFrom: Integer; Range: Real);
+
   end;
 
 const
@@ -117,20 +117,6 @@ implementation
         Begin
           ArrayOfDots[I] := Calculate(Expression, X);
           X := X + XStep;
-        End;
-    End;
-
-  procedure TGraph.FindExtrema(XFrom: Integer; Range: Real);
-    Begin
-      for var I := Low(ArrayOfDots) + 1 to High(ArrayOfDots) - 1 do
-        Begin
-          if (ArrayOfDots[I] > ArrayOfDots[I + 1]) and
-             (ArrayOfDots[I] > ArrayOfDots[I - 1]) then
-            MaxExtrList.Add(Math.RoundTo(XFrom + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
-
-          if (ArrayOfDots[I] < ArrayOfDots[I + 1]) and
-             (ArrayOfDots[I] < ArrayOfDots[I - 1]) then
-            MinExtrList.Add(Math.RoundTo(XFrom + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
         End;
     End;
 
