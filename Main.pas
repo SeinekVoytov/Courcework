@@ -259,7 +259,11 @@ end;
 Procedure TMainForm.PaintAllGraphs();
 Begin
   for var I := 1 to GraphAmount do
-    GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)
+    Begin
+      GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
+      if GraphsArray[I].MaxExtrList <> nil then
+        GraphsArray[I].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.YTo);
+    End;
 End;
 
 Function TMainForm.GetSelectedWidth(): Byte;
@@ -424,7 +428,10 @@ begin
                   End
                 else
                   for var I := 1 to GraphAmount do
-                    GraphsArray[I].ShiftArrayOfDotsRight(Self.XFrom, Self.IterationsPerUnit, Self.Range);
+                    Begin
+                      GraphsArray[I].ShiftArrayOfDotsRight(Self.XFrom, Self.IterationsPerUnit, Self.Range);
+                      GraphsArray[I].FindExtrema(Self.XFrom - 1, Self.Range);
+                    End;
                 Dec(XTo);
                 Dec(XFrom);
               end
@@ -438,7 +445,10 @@ begin
                    End
                  else
                    for var I := 1 to GraphAmount do
-                     GraphsArray[I].ShiftArrayOfDotsLeft(Self.XTo, Self.IterationsPerUnit, Self.Range);
+                     Begin
+                       GraphsArray[I].ShiftArrayOfDotsLeft(Self.XTo, Self.IterationsPerUnit, Self.Range);
+                       GraphsArray[I].FindExtrema(Self.XFrom + 1, Self.Range);
+                     End;
                 Inc(XTo);
                 Inc(XFrom);
               end;

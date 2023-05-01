@@ -21,7 +21,7 @@ Type
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
     procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, YTo: Integer);
-    procedure FindExtrema(XFrom: Integer; Range: Real);
+    procedure FindExtrema(XFrom, IndexFrom, IndexTo: Integer; Range: Real);
   end;
 
 const
@@ -48,6 +48,8 @@ implementation
       End;
 
     Begin
+      MinExtrList := TList.Create;
+      MaxExtrList := TList.Create;
       Self.Expression := Expression;
       MaxY := Single.MinValue;
       MinY := Single.MaxValue;
@@ -121,21 +123,9 @@ implementation
         End;
     End;
 
-  procedure TGraph.FindExtrema(XFrom: Integer; Range: Real);
+  procedure TGraph.FindExtrema(XFrom, IndexFrom, IndexTo: Integer; Range: Real);
     Begin
-      if (MinExtrList = nil) or (MaxExtrList = nil) then
-        Begin
-          MinExtrList := TList.Create;
-          MaxExtrList := TList.Create;
-        End
-      else
-        Begin
-          MinExtrList.Destroy;
-          MaxExtrList.Destroy;
-          MinExtrList := TList.Create;
-          MaxExtrList := TList.Create;
-        End;
-      for var I := Low(ArrayOfDots) + 1 to  High(ArrayOfDots) - 1 do
+      for var I := IndexFrom + 1 to  IndexTo - 1 do
         Begin
           if (ArrayOfDots[I] > ArrayOfDots[I + 1]) and
              (ArrayOfDots[I] > ArrayOfDots[I - 1]) then

@@ -97,8 +97,8 @@ implementation
     var
       X: Real;
     Begin
-      for var I := High(ArrayOfDots) - ShiftingSize downto Low(ArrayOfDots) do
-        ArrayOfDots[I + ShiftingSize] := ArrayOfDots[I];
+      for var I := ShiftingSize + 1 to High(ArrayOfDots) do
+        ArrayOfDots[I - ShiftingSize] := ArrayOfDots[I];
 
       X := XFrom;
       for var I := ShiftingSize downto Low(ArrayOfDots) do
@@ -112,8 +112,8 @@ implementation
   var
     X: Real;
     Begin
-      for var I := ShiftingSize + 1 to High(ArrayOfDots) do
-        ArrayOfDots[I - ShiftingSize] := ArrayOfDots[I];
+      for var I := High(ArrayOfDots) - ShiftingSize downto Low(ArrayOfDots) do
+        ArrayOfDots[I + ShiftingSize] := ArrayOfDots[I];
 
       X := XTo;
       for var I := ITERATION_COUNT - ShiftingSize + 1 to ITERATION_COUNT do
