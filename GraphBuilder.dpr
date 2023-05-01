@@ -5,9 +5,10 @@ uses
   Main in 'Main.pas' {MainForm},
   Converter in 'Converter.pas',
   Checker in 'Checker.pas',
-  Stack in 'Stack.pas',
+  TStack in 'TStack.pas',
   Calculator in 'Calculator.pas',
-  ExtremaChecker in 'ExtremaChecker.pas';
+  ExtremaFinder in 'ExtremaFinder.pas',
+  List in 'List.pas';
 
 {$R *.res}
 

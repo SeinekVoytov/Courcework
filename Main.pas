@@ -404,10 +404,10 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     GraphAmount := 0;
     Step := GraphPaintBox.Width / ITERATION_COUNT;
     Range := (XTo - XFrom) / ITERATION_COUNT;
-    YOffset := GraphPaintBox.Height div 2;
     Scale := GraphPaintBox.Width div (XTo - XFrom);
     CurrXAxisPos := GraphPaintBox.Height div 2;
     CurrYAxisPos := GraphPaintBox.Width div 2;
+    YOffset := CurrXAxisPos;
     LBorder := 0;
     RBorder := ITERATION_COUNT;
     PrevWidth := ClientWidth;
@@ -673,6 +673,46 @@ begin
     End;
 end;
 
+procedure PaintExtrema(ExtremaList: TList; Bitmap: TBitmap; Scale, YOffset: Integer);
+const
+  CIRCLE_RADIUS = 30;
+var
+  PenColor, BrushColor: TColor;
+  CurrNode: PNode;
+  X, Y: Integer;
+begin
+  PenColor := Bitmap.Canvas.Pen.Color;
+  BrushColor :=  Bitmap.Canvas.Brush.Color;
+
+  with Bitmap.Canvas do
+  if (PenColor = clRed) then
+    Begin
+      Pen.Color := clBlack;
+      Brush.Color := clBlack;
+    End
+  else
+    Begin
+      Pen.Color := clRed;
+      Brush.Color := clRed;
+    End;
+
+  CurrNode := ExtremaList.GetHead().Next;
+  while (CurrNode <> nil) do
+    Begin
+      X := Trunc(CurrNode.X * Scale);
+      Y := Trunc(CurrNode.Y) + YOffset;
+      Bitmap.Canvas.Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
+                            X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
+      CurrNode := CurrNode.Next;
+    End;
+
+    with Bitmap.Canvas do
+      Begin
+        Pen.Color := PenColor;
+        Brush.Color := BrushColor;
+      End;
+end;
+
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
     CurrX, CurrY, MinY, MaxY: Real;
@@ -701,18 +741,6 @@ begin
       CurrX := CurrX + Range;
     End;
 
-  if (ExtremaCheckBox.Checked) then
-    Begin
-      MinExtrList := TList.Create;
-      MaxExtrList := TList.Create;
-      FindExtremums(DotArrays[GraphAmount],
-                    MinExtrList,
-                    MaxExtrList,
-                    Self.XFrom,
-                    Self.Range
-                    );
-    End;
-
   GraphPicture.Canvas.Pen.Color := ColorBox.Selected;
   ColorsArray[GraphAmount] := ColorBox.Selected;
 
@@ -737,6 +765,21 @@ begin
       PaintXAxis(CurrXAxisPos);
       PaintYAxis(CurrYAxisPos);
     End;
+
+  if (ExtremaCheckBox.Checked) then
+    Begin
+      MinExtrList := TList.Create;
+      MaxExtrList := TList.Create;
+      FindExtrema(DotArrays[GraphAmount],
+                    MinExtrList,
+                    MaxExtrList,
+                    Self.XFrom,
+                    Self.Range
+                    );
+      PaintExtrema(MinExtrList, GraphPicture, Scale, YOffset);
+      PaintExtrema(MaxExtrList, GraphPicture, Scale, YOffset);
+    End;
+
   PaintGraph(GraphAmount);
 
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
@@ -760,11 +803,11 @@ begin
   XTo := 10;
   YTo := 10;
   YFrom := -10;
-  YOffset := GraphPaintBox.Height div 2;
   LBorder := 0;
   RBorder := ITERATION_COUNT;
-  CurrXAxisPos := GraphPaintBox.Height div 2;
-  CurrYAxisPos := GraphPaintBox.Width div 2;
+  CurrXAxisPos := YTo * Scale;
+  CurrYAxisPos := -XFrom * Scale;
+  YOffset := CurrXAxisPos;
   PaintYAxis(CurrXAxisPos);
   PaintXAxis(CurrYAxisPos);
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);

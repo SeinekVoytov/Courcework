@@ -3,12 +3,12 @@ unit ExtremaFinder;
 interface
   uses List, Calculator, Math;
 
-  Procedure FindExtremums(DotArray: TDotArray;
+  Procedure FindExtrema(DotArray: TDotArray;
                           var MinExtrList, MaxExtrList: TList;
                           XFrom: Integer; Range: Real);
 
 implementation
-  Procedure FindExtremums(DotArray: TDotArray;
+  Procedure FindExtrema(DotArray: TDotArray;
             var MinExtrList, MaxExtrList: TList;
             XFrom: Integer; Range: Real);
     Begin

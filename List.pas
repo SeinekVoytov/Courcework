@@ -19,6 +19,7 @@ Type
     private
       Head: PNode;
     public
+      function GetHead(): PNode;
       procedure Add(X, Y: Real);
       function IsEmpty(): Boolean;
       constructor Create();
@@ -26,6 +27,11 @@ Type
   end;
 
 implementation
+
+  function TList.GetHead(): PNode;
+    Begin
+      Result := Head;
+    End;
 
   procedure TList.Add(X, Y: Real);
     var

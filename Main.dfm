@@ -104,7 +104,7 @@ object MainForm: TMainForm
     end
     object MathInputPanel: TPanel
       Left = 0
-      Top = 307
+      Top = 308
       Width = 269
       Height = 118
       BevelOuter = bvNone
