@@ -441,7 +441,7 @@ begin
                     Begin
                       GraphsArray[I].ShiftArrayOfDotsRight(Self.XFrom, Self.IterationsPerUnit, Self.Range);
                       if GraphsArray[I].IsExtremaFound then
-                        GraphsArray[I].FindExtrema(Self.XFrom - 1, Self.Range);
+                        GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                     End;
 //                EditRangeEdit(RangeFromEdit, 1);
 //                EditRangeEdit(RangeToEdit, 1);
@@ -461,7 +461,7 @@ begin
                      Begin
                        GraphsArray[I].ShiftArrayOfDotsLeft(Self.XTo, Self.IterationsPerUnit, Self.Range);
                        if GraphsArray[I].IsExtremaFound then
-                        GraphsArray[I].FindExtrema(Self.XFrom + 1, Self.Range);
+                        GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                      End;
 //                EditRangeEdit(RangeFromEdit, -1);
 //                EditRangeEdit(RangeToEdit, -1);
@@ -503,6 +503,7 @@ begin
   PaintXAxis(CurrXAxisPos);
   PaintYAxis(CurrYAxisPos);
   YOffset := CurrXAxisPos;
+  Step := GraphPaintBox.Width / (RBorder - LBorder);
   PaintAllGraphs();
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -634,7 +635,7 @@ begin
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
 
-  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, StrToInt(Self.RangeFromEdit.Text), ExtremaCheckBox.Checked);
+  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom, ExtremaCheckBox.Checked);
 
   if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
     Begin

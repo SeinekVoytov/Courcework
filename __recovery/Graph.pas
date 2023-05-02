@@ -16,7 +16,7 @@ Type
     Width: Byte;
     IsExtremaFound: Boolean;
     LeftBound: Integer;
-    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer);
+    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     destructor Destroy();
     procedure Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
@@ -29,7 +29,7 @@ const
   ITERATION_COUNT = 10000;
 
 implementation
-  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer);
+  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     procedure InitArrayOfDots();
       var
         CurrY: Real;
@@ -50,6 +50,7 @@ implementation
     Begin
       Self.Expression := Expression;
       MaxY := Single.MinValue;
+      Self.IsExtremaFound := IsExtremaFound;
       MinY := Single.MaxValue;
       InitArrayOfDots();
       Self.Color := Color;
@@ -73,6 +74,7 @@ implementation
     Begin
       WasNan := True;
       CurrX := 0;
+      Bitmap.Canvas.Pen.Color := Self.Color;
       for I := LBorder + 1 to RBorder do
         Begin
           CurrY := Trunc(-Scale * Self.ArrayOfDots[I]) + YOffset;
