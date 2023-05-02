@@ -7,8 +7,8 @@ uses
   Checker in 'Checker.pas',
   TStack in 'TStack.pas',
   Calculator in 'Calculator.pas',
-  ExtremaFinder in 'ExtremaFinder.pas',
-  List in 'List.pas';
+  List in 'List.pas',
+  Graph in 'Graph.pas';
 
 {$R *.res}
 

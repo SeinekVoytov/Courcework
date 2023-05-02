@@ -33,7 +33,6 @@ implementation
       var
         CurrY: Real;
       Begin
-
         for var I := 1 to ITERATION_COUNT do
           Begin
             CurrY := Calculate(Expression, CurrX);
