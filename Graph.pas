@@ -74,6 +74,7 @@ implementation
     Begin
       WasNan := True;
       CurrX := 0;
+      Bitmap.Canvas.Pen.Color := Self.Color;
       for I := LBorder + 1 to RBorder do
         Begin
           CurrY := Trunc(-Scale * Self.ArrayOfDots[I]) + YOffset;
@@ -141,13 +142,18 @@ implementation
         End;
       for var I := Low(ArrayOfDots) + 1 to  High(ArrayOfDots) - 1 do
         Begin
-          if (ArrayOfDots[I] > ArrayOfDots[I + 1]) and
-             (ArrayOfDots[I] > ArrayOfDots[I - 1]) then
-            MaxExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+          if (FloatToStr(ArrayOfDots[I]) <> 'NAN') and
+             (FloatToStr(ArrayOfDots[I - 1]) <> 'NAN') and
+             (FloatToStr(ArrayOfDots[I + 1]) <> 'NAN') then
+            Begin
+              if (ArrayOfDots[I] > ArrayOfDots[I + 1]) and
+                 (ArrayOfDots[I] > ArrayOfDots[I - 1]) then
+                MaxExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
 
-          if (ArrayOfDots[I] < ArrayOfDots[I + 1]) and
-             (ArrayOfDots[I] < ArrayOfDots[I - 1]) then
-            MinExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+              if (ArrayOfDots[I] < ArrayOfDots[I + 1]) and
+                 (ArrayOfDots[I] < ArrayOfDots[I - 1]) then
+                MinExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+            End;
         End;
     End;
 
