@@ -60,8 +60,11 @@ implementation
 
   destructor TGraph.Destroy();
     Begin
-      MinExtrList.Destroy;
-      MaxExtrList.Destroy;
+      if IsExtremaFound then
+      Begin
+        MinExtrList.Destroy;
+        MaxExtrList.Destroy;
+      End;
       inherited;
     End;
 

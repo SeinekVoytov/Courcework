@@ -47,6 +47,7 @@ Type
     ScaleLabel: TLabel;
     InfoScaleLabel: TLabel;
     ExtremaCheckBox: TCheckBox;
+    ClearGraphComboBox: TComboBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -86,6 +87,8 @@ Type
     procedure SquareButtonClick(Sender: TObject);
     procedure XSquareButtonClick(Sender: TObject);
     procedure PiButtonClick(Sender: TObject);
+    procedure ClearGraphComboBoxClick(Sender: TObject);
+    procedure ClearGraphComboBoxChange(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -626,15 +629,15 @@ end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX, CurrY: Real;
+    CurrX: Real;
     I: Integer;
-
+    CurrExpr: String;
 begin
   Inc(GraphAmount);
   SetEditEnabled(False);
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
-
+  ClearGraphComboBox.Items.Add(InputEdit.Text);
   GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom, ExtremaCheckBox.Checked);
 
   if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
@@ -716,10 +719,36 @@ end;
 
 procedure TMainForm.ClearGraphButtonClick(Sender: TObject);
 begin
-  Dec(GraphAmount);
+
+  if (GraphAmount > 1) then
+    Begin
+      ClearGraphComboBox.Visible := True;
+      ClearGraphComboBox.DroppedDown := True;
+    End
+  else
+    Begin
+      ClearGraphComboBox.ItemIndex := 0;
+      ClearGraphComboBoxChange(Sender);
+    End;
+
   if (GraphAmount = 0) then
     ClearGraphButton.Enabled := False;
 
+end;
+
+procedure TMainForm.ClearGraphComboBoxChange(Sender: TObject);
+begin
+  var Index := ClearGraphComboBox.ItemIndex + 1;
+  ClearGraphComboBox.Items.Delete(Index - 1);
+  GraphsArray[Index].Free;
+  GraphsArray[Index] := nil;
+  for var I := Index to High(GraphsArray) - 1 do
+    Begin
+      GraphsArray[I] := GraphsArray[I + 1];
+      GraphsArray[I + 1] := nil;
+    End;
+
+  Dec(GraphAmount);
   ClearPaintBox();
   PaintYAxis(CurrYAxisPos);
   PaintXAxis(CurrXAxisPos);
@@ -730,6 +759,17 @@ begin
   PenWidthComboBox.Enabled := True;
   MathInputPanel.Enabled := True;
   ShowGraphButton.Enabled := True;
+
+  ClearGraphComboBox.DroppedDown := False;
+  ClearGraphComboBox.Visible := False;
+end;
+
+procedure TMainForm.ClearGraphComboBoxClick(Sender: TObject);
+begin
+  if (GraphAmount > 1) then
+    ClearGraphComboBox.DroppedDown := True
+  else
+    ClearGraphComboBox.DroppedDown := False;
 end;
 
 procedure MathInputEditor(var InputEdit: TEdit; const Text: String);

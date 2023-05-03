@@ -303,7 +303,7 @@ object MainForm: TMainForm
       object ShowGraphButton: TButton
         Left = 34
         Top = 124
-        Width = 106
+        Width = 105
         Height = 25
         Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
         TabOrder = 2
@@ -326,7 +326,7 @@ object MainForm: TMainForm
       end
       object ClearGraphButton: TButton
         Left = 168
-        Top = 124
+        Top = 100
         Width = 91
         Height = 25
         Caption = #1057#1090#1077#1088#1077#1090#1100' '#1075#1088#1072#1092#1080#1082
@@ -334,9 +334,9 @@ object MainForm: TMainForm
         OnClick = ClearGraphButtonClick
       end
       object ClearAllButton: TButton
-        Left = 170
+        Left = 165
         Top = 155
-        Width = 89
+        Width = 105
         Height = 25
         Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
         TabOrder = 6
@@ -349,6 +349,17 @@ object MainForm: TMainForm
         Height = 17
         Caption = #1048#1089#1082#1072#1090#1100' '#1101#1082#1089#1090#1088#1077#1084#1091#1084#1099
         TabOrder = 7
+      end
+      object ClearGraphComboBox: TComboBox
+        Left = 168
+        Top = 124
+        Width = 91
+        Height = 21
+        Style = csDropDownList
+        TabOrder = 8
+        Visible = False
+        OnChange = ClearGraphComboBoxChange
+        OnClick = ClearGraphComboBoxClick
       end
     end
     object ClearInputButton: TButton

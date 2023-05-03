@@ -47,6 +47,7 @@ Type
     ScaleLabel: TLabel;
     InfoScaleLabel: TLabel;
     ExtremaCheckBox: TCheckBox;
+    ClearGraphComboBox: TComboBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -86,6 +87,8 @@ Type
     procedure SquareButtonClick(Sender: TObject);
     procedure XSquareButtonClick(Sender: TObject);
     procedure PiButtonClick(Sender: TObject);
+    procedure ClearGraphComboBoxMouseLeave(Sender: TObject);
+    procedure ClearGraphComboBoxMouseEnter(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -270,7 +273,7 @@ Begin
   for var I := 1 to GraphAmount do
     Begin
       GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
-      if GraphsArray[I].MaxExtrList <> nil then
+      if GraphsArray[I].IsExtremaFound then
         GraphsArray[I].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.XTo, Self.YTo);
     End;
 End;
@@ -440,7 +443,8 @@ begin
                   for var I := 1 to GraphAmount do
                     Begin
                       GraphsArray[I].ShiftArrayOfDotsRight(Self.XFrom, Self.IterationsPerUnit, Self.Range);
-                      GraphsArray[I].FindExtrema(Self.XFrom - 1, Self.Range);
+                      if GraphsArray[I].IsExtremaFound then
+                        GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                     End;
 //                EditRangeEdit(RangeFromEdit, 1);
 //                EditRangeEdit(RangeToEdit, 1);
@@ -459,7 +463,8 @@ begin
                    for var I := 1 to GraphAmount do
                      Begin
                        GraphsArray[I].ShiftArrayOfDotsLeft(Self.XTo, Self.IterationsPerUnit, Self.Range);
-                       GraphsArray[I].FindExtrema(Self.XFrom + 1, Self.Range);
+                       if GraphsArray[I].IsExtremaFound then
+                        GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                      End;
 //                EditRangeEdit(RangeFromEdit, -1);
 //                EditRangeEdit(RangeToEdit, -1);
@@ -501,6 +506,7 @@ begin
   PaintXAxis(CurrXAxisPos);
   PaintYAxis(CurrYAxisPos);
   YOffset := CurrXAxisPos;
+  Step := GraphPaintBox.Width / (RBorder - LBorder);
   PaintAllGraphs();
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -614,6 +620,7 @@ begin
       YOffset := CurrXAxisPos;
       PaintXAxis(CurrXAxisPos);
       PaintYAxis(CurrYAxisPos);
+
       Range := (XTo - XFrom) / ITERATION_COUNT;
       IterationsPerUnit := ITERATION_COUNT div (XTo - XFrom);
       GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -622,16 +629,17 @@ end;
 
 procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
   Var
-    CurrX, CurrY: Real;
+    CurrX: Real;
     I: Integer;
-
+    CurrExpr: String;
 begin
   Inc(GraphAmount);
   SetEditEnabled(False);
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
-
-  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, StrToInt(Self.RangeFromEdit.Text));
+  CurrExpr := ConvertToPolishNotation(InputEdit.Text);
+  ClearGraphComboBox.Items.Add(CurrExpr);
+  GraphsArray[GraphAmount] := TGraph.Create(CurrExpr, ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom, ExtremaCheckBox.Checked);
 
   if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
     Begin
@@ -726,6 +734,17 @@ begin
   PenWidthComboBox.Enabled := True;
   MathInputPanel.Enabled := True;
   ShowGraphButton.Enabled := True;
+end;
+
+procedure TMainForm.ClearGraphComboBoxMouseEnter(Sender: TObject);
+begin
+  if (GraphAmount > 1) then
+    ClearGraphComboBox.DroppedDown := True;
+end;
+
+procedure TMainForm.ClearGraphComboBoxMouseLeave(Sender: TObject);
+begin
+  ClearGraphComboBox.DroppedDown := False;
 end;
 
 procedure MathInputEditor(var InputEdit: TEdit; const Text: String);

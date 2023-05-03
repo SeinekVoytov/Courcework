@@ -161,6 +161,15 @@ begin
   ScaleLabel.Caption := IntToStr(CurrScale) + '%';
 end;
 
+procedure EditRangeEdit(var RangeEdit: TEdit; const Delta: Short);
+var
+  CurrX: Integer;
+begin
+  CurrX := StrToInt(RangeEdit.Text);
+  Inc(CurrX, Delta);
+  RangeEdit.Text := IntToStr(CurrX);
+end;
+
 procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
 begin
   EditScaleLabel(ScaleLabel, 10);
@@ -261,7 +270,7 @@ Begin
   for var I := 1 to GraphAmount do
     Begin
       GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
-      if GraphsArray[I].MaxExtrList <> nil then
+      if GraphsArray[I].IsExtremaFound then
         GraphsArray[I].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.XTo, Self.YTo);
     End;
 End;
@@ -345,6 +354,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
           End;
       End;
   begin
+    DoubleBuffered := True;
     XFrom := -10;
     XTo := 10;
     YFrom := -10;
@@ -430,8 +440,11 @@ begin
                   for var I := 1 to GraphAmount do
                     Begin
                       GraphsArray[I].ShiftArrayOfDotsRight(Self.XFrom, Self.IterationsPerUnit, Self.Range);
-                      GraphsArray[I].FindExtrema(Self.XFrom - 1, Self.Range);
+                      if GraphsArray[I].IsExtremaFound then
+                        GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                     End;
+//                EditRangeEdit(RangeFromEdit, 1);
+//                EditRangeEdit(RangeToEdit, 1);
                 Dec(XTo);
                 Dec(XFrom);
               end
@@ -447,8 +460,11 @@ begin
                    for var I := 1 to GraphAmount do
                      Begin
                        GraphsArray[I].ShiftArrayOfDotsLeft(Self.XTo, Self.IterationsPerUnit, Self.Range);
-                       GraphsArray[I].FindExtrema(Self.XFrom + 1, Self.Range);
+                       if GraphsArray[I].IsExtremaFound then
+                        GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                      End;
+//                EditRangeEdit(RangeFromEdit, -1);
+//                EditRangeEdit(RangeToEdit, -1);
                 Inc(XTo);
                 Inc(XFrom);
               end;
@@ -487,10 +503,10 @@ begin
   PaintXAxis(CurrXAxisPos);
   PaintYAxis(CurrYAxisPos);
   YOffset := CurrXAxisPos;
+  Step := GraphPaintBox.Width / (RBorder - LBorder);
   PaintAllGraphs();
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-
 end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
@@ -601,6 +617,7 @@ begin
       YOffset := CurrXAxisPos;
       PaintXAxis(CurrXAxisPos);
       PaintYAxis(CurrYAxisPos);
+
       Range := (XTo - XFrom) / ITERATION_COUNT;
       IterationsPerUnit := ITERATION_COUNT div (XTo - XFrom);
       GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
@@ -618,7 +635,7 @@ begin
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
 
-  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, StrToInt(Self.RangeFromEdit.Text));
+  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom, ExtremaCheckBox.Checked);
 
   if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
     Begin
