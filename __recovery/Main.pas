@@ -47,6 +47,7 @@ Type
     ScaleLabel: TLabel;
     InfoScaleLabel: TLabel;
     ExtremaCheckBox: TCheckBox;
+    ComboBox1: TComboBox;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);

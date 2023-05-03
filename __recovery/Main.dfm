@@ -350,6 +350,14 @@ object MainForm: TMainForm
         Caption = #1048#1089#1082#1072#1090#1100' '#1101#1082#1089#1090#1088#1077#1084#1091#1084#1099
         TabOrder = 7
       end
+      object ComboBox1: TComboBox
+        Left = 159
+        Top = 28
+        Width = 110
+        Height = 21
+        TabOrder = 8
+        Text = #1057#1090#1077#1088#1077#1090#1100' '#1075#1088#1072#1092#1080#1082
+      end
     end
     object ClearInputButton: TButton
       Left = 204
