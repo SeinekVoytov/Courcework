@@ -102,6 +102,7 @@ Type
     LBorder, RBorder: Integer;
     IterationsPerUnit: Integer;
     PrevWidth, PrevHeight: Integer;
+    ZoomStep: Byte;
   public
     GraphPicture: TBitmap;
   end;
@@ -180,6 +181,7 @@ begin
   Dec(XTo);
   Inc(YFrom);
   Dec(YTo);
+  Inc(ZoomStep);
   Inc(LBorder, IterationsPerUnit);
   Dec(RBorder, IterationsPerUnit);
   Step := GraphPaintBox.Width / (RBorder - LBorder);
@@ -220,6 +222,7 @@ begin
     End;
   Dec(YFrom);
   Inc(YTo);
+  Dec(ZoomStep);
   Step := GraphPaintBox.Width / (RBorder - LBorder);
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := YTo * Scale;
@@ -370,6 +373,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     CurrYAxisPos := GraphPaintBox.Width div 2;
     YOffset := CurrXAxisPos;
     LBorder := 0;
+    ZoomStep := 0;
     RBorder := ITERATION_COUNT;
     PrevWidth := ClientWidth;
     PrevHeight := ClientHeight;
@@ -638,7 +642,7 @@ begin
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
   ClearGraphComboBox.Items.Add(InputEdit.Text);
-  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom, ExtremaCheckBox.Checked);
+  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom - ZoomStep, ExtremaCheckBox.Checked);
 
   if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
     Begin
@@ -697,6 +701,7 @@ begin
   CurrYAxisPos := -XFrom * Scale;
   for var I := 1 to GraphAmount do
     GraphsArray[I].Destroy;
+  ClearGraphComboBox.Items.Clear;
   YOffset := CurrXAxisPos;
   PaintYAxis(CurrXAxisPos);
   PaintXAxis(CurrYAxisPos);
