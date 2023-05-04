@@ -642,7 +642,7 @@ begin
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
   ClearGraphComboBox.Items.Add(InputEdit.Text);
-  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom - ZoomStep, ExtremaCheckBox.Checked);
+  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom - LBorder div IterationsPerUnit, ExtremaCheckBox.Checked);
 
   if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
     Begin
