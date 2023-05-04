@@ -320,9 +320,9 @@ object MainForm: TMainForm
       object ChooseWidthLabel: TLabel
         Left = 20
         Top = 100
-        Width = 88
+        Width = 91
         Height = 13
-        Caption = #1058#1086#1083#1094#1080#1085#1072' '#1075#1088#1072#1092#1080#1082#1072
+        Caption = #1058#1086#1083#1097#1080#1085#1072' '#1075#1088#1072#1092#1080#1082#1072
       end
       object RangeFromEdit: TEdit
         Left = 37

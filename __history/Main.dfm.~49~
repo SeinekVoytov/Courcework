@@ -47,6 +47,7 @@ object MainForm: TMainForm
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitLeft = 180
     DesignSize = (
       274
       602)
@@ -106,7 +107,7 @@ object MainForm: TMainForm
       Left = 0
       Top = 308
       Width = 269
-      Height = 118
+      Height = 93
       BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -116,8 +117,8 @@ object MainForm: TMainForm
       ParentFont = False
       TabOrder = 2
       object SinButton: TButton
-        Left = 42
-        Top = 8
+        Left = 87
+        Top = 6
         Width = 30
         Height = 25
         Caption = 'Sin'
@@ -125,8 +126,8 @@ object MainForm: TMainForm
         OnClick = SinButtonClick
       end
       object CosButton: TButton
-        Left = 73
-        Top = 8
+        Left = 118
+        Top = 6
         Width = 30
         Height = 25
         Caption = 'Cos'
@@ -134,8 +135,8 @@ object MainForm: TMainForm
         OnClick = CosButtonClick
       end
       object TgButton: TButton
-        Left = 104
-        Top = 8
+        Left = 149
+        Top = 6
         Width = 30
         Height = 25
         Caption = 'Tg'
@@ -143,8 +144,8 @@ object MainForm: TMainForm
         OnClick = TgButtonClick
       end
       object CtgButton: TButton
-        Left = 135
-        Top = 8
+        Left = 180
+        Top = 6
         Width = 30
         Height = 25
         Caption = 'Ctg'
@@ -152,8 +153,8 @@ object MainForm: TMainForm
         OnClick = CtgButtonClick
       end
       object ASinButton: TButton
-        Left = 42
-        Top = 34
+        Left = 87
+        Top = 32
         Width = 30
         Height = 25
         Caption = 'ASin'
@@ -161,8 +162,8 @@ object MainForm: TMainForm
         OnClick = ASinButtonClick
       end
       object ACosButton: TButton
-        Left = 73
-        Top = 34
+        Left = 118
+        Top = 32
         Width = 30
         Height = 25
         Caption = 'ACos'
@@ -171,8 +172,8 @@ object MainForm: TMainForm
         OnClick = ACosButtonClick
       end
       object ATgButton: TButton
-        Left = 104
-        Top = 34
+        Left = 149
+        Top = 32
         Width = 30
         Height = 25
         Caption = 'ATg'
@@ -180,8 +181,8 @@ object MainForm: TMainForm
         OnClick = ATgButtonClick
       end
       object ACtgButton: TButton
-        Left = 135
-        Top = 34
+        Left = 180
+        Top = 32
         Width = 30
         Height = 25
         Caption = 'ACtg'
@@ -189,8 +190,8 @@ object MainForm: TMainForm
         OnClick = ACtgButtonClick
       end
       object SqrtButton: TButton
-        Left = 42
-        Top = 60
+        Left = 87
+        Top = 58
         Width = 30
         Height = 25
         Caption = #8730
@@ -199,8 +200,8 @@ object MainForm: TMainForm
         OnClick = SqrtButtonClick
       end
       object LogButton: TButton
-        Left = 73
-        Top = 60
+        Left = 118
+        Top = 58
         Width = 30
         Height = 25
         Caption = 'Log'#8321#8320
@@ -208,8 +209,8 @@ object MainForm: TMainForm
         OnClick = LogButtonClick
       end
       object LnButton: TButton
-        Left = 104
-        Top = 60
+        Left = 149
+        Top = 58
         Width = 30
         Height = 25
         Caption = 'Ln'
@@ -217,8 +218,8 @@ object MainForm: TMainForm
         OnClick = LnButtonClick
       end
       object AbsButton: TButton
-        Left = 134
-        Top = 60
+        Left = 180
+        Top = 58
         Width = 30
         Height = 25
         Caption = '|  |'
@@ -226,8 +227,8 @@ object MainForm: TMainForm
         OnClick = AbsButtonClick
       end
       object SquareButton: TButton
-        Left = 42
-        Top = 86
+        Left = 25
+        Top = 6
         Width = 30
         Height = 25
         Caption = #9633#178
@@ -236,8 +237,8 @@ object MainForm: TMainForm
         OnClick = SquareButtonClick
       end
       object XSquareButton: TButton
-        Left = 73
-        Top = 86
+        Left = 25
+        Top = 32
         Width = 30
         Height = 25
         Caption = 'x'#178
@@ -245,13 +246,40 @@ object MainForm: TMainForm
         OnClick = XSquareButtonClick
       end
       object PiButton: TButton
-        Left = 104
-        Top = 86
+        Left = 25
+        Top = 58
         Width = 30
         Height = 25
         Caption = #960
         TabOrder = 14
         OnClick = PiButtonClick
+      end
+      object ParenthesesButton: TButton
+        Left = 56
+        Top = 58
+        Width = 30
+        Height = 25
+        Caption = '('#9633')'
+        TabOrder = 15
+        OnClick = ParenthesesButtonClick
+      end
+      object XCubeButton: TButton
+        Left = 56
+        Top = 32
+        Width = 30
+        Height = 25
+        Caption = 'x'#179
+        TabOrder = 16
+        OnClick = XCubeButtonClick
+      end
+      object CubeButton: TButton
+        Left = 56
+        Top = 6
+        Width = 30
+        Height = 25
+        Caption = #9633#179
+        TabOrder = 17
+        OnClick = CubeButtonClick
       end
     end
     object RangeAndBuildPanel: TPanel
@@ -282,6 +310,20 @@ object MainForm: TMainForm
         Height = 13
         Caption = #1054#1090
       end
+      object ChooseColorLabel: TLabel
+        Left = 20
+        Top = 58
+        Width = 72
+        Height = 13
+        Caption = #1062#1074#1077#1090' '#1075#1088#1072#1092#1080#1082#1072
+      end
+      object ChooseWidthLabel: TLabel
+        Left = 20
+        Top = 100
+        Width = 88
+        Height = 13
+        Caption = #1058#1086#1083#1094#1080#1085#1072' '#1075#1088#1072#1092#1080#1082#1072
+      end
       object RangeFromEdit: TEdit
         Left = 37
         Top = 28
@@ -301,9 +343,9 @@ object MainForm: TMainForm
         OnChange = RangeToEditChange
       end
       object ShowGraphButton: TButton
-        Left = 34
-        Top = 124
-        Width = 106
+        Left = 37
+        Top = 143
+        Width = 105
         Height = 25
         Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
         TabOrder = 2
@@ -311,14 +353,14 @@ object MainForm: TMainForm
       end
       object ColorBox: TColorBox
         Left = 17
-        Top = 69
+        Top = 75
         Width = 145
         Height = 22
         TabOrder = 3
       end
       object PenWidthComboBox: TComboBox
         Left = 17
-        Top = 97
+        Top = 116
         Width = 145
         Height = 21
         Style = csDropDownList
@@ -326,7 +368,7 @@ object MainForm: TMainForm
       end
       object ClearGraphButton: TButton
         Left = 168
-        Top = 124
+        Top = 143
         Width = 91
         Height = 25
         Caption = #1057#1090#1077#1088#1077#1090#1100' '#1075#1088#1072#1092#1080#1082
@@ -334,9 +376,9 @@ object MainForm: TMainForm
         OnClick = ClearGraphButtonClick
       end
       object ClearAllButton: TButton
-        Left = 170
-        Top = 155
-        Width = 89
+        Left = 168
+        Top = 184
+        Width = 91
         Height = 25
         Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
         TabOrder = 6
@@ -349,6 +391,17 @@ object MainForm: TMainForm
         Height = 17
         Caption = #1048#1089#1082#1072#1090#1100' '#1101#1082#1089#1090#1088#1077#1084#1091#1084#1099
         TabOrder = 7
+      end
+      object ClearGraphComboBox: TComboBox
+        Left = 169
+        Top = 165
+        Width = 91
+        Height = 21
+        Style = csDropDownList
+        TabOrder = 8
+        Visible = False
+        OnChange = ClearGraphComboBoxChange
+        OnClick = ClearGraphComboBoxClick
       end
     end
     object ClearInputButton: TButton
