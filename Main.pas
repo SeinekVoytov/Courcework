@@ -48,6 +48,8 @@ Type
     InfoScaleLabel: TLabel;
     ExtremaCheckBox: TCheckBox;
     ClearGraphComboBox: TComboBox;
+    ChooseColorLabel: TLabel;
+    ChooseWidthLabel: TLabel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);

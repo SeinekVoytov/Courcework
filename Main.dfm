@@ -282,6 +282,20 @@ object MainForm: TMainForm
         Height = 13
         Caption = #1054#1090
       end
+      object ChooseColorLabel: TLabel
+        Left = 20
+        Top = 58
+        Width = 72
+        Height = 13
+        Caption = #1062#1074#1077#1090' '#1075#1088#1072#1092#1080#1082#1072
+      end
+      object ChooseWidthLabel: TLabel
+        Left = 20
+        Top = 100
+        Width = 88
+        Height = 13
+        Caption = #1058#1086#1083#1094#1080#1085#1072' '#1075#1088#1072#1092#1080#1082#1072
+      end
       object RangeFromEdit: TEdit
         Left = 37
         Top = 28
@@ -301,8 +315,8 @@ object MainForm: TMainForm
         OnChange = RangeToEditChange
       end
       object ShowGraphButton: TButton
-        Left = 34
-        Top = 124
+        Left = 37
+        Top = 143
         Width = 105
         Height = 25
         Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
@@ -311,14 +325,14 @@ object MainForm: TMainForm
       end
       object ColorBox: TColorBox
         Left = 17
-        Top = 69
+        Top = 75
         Width = 145
         Height = 22
         TabOrder = 3
       end
       object PenWidthComboBox: TComboBox
         Left = 17
-        Top = 97
+        Top = 116
         Width = 145
         Height = 21
         Style = csDropDownList
@@ -326,7 +340,7 @@ object MainForm: TMainForm
       end
       object ClearGraphButton: TButton
         Left = 168
-        Top = 100
+        Top = 143
         Width = 91
         Height = 25
         Caption = #1057#1090#1077#1088#1077#1090#1100' '#1075#1088#1072#1092#1080#1082
@@ -334,9 +348,9 @@ object MainForm: TMainForm
         OnClick = ClearGraphButtonClick
       end
       object ClearAllButton: TButton
-        Left = 165
-        Top = 155
-        Width = 105
+        Left = 168
+        Top = 184
+        Width = 91
         Height = 25
         Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
         TabOrder = 6
@@ -351,8 +365,8 @@ object MainForm: TMainForm
         TabOrder = 7
       end
       object ClearGraphComboBox: TComboBox
-        Left = 168
-        Top = 124
+        Left = 169
+        Top = 165
         Width = 91
         Height = 21
         Style = csDropDownList

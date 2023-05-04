@@ -78,6 +78,7 @@ implementation
       WasNan := True;
       CurrX := 0;
       Bitmap.Canvas.Pen.Color := Self.Color;
+      Bitmap.Canvas.Pen.Width := Self.Width;
       for I := LBorder + 1 to RBorder do
         Begin
           CurrY := Trunc(-Scale * Self.ArrayOfDots[I]) + YOffset;
