@@ -14,13 +14,14 @@ Type
     MaxExtrList: TList;
     Color: TColor;
     Width: Byte;
-
-    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real);
+    IsExtremaFound: Boolean;
+    LeftBound: Integer;
+    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     destructor Destroy();
     procedure Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
-    procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, YTo: Integer);
+    procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo: Integer);
     procedure FindExtrema(XFrom: Integer; Range: Real);
   end;
 
@@ -28,12 +29,11 @@ const
   ITERATION_COUNT = 10000;
 
 implementation
-  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real);
+  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     procedure InitArrayOfDots();
       var
         CurrY: Real;
       Begin
-
         for var I := 1 to ITERATION_COUNT do
           Begin
             CurrY := Calculate(Expression, CurrX);
@@ -48,20 +48,23 @@ implementation
       End;
 
     Begin
-      MinExtrList := TList.Create;
-      MaxExtrList := TList.Create;
       Self.Expression := Expression;
       MaxY := Single.MinValue;
+      Self.IsExtremaFound := IsExtremaFound;
       MinY := Single.MaxValue;
       InitArrayOfDots();
       Self.Color := Color;
       Self.Width := Width;
+      LeftBound := XFrom;
     End;
 
   destructor TGraph.Destroy();
     Begin
-      MinExtrList.Destroy;
-      MaxExtrList.Destroy;
+      if IsExtremaFound then
+      Begin
+        MinExtrList.Destroy;
+        MaxExtrList.Destroy;
+      End;
       inherited;
     End;
 
@@ -74,6 +77,8 @@ implementation
     Begin
       WasNan := True;
       CurrX := 0;
+      Bitmap.Canvas.Pen.Color := Self.Color;
+      Bitmap.Canvas.Pen.Width := Self.Width;
       for I := LBorder + 1 to RBorder do
         Begin
           CurrY := Trunc(-Scale * Self.ArrayOfDots[I]) + YOffset;
@@ -97,8 +102,9 @@ implementation
     var
       X: Real;
     Begin
-      for var I := ShiftingSize + 1 to High(ArrayOfDots) do
-        ArrayOfDots[I - ShiftingSize] := ArrayOfDots[I];
+      Dec(LeftBound);
+      for var I := High(ArrayOfDots) - ShiftingSize downto Low(ArrayOfDots) do
+        ArrayOfDots[I + ShiftingSize] := ArrayOfDots[I];
 
       X := XFrom;
       for var I := ShiftingSize downto Low(ArrayOfDots) do
@@ -112,8 +118,9 @@ implementation
   var
     X: Real;
     Begin
-      for var I := High(ArrayOfDots) - ShiftingSize downto Low(ArrayOfDots) do
-        ArrayOfDots[I + ShiftingSize] := ArrayOfDots[I];
+      Inc(LeftBound);
+      for var I := ShiftingSize + 1 to High(ArrayOfDots) do
+        ArrayOfDots[I - ShiftingSize] := ArrayOfDots[I];
 
       X := XTo;
       for var I := ITERATION_COUNT - ShiftingSize + 1 to ITERATION_COUNT do
@@ -125,19 +132,36 @@ implementation
 
   procedure TGraph.FindExtrema(XFrom: Integer; Range: Real);
     Begin
-      for var I := Low(ArrayOfDots) + 1 to High(ArrayOfDots) - 1 do
+      if (MinExtrList = nil) or (MaxExtrList = nil) then
         Begin
-          if (ArrayOfDots[I] > ArrayOfDots[I + 1]) and
-             (ArrayOfDots[I] > ArrayOfDots[I - 1]) then
-            MaxExtrList.Add(Math.RoundTo(XFrom + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+          MinExtrList := TList.Create;
+          MaxExtrList := TList.Create;
+        End
+      else
+        Begin
+          MinExtrList.Destroy;
+          MaxExtrList.Destroy;
+          MinExtrList := TList.Create;
+          MaxExtrList := TList.Create;
+        End;
+      for var I := Low(ArrayOfDots) + 1 to  High(ArrayOfDots) - 1 do
+        Begin
+          if (FloatToStr(ArrayOfDots[I]) <> 'NAN') and
+             (FloatToStr(ArrayOfDots[I - 1]) <> 'NAN') and
+             (FloatToStr(ArrayOfDots[I + 1]) <> 'NAN') then
+            Begin
+              if (ArrayOfDots[I] > ArrayOfDots[I + 1]) and
+                 (ArrayOfDots[I] > ArrayOfDots[I - 1]) then
+                MaxExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
 
-          if (ArrayOfDots[I] < ArrayOfDots[I + 1]) and
-             (ArrayOfDots[I] < ArrayOfDots[I - 1]) then
-            MinExtrList.Add(Math.RoundTo(XFrom + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+              if (ArrayOfDots[I] < ArrayOfDots[I + 1]) and
+                 (ArrayOfDots[I] < ArrayOfDots[I - 1]) then
+                MinExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+            End;
         End;
     End;
 
-  procedure TGraph.PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, YTo: Integer);
+  procedure TGraph.PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo: Integer);
   const
     CIRCLE_RADIUS = 5;
 
@@ -149,10 +173,13 @@ implementation
       CurrNode := ExtrList.GetHead().Next;
       while (CurrNode <> nil) do
         Begin
-          X := Trunc((CurrNode.X - XFrom) * Scale);
-          Y := Trunc((YTo - CurrNode.Y) * Scale);
-          Bitmap.Canvas.Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
-                                X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
+          if (CurrNode.X >= XFrom)  and (CurrNode.X <= XTo) then
+            Begin
+              X := Trunc((CurrNode.X - XFrom) * Scale);
+              Y := Trunc((YTo - CurrNode.Y) * Scale);
+              Bitmap.Canvas.Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
+                                    X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
+            End;
           CurrNode := CurrNode.Next;
         End;
     End;
@@ -164,7 +191,7 @@ implementation
       BrushColor :=  Bitmap.Canvas.Brush.Color;
 
       with Bitmap.Canvas do
-      if (PenColor = clRed) then
+      if (Self.Color = clRed) then
         Begin
           Pen.Color := clBlack;
           Brush.Color := clBlack;

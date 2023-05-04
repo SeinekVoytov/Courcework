@@ -191,7 +191,7 @@ implementation
       BrushColor :=  Bitmap.Canvas.Brush.Color;
 
       with Bitmap.Canvas do
-      if (Self.Color = clRed) then
+      if (Self.Color = clRed) or (Self.Color = $FF00FF) then
         Begin
           Pen.Color := clBlack;
           Brush.Color := clBlack;

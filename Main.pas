@@ -341,7 +341,12 @@ Procedure TMainForm.FormCreate(Sender: TObject);
   Procedure SetFormMaxHeight();
     Begin
       var ScreenHeight := GetSystemMetrics(SM_CYSCREEN);
-      Self.Constraints.MaxHeight := ScreenHeight - (Self.Height - Self.ClientHeight);;
+      Self.Constraints.MaxHeight := ScreenHeight - (Self.Height - Self.ClientHeight);
+    End;
+
+  Procedure SetFormMaxWidth();
+    Begin
+      Self.Constraints.MaxWidth := Self.EditPanel.Width + Self.Constraints.MaxHeight;
     End;
 
   Procedure InitPenColorComboBox();
@@ -368,7 +373,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
           End;
       End;
   begin
-    DoubleBuffered := True;
+
     XFrom := -10;
     XTo := 10;
     YFrom := -10;
@@ -389,6 +394,10 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     MathInput := False;
     SetClearButtonEnabled(False);
     SetFormMaxHeight();
+    SetFormMaxWidth();
+
+    WindowState := wsMaximized;
+
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
@@ -507,6 +516,8 @@ begin
       Width := ClientHeight + EditPanel.Width;
       PrevHeight := ClientHeight;
     End;
+//  hEight := PrevHeight;
+//  width := prevwidth;
   ClearPaintBox();
   Scale := GraphPaintBox.Width div (XTo - XFrom);
   CurrXAxisPos := YTo * Scale;
@@ -527,7 +538,7 @@ end;
 
 procedure TMainForm.InputEditChange(Sender: TObject);
 Var
-    Text: String;
+  Text: String;
 begin
   Text := Lowercase(InputEdit.Text);
   if (not IsMathExprValid(Text)) then

@@ -88,6 +88,104 @@ implementation
       Expr := StringReplace(Expr, ' ', '', [rfReplaceAll]);
     End;
 
+  Procedure AddStars(var Expr: String; FromIndex, ToIndex: Integer);
+
+    Procedure EvaluateParentheses(var Expr: String; var Index: Integer);
+      Begin
+        Inc(Index);
+        var ParenthesesCounter := 1;
+        var StartIndex := Index;
+
+        while (ParenthesesCounter > 0) do
+          Begin
+            if (Expr[Index] = '(') then
+              Inc(ParenthesesCounter)
+            else if (Expr[Index] = ')') then
+              Dec(ParenthesesCounter);
+            Inc(Index);
+          End;
+        Dec(Index);
+        AddStars(Expr, StartIndex, Index - 1);
+      End;
+
+    Procedure InsertStar(var Expr: String; var Index, ToIndex: Integer);
+      Begin
+        Insert('*', Expr, Index);
+        Inc(Index);
+        Inc(ToIndex);
+      End;
+
+    Procedure CheckInsertComditions(var Cond1, Cond2, Cond3, Cond4, Cond5: Boolean; var Expr: String; var Index, ToIndex: Integer);
+      Begin
+        if (Cond1) or (Cond2) or (Cond3) or (Cond4) or (Cond5) then
+          Begin
+            InsertStar(Expr, Index, ToIndex);
+            Cond1 := False;
+            Cond2 := False;
+            Cond3 := False;
+            Cond4 := False;
+            Cond5 := False;
+          End;
+      End;
+    var
+      WasNumber, WasFunction, WasX, WasPi, WasParentheses: Boolean;
+      CurrSymbol: Char;
+      I: Integer;
+    Begin
+      I := FromIndex;
+      WasNumber := False;
+      WasX := False;
+      WasFunction := False;
+      WasPi := False;
+      WasParentheses := False;
+      while (I <= ToIndex) do
+        Begin
+          CurrSymbol := Expr[I];
+          if (CharInSet(CurrSymbol, ['+', '-', '*', '/', '^'])) then
+            Begin
+              WasNumber := False;
+              WasX := False;
+              WasFunction := False;
+              WasPi := False;
+              WasParentheses := False;
+            End
+          else if (CharInSet(CurrSymbol, ['0'..'9'])) then
+            Begin
+              CheckInsertComditions(WasParentheses, WasFunction, WasX, WasX, WasPi, Expr, I, ToIndex);
+              WasNumber := True;
+              Inc(I);
+
+              while (I <= ToIndex) and (CharInSet(Expr[I], ['0'..'9'])) do
+                Inc(I);
+              Dec(I);
+            End
+          else if (CurrSymbol = 'p') then
+            Begin
+              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              WasPi := True;
+              Inc(I);
+            End
+          else if (IsFunction(CurrSymbol)) then
+            Begin
+              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              WasFunction := True;
+            End
+          else if (CurrSymbol = 'x') then
+            Begin
+              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              WasX := True;
+            End
+          else if (CurrSymbol = '(') then
+            Begin
+              CheckInsertComditions(WasParentheses, WasNumber, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              WasFunction := False;
+              EvaluateParentheses(Expr, I);
+              WasParentheses := True;
+            End;
+          Inc(I);
+        End;
+    End;
+
   Procedure Convert(Var SignStack: TStack<TSign>; Var OperandStack: TStack<String>; Var Sign: TSign);
   Var
     LeftPart, RightPart: String;
@@ -160,8 +258,10 @@ implementation
   Begin
     InitPriority(Priority);
     DeleteSpaces(Expr);
-    Expr := '(' + Lowercase(Expr) + ')';
+    Expr := Lowercase(Expr);
     ReplaceFunctions(Expr);
+    AddStars(Expr, 1, Length(Expr));
+    Expr := '(' + Expr + ')';
     Len := Length(Expr);
     OperandStack := TStack<String>.Create(Len);
     SignStack := TStack<TSign>.Create(Len);
