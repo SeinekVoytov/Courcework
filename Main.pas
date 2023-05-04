@@ -50,6 +50,9 @@ Type
     ClearGraphComboBox: TComboBox;
     ChooseColorLabel: TLabel;
     ChooseWidthLabel: TLabel;
+    ParenthesesButton: TButton;
+    XCubeButton: TButton;
+    CubeButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -91,6 +94,9 @@ Type
     procedure PiButtonClick(Sender: TObject);
     procedure ClearGraphComboBoxClick(Sender: TObject);
     procedure ClearGraphComboBoxChange(Sender: TObject);
+    procedure ParenthesesButtonClick(Sender: TObject);
+    procedure CubeButtonClick(Sender: TObject);
+    procedure XCubeButtonClick(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -452,8 +458,6 @@ begin
                       if GraphsArray[I].IsExtremaFound then
                         GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                     End;
-//                EditRangeEdit(RangeFromEdit, 1);
-//                EditRangeEdit(RangeToEdit, 1);
                 Dec(XTo);
                 Dec(XFrom);
               end
@@ -472,8 +476,6 @@ begin
                        if GraphsArray[I].IsExtremaFound then
                         GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                      End;
-//                EditRangeEdit(RangeFromEdit, -1);
-//                EditRangeEdit(RangeToEdit, -1);
                 Inc(XTo);
                 Inc(XFrom);
               end;
@@ -857,6 +859,16 @@ begin
   MathInputEditor(Self.InputEdit, '()^2');
 end;
 
+procedure TMainForm.CubeButtonClick(Sender: TObject);
+begin
+  MathInputEditor(Self.InputEdit, '()^3');
+end;
+
+procedure TMainForm.ParenthesesButtonClick(Sender: TObject);
+begin
+  MathInputEditor(Self.InputEdit, '()');
+end;
+
 procedure TMainForm.XSquareButtonClick(Sender: TObject);
 var
   CurrInput: String;
@@ -865,6 +877,19 @@ begin
   CurrInput := InputEdit.Text;
   CurrCursorPos := InputEdit.SelStart;
   Insert('x^2', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 3;
+end;
+
+procedure TMainForm.XCubeButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('x^3', CurrInput, CurrCursorPos + 1);
   InputEdit.Text := CurrInput;
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 3;
