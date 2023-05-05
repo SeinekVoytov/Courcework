@@ -114,12 +114,12 @@ implementation
                       Begin
                         Inc(I);
                       End;
-                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = '(') or (Expr[I] = 'x') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p'])));
+                    Result := Result and ((IsNumber(Expr[I]) or (Expr[I] = '(') or (Expr[I] = 'x') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p', 'e']))));
                     while (TempIndex > 1) and (Expr[TempIndex] = ' ') do
                       Begin
                         Dec(TempIndex);
                       End;
-                    Result := Result and (IsNumber(Expr[I]) or (Expr[I] = 'x') or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p'])));
+                    Result := Result and ((IsNumber(Expr[I]) or (Expr[I] = 'x') or (Expr[I] = '(') or (CharInSet(Expr[I], ['s', 'c', 't', 'l', 'a', 'p', 'e']))));
                     Dec(I);
                   End
                 else if IsNumber(CurrSymbol) then
