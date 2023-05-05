@@ -115,9 +115,9 @@ implementation
         Inc(ToIndex);
       End;
 
-    Procedure CheckInsertComditions(var Cond1, Cond2, Cond3, Cond4, Cond5: Boolean; var Expr: String; var Index, ToIndex: Integer);
+    Procedure CheckInsertConditions(var Cond1, Cond2, Cond3, Cond4, Cond5, Cond6: Boolean; var Expr: String; var Index, ToIndex: Integer);
       Begin
-        if (Cond1) or (Cond2) or (Cond3) or (Cond4) or (Cond5) then
+        if (Cond1) or (Cond2) or (Cond3) or (Cond4) or (Cond5) or (Cond6) then
           Begin
             InsertStar(Expr, Index, ToIndex);
             Cond1 := False;
@@ -125,10 +125,11 @@ implementation
             Cond3 := False;
             Cond4 := False;
             Cond5 := False;
+            Cond6 := False;
           End;
       End;
     var
-      WasNumber, WasFunction, WasX, WasPi, WasParentheses: Boolean;
+      WasNumber, WasFunction, WasX, WasPi, WasParentheses, WasExp: Boolean;
       CurrSymbol: Char;
       I: Integer;
     Begin
@@ -138,6 +139,7 @@ implementation
       WasFunction := False;
       WasPi := False;
       WasParentheses := False;
+      WasExp := False;
       while (I <= ToIndex) do
         Begin
           CurrSymbol := Expr[I];
@@ -148,39 +150,45 @@ implementation
               WasFunction := False;
               WasPi := False;
               WasParentheses := False;
+              WasExp := False;
             End
           else if (CharInSet(CurrSymbol, ['0'..'9'])) then
             Begin
-              CheckInsertComditions(WasParentheses, WasFunction, WasX, WasX, WasPi, Expr, I, ToIndex);
+              CheckInsertConditions(WasParentheses, WasFunction, WasX, WasX, WasPi, WasExp, Expr, I, ToIndex);
               WasNumber := True;
               Inc(I);
 
-              while (I <= ToIndex) and (CharInSet(Expr[I], ['0'..'9'])) do
+              while (I <= ToIndex) and (CharInSet(Expr[I], ['0'..'9', '.'])) do
                 Inc(I);
               Dec(I);
             End
           else if (CurrSymbol = 'p') then
             Begin
-              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              CheckInsertConditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, WasExp, Expr, I, ToIndex);
               WasPi := True;
               Inc(I);
             End
           else if (IsFunction(CurrSymbol)) then
             Begin
-              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              CheckInsertConditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, WasExp,  Expr, I, ToIndex);
               WasFunction := True;
             End
           else if (CurrSymbol = 'x') then
             Begin
-              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              CheckInsertConditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, WasExp,  Expr, I, ToIndex);
               WasX := True;
             End
           else if (CurrSymbol = '(') then
             Begin
-              CheckInsertComditions(WasParentheses, WasNumber, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              CheckInsertConditions(WasParentheses, WasNumber, WasNumber, WasX, WasPi, WasExp, Expr, I, ToIndex);
               WasFunction := False;
               EvaluateParentheses(Expr, I);
               WasParentheses := True;
+            End
+          else if (CurrSymbol = 'e') then
+            Begin
+              CheckInsertConditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, WasExp,  Expr, I, ToIndex);
+              WasExp := True;
             End;
           Inc(I);
         End;

@@ -1,15 +1,12 @@
 unit Converter;
 
 interface
-  uses Stack, System.SysUtils;
+  uses TStack, System.SysUtils;
 
-  Type
-    TConverter = class
-      class Function ConvertToPolishNotation(Expr: String): String;
-    end;
+ Function ConvertToPolishNotation(Expr: String): String;
 
 implementation
-  class Function TConverter.ConvertToPolishNotation(Expr: String): String;
+  Function ConvertToPolishNotation(Expr: String): String;
 
   Type
     TSign = (Uno_Minus, Uno_Plus, Sin, Cos, Tg, Ctg, ArcSin, ArcCos, ArcTg, ArcCtg, Ln, Log10, Abs, Sqrt, Caret, Minus, Plus, Star, Slash, Open, Close);
@@ -91,6 +88,104 @@ implementation
       Expr := StringReplace(Expr, ' ', '', [rfReplaceAll]);
     End;
 
+  Procedure AddStars(var Expr: String; FromIndex, ToIndex: Integer);
+
+    Procedure EvaluateParentheses(var Expr: String; var Index: Integer);
+      Begin
+        Inc(Index);
+        var ParenthesesCounter := 1;
+        var StartIndex := Index;
+
+        while (ParenthesesCounter > 0) do
+          Begin
+            if (Expr[Index] = '(') then
+              Inc(ParenthesesCounter)
+            else if (Expr[Index] = ')') then
+              Dec(ParenthesesCounter);
+            Inc(Index);
+          End;
+        Dec(Index);
+        AddStars(Expr, StartIndex, Index - 1);
+      End;
+
+    Procedure InsertStar(var Expr: String; var Index, ToIndex: Integer);
+      Begin
+        Insert('*', Expr, Index);
+        Inc(Index);
+        Inc(ToIndex);
+      End;
+
+    Procedure CheckInsertComditions(var Cond1, Cond2, Cond3, Cond4, Cond5: Boolean; var Expr: String; var Index, ToIndex: Integer);
+      Begin
+        if (Cond1) or (Cond2) or (Cond3) or (Cond4) or (Cond5) then
+          Begin
+            InsertStar(Expr, Index, ToIndex);
+            Cond1 := False;
+            Cond2 := False;
+            Cond3 := False;
+            Cond4 := False;
+            Cond5 := False;
+          End;
+      End;
+    var
+      WasNumber, WasFunction, WasX, WasPi, WasParentheses: Boolean;
+      CurrSymbol: Char;
+      I: Integer;
+    Begin
+      I := FromIndex;
+      WasNumber := False;
+      WasX := False;
+      WasFunction := False;
+      WasPi := False;
+      WasParentheses := False;
+      while (I <= ToIndex) do
+        Begin
+          CurrSymbol := Expr[I];
+          if (CharInSet(CurrSymbol, ['+', '-', '*', '/', '^'])) then
+            Begin
+              WasNumber := False;
+              WasX := False;
+              WasFunction := False;
+              WasPi := False;
+              WasParentheses := False;
+            End
+          else if (CharInSet(CurrSymbol, ['0'..'9'])) then
+            Begin
+              CheckInsertComditions(WasParentheses, WasFunction, WasX, WasX, WasPi, Expr, I, ToIndex);
+              WasNumber := True;
+              Inc(I);
+
+              while (I <= ToIndex) and (CharInSet(Expr[I], ['0'..'9'])) do
+                Inc(I);
+              Dec(I);
+            End
+          else if (CurrSymbol = 'p') then
+            Begin
+              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              WasPi := True;
+              Inc(I);
+            End
+          else if (IsFunction(CurrSymbol)) then
+            Begin
+              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              WasFunction := True;
+            End
+          else if (CurrSymbol = 'x') then
+            Begin
+              CheckInsertComditions(WasParentheses, WasFunction, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              WasX := True;
+            End
+          else if (CurrSymbol = '(') then
+            Begin
+              CheckInsertComditions(WasParentheses, WasNumber, WasNumber, WasX, WasPi, Expr, I, ToIndex);
+              WasFunction := False;
+              EvaluateParentheses(Expr, I);
+              WasParentheses := True;
+            End;
+          Inc(I);
+        End;
+    End;
+
   Procedure Convert(Var SignStack: TStack<TSign>; Var OperandStack: TStack<String>; Var Sign: TSign);
   Var
     LeftPart, RightPart: String;
@@ -98,7 +193,7 @@ implementation
     Sign := SignStack.Pop();
     if (Sign = Uno_Minus) or (Sign = Uno_Plus) or (Sign = Sin) or
        (Sign = Cos) or (Sign = Tg) or (Sign = Ctg) or (Sign = Ln) or
-       (Sign = Sqrt) or (Sign = Log10) or
+       (Sign = Sqrt) or (Sign = Log10) or (Sign = Abs) or
        (Sign = ArcSin) or (Sign = ArcCos) or (Sign = ArcTg) or (Sign = ArcCtg) then
       Begin
         LeftPart := OperandStack.Pop();
@@ -137,15 +232,15 @@ implementation
         LeftPart := OperandStack.Pop();
           case Sign of
             Caret:
-              LeftPart := '^ ' + LeftPart + ' ' + RightPart;
+              LeftPart := '^' + LeftPart + ' ' + RightPart;
             Minus:
-              LeftPart := '- ' + LeftPart + ' ' + RightPart;
+              LeftPart := '-' + LeftPart + ' ' + RightPart;
             Plus:
-              LeftPart := '+ ' + LeftPart + ' ' + RightPart;
+              LeftPart := '+' + LeftPart + ' ' + RightPart;
             Star:
-              LeftPart := '* ' + LeftPart + ' ' + RightPart;
+              LeftPart := '*' + LeftPart + ' ' + RightPart;
             Slash:
-              LeftPart := '/ ' + LeftPart + ' ' + RightPart;
+              LeftPart := '/' + LeftPart + ' ' + RightPart;
           end;
       End;
 
@@ -162,8 +257,10 @@ implementation
     CurrSymbol: Char;
   Begin
     InitPriority(Priority);
+    DeleteSpaces(Expr);
+    Expr := Lowercase(Expr);
     ReplaceFunctions(Expr);
-     DeleteSpaces(Expr);
+    AddStars(Expr, 1, Length(Expr));
     Expr := '(' + Expr + ')';
     Len := Length(Expr);
     OperandStack := TStack<String>.Create(Len);
@@ -172,21 +269,19 @@ implementation
     while (I <= Len) do
       Begin
         CurrSymbol := Expr[I];
-        if (IsOperand(CurrSymbol)) or (Expr[I] = 'p') then
+        if (IsOperand(CurrSymbol)) or (Expr[I] = 'p') or (Expr[I] = 'e') then
           Begin
             if (CurrSymbol = 'x') then
-              Begin
-                Operand := CurrSymbol;
-              End
+              Operand := CurrSymbol
             else if (CurrSymbol = 'p') then
               Begin
                 Operand := '~';
                 Inc(I);
               End
+            else if (CurrSymbol = 'e') then
+              Operand := 'e'
             else
-              Begin
-                Operand := FindOperand(Expr, I);
-              End;
+              Operand := FindOperand(Expr, I);
 
             OperandStack.Push(Operand);
           End
