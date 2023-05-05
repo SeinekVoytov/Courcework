@@ -86,13 +86,11 @@ Type
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
     Procedure PaintAllGraphs();
-    //procedure InputEditKeyPress(Sender: TObject; var Key: Char);
     procedure PlusScaleButtonClick(Sender: TObject);
     procedure MinusScaleButtonClick(Sender: TObject);
     procedure SquareButtonClick(Sender: TObject);
     procedure XSquareButtonClick(Sender: TObject);
     procedure PiButtonClick(Sender: TObject);
-    procedure ClearGraphComboBoxClick(Sender: TObject);
     procedure ClearGraphComboBoxChange(Sender: TObject);
     procedure ParenthesesButtonClick(Sender: TObject);
     procedure CubeButtonClick(Sender: TObject);
@@ -122,7 +120,8 @@ const
 
 var
   MainForm: TMainForm;
-  ZoomFactor: Byte;
+  researchmode: Boolean;
+  CanBeZoomed, CanBeUnzoomed: Boolean;
 
 implementation
 
@@ -373,7 +372,13 @@ Procedure TMainForm.FormCreate(Sender: TObject);
           End;
       End;
   begin
-
+    CanBeZoomed := True;
+    CanBeUnzoomed := False;
+    ResearchMode := False;
+    PlusScaleButton.Enabled := False;
+    MinusScaleButton.Enabled := False;
+    InfoScaleLabel.Enabled := False;
+    ScaleLabel.Enabled := False;
     XFrom := -10;
     XTo := 10;
     YFrom := -10;
@@ -419,10 +424,11 @@ begin
   case Key of
     VK_UP, VK_DOWN:
       Begin
-//        if (not InputEdit.Focused) then
+        if ResearchMode then
           with GraphPicture.Canvas.Pen do
             begin
-              KeyPreview := True;
+              KeyPreview := False;
+              Key := 0;
               ClearPaintBox();
               if (Key = VK_UP) then
                 begin
@@ -447,7 +453,7 @@ begin
       End;
     VK_RIGHT, VK_LEFT:
       begin
-//        if (not InputEdit.Focused) then
+        if ResearchMode then
         with GraphPicture.Canvas.Pen do
           begin
             KeyPreview := True;
@@ -493,8 +499,102 @@ begin
 
             PaintAllGraphs();
           end;
+        Key := 0;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
+    Ord('R'):
+      Begin
+        if (ssCtrl in Shift) then
+          Begin
+            if (not ResearchMode) then
+              Begin
+                PlusScaleButton.Enabled := True;
+                MinusScaleButton.Enabled := True;
+                InfoScaleLabel.Enabled := True;
+                ScaleLabel.Enabled := True;
+                if (MathInput) then
+                  MathInputButtonClick(Sender);
+                for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
+                  RangeAndBuildPanel.Controls[i].Enabled := False;
+                ResearchMode := True
+              End
+            else
+              Begin
+                PlusScaleButton.Enabled := False;
+                MinusScaleButton.Enabled := False;
+                InfoScaleLabel.Enabled := False;
+                ScaleLabel.Enabled := False;
+                for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
+                  RangeAndBuildPanel.Controls[i].Enabled := True;
+                ResearchMode := False;
+              End;
+          End;
+      End;
+    VK_OEM_MINUS:
+      Begin
+        if (ssCtrl in Shift) then
+          Begin
+            if (LBorder = 0) then
+              Begin
+                Inc(XTo, 2);
+                Inc(RBorder, 2*IterationsPerUnit);
+              End
+            else if (RBorder = ITERATION_COUNT) then
+              Begin
+                Dec(XFrom, 2);
+                Dec(LBorder, 2*IterationsPerUnit);
+              End
+            else
+              Begin
+                Dec(XFrom);
+                Dec(LBorder, IterationsPerUnit);
+                Inc(XTo);
+                Inc(RBorder, IterationsPerUnit);
+              End;
+            Dec(YFrom);
+            Inc(YTo);
+            Dec(ZoomStep);
+            Step := GraphPaintBox.Width / (RBorder - LBorder);
+            Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+            CurrXAxisPos := YTo * Scale;
+            CurrYAxisPos := -XFrom * Scale;
+            ClearPaintBox();
+            PaintXAxis(CurrXAxisPos);
+            PaintYAxis(CurrYAxisPos);
+            YOffset := CurrXAxisPos;
+            PaintAllGraphs();
+            GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+            PlusScaleButton.Enabled := True;
+            if (StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text) = XTo - XFrom) then
+              MinusScaleButton.Enabled := False;
+          End;
+      End;
+    VK_OEM_PLUS:
+      Begin
+        if (ssCtrl in Shift) then
+          Begin
+            Inc(XFrom);
+            Dec(XTo);
+            Inc(YFrom);
+            Dec(YTo);
+            Inc(ZoomStep);
+            Inc(LBorder, IterationsPerUnit);
+            Dec(RBorder, IterationsPerUnit);
+            Step := GraphPaintBox.Width / (RBorder - LBorder);
+            Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+            CurrXAxisPos := YTo * Scale;
+            CurrYAxisPos := -XFrom * Scale;
+            ClearPaintBox();
+            PaintXAxis(CurrXAxisPos);
+            PaintYAxis(CurrYAxisPos);
+            YOffset := CurrXAxisPos;
+            PaintAllGraphs();
+            GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+            MinusScaleButton.Enabled := True;
+            if (XTo - XFrom = 4) then
+              PlusScaleButton.Enabled := False;
+          End;
+      End;
   end;
 end;
 
@@ -510,8 +610,6 @@ begin
       Width := ClientHeight + EditPanel.Width;
       PrevHeight := ClientHeight;
     End;
-//  hEight := PrevHeight;
-//  width := prevwidth;
   ClearPaintBox();
   Scale := GraphPaintBox.Width div (XTo - XFrom);
   CurrXAxisPos := YTo * Scale;
@@ -541,19 +639,15 @@ begin
     ShowGraphButton.Enabled := True;
 end;
 
-//procedure TMainForm.InputEditKeyPress(Sender: TObject; var Key: Char);
-//begin
-//  if (Key = #13) then
-//    KeyPreview := True;
-//end;
-
 procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if (Key = VK_RETURN) then
     Begin
       if Self.ShowGraphButton.Enabled then
-        ShowGraphButtonClick(Sender);
+        ShowGraphButtonClick(Sender)
+      else
+        ShowMessage('Ввод некорректен. Построение невозможно.');
       Key := 0;
       KeyPreview := True;
     End;
@@ -585,7 +679,7 @@ end;
 
 procedure TMainForm.RangeFromEditChange(Sender: TObject);
 begin
-  if (CheckInput(RangeFromEdit.Text)) or (XTo <= StrToInt(RangeFromEdit.Text)) then
+  if (not CheckInput(RangeFromEdit.Text)) or (XTo <= StrToInt(RangeFromEdit.Text)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
       ShowGraphButton.Enabled := False;
@@ -614,7 +708,7 @@ end;
 
 procedure TMainForm.RangeToEditChange(Sender: TObject);
 begin
-  if (CheckInput(RangeToEdit.Text)) or (XFrom >= StrToInt(RangeToEdit.Text)) then
+  if (not CheckInput(RangeToEdit.Text)) or (XFrom >= StrToInt(RangeToEdit.Text)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
 
@@ -703,10 +797,13 @@ procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
   GraphAmount := 0;
   ClearPaintBox();
-  XFrom := -10;
-  XTo := 10;
-  YTo := 10;
-  YFrom := -10;
+  XFrom := StrToInt(RangeFromEdit.Text);
+  XTo := StrToInt(RangeToEdit.Text);
+  YTo := Abs((XTo - XFrom) div 2);
+  if ((XTo - XFrom) mod 2 = 1) then
+    YFrom := -YTo - 1
+  else
+    YFrom := -YTo;
   LBorder := 0;
   RBorder := ITERATION_COUNT;
   CurrXAxisPos := YTo * Scale;
@@ -714,12 +811,13 @@ begin
   for var I := 1 to GraphAmount do
     GraphsArray[I].Destroy;
   ClearGraphComboBox.Items.Clear;
+  Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrYAxisPos := -XFrom * Scale;
   YOffset := CurrXAxisPos;
-  PaintYAxis(CurrXAxisPos);
-  PaintXAxis(CurrYAxisPos);
+  PaintXAxis(CurrXAxisPos);
+  PaintYAxis(CurrYAxisPos);
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
-  RangeFromEdit.Text := IntToStr(XFrom);
-  RangeToEdit.Text := IntToStr(XTo);
   SetEditEnabled(True);
   SetClearButtonEnabled(False);
   InputEdit.Enabled := True;
@@ -732,6 +830,7 @@ begin
   PenWidthComboBox.Enabled := True;
   ColorBox.Enabled := True;
   ClearInputButton.Enabled := True;
+  ShowGraphButton.Enabled := False;
 end;
 
 procedure TMainForm.ClearGraphButtonClick(Sender: TObject);
@@ -755,6 +854,8 @@ end;
 
 procedure TMainForm.ClearGraphComboBoxChange(Sender: TObject);
 begin
+  ClearGraphComboBox.Visible := False;
+  ClearGraphComboBox.DroppedDown := False;
   var Index := ClearGraphComboBox.ItemIndex + 1;
   ClearGraphComboBox.Items.Delete(Index - 1);
   GraphsArray[Index].Free;
@@ -777,17 +878,6 @@ begin
   MathInputPanel.Enabled := True;
   ShowGraphButton.Enabled := True;
   ClearInputButton.Enabled := True;
-
-  ClearGraphComboBox.DroppedDown := False;
-  ClearGraphComboBox.Visible := False;
-end;
-
-procedure TMainForm.ClearGraphComboBoxClick(Sender: TObject);
-begin
-  if (GraphAmount > 1) then
-    ClearGraphComboBox.DroppedDown := True
-  else
-    ClearGraphComboBox.DroppedDown := False;
 end;
 
 procedure MathInputEditor(var InputEdit: TEdit; const Text: String);
