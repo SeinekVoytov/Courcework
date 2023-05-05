@@ -86,7 +86,7 @@ object MainForm: TMainForm
       ParentFont = False
       TabOrder = 0
       OnChange = InputEditChange
-      OnKeyPress = InputEditKeyPress
+      OnKeyDown = InputEditKeyDown
     end
     object MathInputButton: TButton
       AlignWithMargins = True

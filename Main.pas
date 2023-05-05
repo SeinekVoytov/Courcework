@@ -73,8 +73,8 @@ Type
     procedure LogButtonClick(Sender: TObject);
     procedure LnButtonClick(Sender: TObject);
     procedure AbsButtonClick(Sender: TObject);
-    {procedure InputEditKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);}
+    procedure InputEditKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     procedure ClearGraphButtonClick(Sender: TObject);
     procedure ClearAllButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -86,7 +86,7 @@ Type
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
     Procedure PaintAllGraphs();
-    procedure InputEditKeyPress(Sender: TObject; var Key: Char);
+    //procedure InputEditKeyPress(Sender: TObject; var Key: Char);
     procedure PlusScaleButtonClick(Sender: TObject);
     procedure MinusScaleButtonClick(Sender: TObject);
     procedure SquareButtonClick(Sender: TObject);
@@ -395,7 +395,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     SetClearButtonEnabled(False);
     SetFormMaxHeight();
     SetFormMaxWidth();
-
+    SystemParametersInfo(SPI_SETBEEP, 0, nil, SPIF_SENDCHANGE);
     WindowState := wsMaximized;
 
     GraphPicture := TBitmap.Create;
@@ -495,12 +495,6 @@ begin
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
-    VK_RETURN:
-      Begin
-        KeyPreview := True;
-        if (ShowGraphButton.Enabled) then
-          ShowGraphButtonClick(Sender);
-      End;
   end;
 end;
 
@@ -547,21 +541,23 @@ begin
     ShowGraphButton.Enabled := True;
 end;
 
-procedure TMainForm.InputEditKeyPress(Sender: TObject; var Key: Char);
-begin
-  if (Key = #13) then
-    KeyPreview := True;
-end;
-
-//procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
-//  Shift: TShiftState);
+//procedure TMainForm.InputEditKeyPress(Sender: TObject; var Key: Char);
 //begin
-//  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
-//    Begin
-//      ShowGraphButtonClick(Sender);
-//      Key := 0;
-//  End;
+//  if (Key = #13) then
+//    KeyPreview := True;
 //end;
+
+procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (Key = VK_RETURN) then
+    Begin
+      if Self.ShowGraphButton.Enabled then
+        ShowGraphButtonClick(Sender);
+      Key := 0;
+      KeyPreview := True;
+    End;
+end;
 
 procedure TMainForm.ClearInputButtonClick(Sender: TObject);
 begin
