@@ -1,4 +1,4 @@
-unit Main;
+﻿unit Main;
 
 interface
 
@@ -86,6 +86,7 @@ Type
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
     Procedure PaintAllGraphs();
+    //procedure InputEditKeyPress(Sender: TObject; var Key: Char);
     procedure PlusScaleButtonClick(Sender: TObject);
     procedure MinusScaleButtonClick(Sender: TObject);
     procedure SquareButtonClick(Sender: TObject);
@@ -509,6 +510,8 @@ begin
       Width := ClientHeight + EditPanel.Width;
       PrevHeight := ClientHeight;
     End;
+//  hEight := PrevHeight;
+//  width := prevwidth;
   ClearPaintBox();
   Scale := GraphPaintBox.Width div (XTo - XFrom);
   CurrXAxisPos := YTo * Scale;
@@ -538,15 +541,19 @@ begin
     ShowGraphButton.Enabled := True;
 end;
 
+//procedure TMainForm.InputEditKeyPress(Sender: TObject; var Key: Char);
+//begin
+//  if (Key = #13) then
+//    KeyPreview := True;
+//end;
+
 procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if (Key = VK_RETURN) then
     Begin
       if Self.ShowGraphButton.Enabled then
-        ShowGraphButtonClick(Sender)
-      else
-        ShowMessage('Ввод некорректен. Построение невозможно.');
+        ShowGraphButtonClick(Sender);
       Key := 0;
       KeyPreview := True;
     End;
@@ -725,7 +732,6 @@ begin
   PenWidthComboBox.Enabled := True;
   ColorBox.Enabled := True;
   ClearInputButton.Enabled := True;
-  ShowGraphButton.Enabled := False;
 end;
 
 procedure TMainForm.ClearGraphButtonClick(Sender: TObject);
@@ -749,8 +755,6 @@ end;
 
 procedure TMainForm.ClearGraphComboBoxChange(Sender: TObject);
 begin
-  ClearGraphComboBox.Visible := False;
-  ClearGraphComboBox.DroppedDown := False;
   var Index := ClearGraphComboBox.ItemIndex + 1;
   ClearGraphComboBox.Items.Delete(Index - 1);
   GraphsArray[Index].Free;
@@ -773,6 +777,9 @@ begin
   MathInputPanel.Enabled := True;
   ShowGraphButton.Enabled := True;
   ClearInputButton.Enabled := True;
+
+  ClearGraphComboBox.DroppedDown := False;
+  ClearGraphComboBox.Visible := False;
 end;
 
 procedure TMainForm.ClearGraphComboBoxClick(Sender: TObject);

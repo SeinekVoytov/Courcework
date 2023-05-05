@@ -353,20 +353,20 @@ object MainForm: TMainForm
       object ColorBox: TColorBox
         Left = 17
         Top = 75
-        Width = 145
+        Width = 125
         Height = 22
         TabOrder = 3
       end
       object PenWidthComboBox: TComboBox
         Left = 17
         Top = 116
-        Width = 145
+        Width = 125
         Height = 21
         Style = csDropDownList
         TabOrder = 4
       end
       object ClearGraphButton: TButton
-        Left = 168
+        Left = 154
         Top = 143
         Width = 91
         Height = 25
@@ -375,7 +375,7 @@ object MainForm: TMainForm
         OnClick = ClearGraphButtonClick
       end
       object ClearAllButton: TButton
-        Left = 168
+        Left = 154
         Top = 184
         Width = 91
         Height = 25
@@ -392,7 +392,7 @@ object MainForm: TMainForm
         TabOrder = 7
       end
       object ClearGraphComboBox: TComboBox
-        Left = 169
+        Left = 154
         Top = 165
         Width = 91
         Height = 21
@@ -400,7 +400,6 @@ object MainForm: TMainForm
         TabOrder = 8
         Visible = False
         OnChange = ClearGraphComboBoxChange
-        OnClick = ClearGraphComboBoxClick
       end
     end
     object ClearInputButton: TButton

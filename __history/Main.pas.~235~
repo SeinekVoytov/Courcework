@@ -51,6 +51,8 @@ Type
     ChooseColorLabel: TLabel;
     ChooseWidthLabel: TLabel;
     ParenthesesButton: TButton;
+    XCubeButton: TButton;
+    CubeButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -71,8 +73,8 @@ Type
     procedure LogButtonClick(Sender: TObject);
     procedure LnButtonClick(Sender: TObject);
     procedure AbsButtonClick(Sender: TObject);
-    {procedure InputEditKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);}
+    procedure InputEditKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     procedure ClearGraphButtonClick(Sender: TObject);
     procedure ClearAllButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -84,15 +86,15 @@ Type
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
     Procedure PaintAllGraphs();
-    procedure InputEditKeyPress(Sender: TObject; var Key: Char);
     procedure PlusScaleButtonClick(Sender: TObject);
     procedure MinusScaleButtonClick(Sender: TObject);
     procedure SquareButtonClick(Sender: TObject);
     procedure XSquareButtonClick(Sender: TObject);
     procedure PiButtonClick(Sender: TObject);
-    procedure ClearGraphComboBoxClick(Sender: TObject);
     procedure ClearGraphComboBoxChange(Sender: TObject);
     procedure ParenthesesButtonClick(Sender: TObject);
+    procedure CubeButtonClick(Sender: TObject);
+    procedure XCubeButtonClick(Sender: TObject);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -337,7 +339,12 @@ Procedure TMainForm.FormCreate(Sender: TObject);
   Procedure SetFormMaxHeight();
     Begin
       var ScreenHeight := GetSystemMetrics(SM_CYSCREEN);
-      Self.Constraints.MaxHeight := ScreenHeight - (Self.Height - Self.ClientHeight);;
+      Self.Constraints.MaxHeight := ScreenHeight - (Self.Height - Self.ClientHeight);
+    End;
+
+  Procedure SetFormMaxWidth();
+    Begin
+      Self.Constraints.MaxWidth := Self.EditPanel.Width + Self.Constraints.MaxHeight;
     End;
 
   Procedure InitPenColorComboBox();
@@ -364,7 +371,6 @@ Procedure TMainForm.FormCreate(Sender: TObject);
           End;
       End;
   begin
-    DoubleBuffered := True;
     XFrom := -10;
     XTo := 10;
     YFrom := -10;
@@ -385,6 +391,10 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     MathInput := False;
     SetClearButtonEnabled(False);
     SetFormMaxHeight();
+    SetFormMaxWidth();
+    SystemParametersInfo(SPI_SETBEEP, 0, nil, SPIF_SENDCHANGE);
+    WindowState := wsMaximized;
+
     GraphPicture := TBitmap.Create;
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
@@ -454,8 +464,6 @@ begin
                       if GraphsArray[I].IsExtremaFound then
                         GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                     End;
-//                EditRangeEdit(RangeFromEdit, 1);
-//                EditRangeEdit(RangeToEdit, 1);
                 Dec(XTo);
                 Dec(XFrom);
               end
@@ -474,8 +482,6 @@ begin
                        if GraphsArray[I].IsExtremaFound then
                         GraphsArray[I].FindExtrema(Self.XFrom, Self.Range);
                      End;
-//                EditRangeEdit(RangeFromEdit, -1);
-//                EditRangeEdit(RangeToEdit, -1);
                 Inc(XTo);
                 Inc(XFrom);
               end;
@@ -486,12 +492,6 @@ begin
           end;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
-    VK_RETURN:
-      Begin
-        KeyPreview := True;
-        if (ShowGraphButton.Enabled) then
-          ShowGraphButtonClick(Sender);
-      End;
   end;
 end;
 
@@ -527,7 +527,7 @@ end;
 
 procedure TMainForm.InputEditChange(Sender: TObject);
 Var
-    Text: String;
+  Text: String;
 begin
   Text := Lowercase(InputEdit.Text);
   if (not IsMathExprValid(Text)) then
@@ -536,21 +536,19 @@ begin
     ShowGraphButton.Enabled := True;
 end;
 
-procedure TMainForm.InputEditKeyPress(Sender: TObject; var Key: Char);
+procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
 begin
-  if (Key = #13) then
-    KeyPreview := True;
+  if (Key = VK_RETURN) then
+    Begin
+      if Self.ShowGraphButton.Enabled then
+        ShowGraphButtonClick(Sender)
+      else
+        ShowMessage('Ввод некорректен. Построение невозможно.');
+      Key := 0;
+      KeyPreview := True;
+    End;
 end;
-
-//procedure TMainForm.InputEditKeyDown(Sender: TObject; var Key: Word;
-//  Shift: TShiftState);
-//begin
-//  if (Key = VK_RETURN) and (ShowGraphButton.Enabled) then
-//    Begin
-//      ShowGraphButtonClick(Sender);
-//      Key := 0;
-//  End;
-//end;
 
 procedure TMainForm.ClearInputButtonClick(Sender: TObject);
 begin
@@ -578,7 +576,7 @@ end;
 
 procedure TMainForm.RangeFromEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeFromEdit.Text) or (XTo <= StrToInt(RangeFromEdit.Text))) then
+  if (not CheckInput(RangeFromEdit.Text)) or (XTo <= StrToInt(RangeFromEdit.Text)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
       ShowGraphButton.Enabled := False;
@@ -607,9 +605,10 @@ end;
 
 procedure TMainForm.RangeToEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeToEdit.Text) or (XFrom >= StrToInt(RangeToEdit.Text))) then
+  if (not CheckInput(RangeToEdit.Text)) or (XFrom >= StrToInt(RangeToEdit.Text)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
+
       ShowGraphButton.Enabled := False;
     End
   else
@@ -695,10 +694,13 @@ procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
   GraphAmount := 0;
   ClearPaintBox();
-  XFrom := -10;
-  XTo := 10;
-  YTo := 10;
-  YFrom := -10;
+  XFrom := StrToInt(RangeFromEdit.Text);
+  XTo := StrToInt(RangeToEdit.Text);
+  YTo := Abs((XTo - XFrom) div 2);
+  if ((XTo - XFrom) mod 2 = 1) then
+    YFrom := -YTo - 1
+  else
+    YFrom := -YTo;
   LBorder := 0;
   RBorder := ITERATION_COUNT;
   CurrXAxisPos := YTo * Scale;
@@ -706,12 +708,13 @@ begin
   for var I := 1 to GraphAmount do
     GraphsArray[I].Destroy;
   ClearGraphComboBox.Items.Clear;
+  Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+  CurrXAxisPos := Abs(YTo) * Scale;
+  CurrYAxisPos := -XFrom * Scale;
   YOffset := CurrXAxisPos;
   PaintYAxis(CurrXAxisPos);
   PaintXAxis(CurrYAxisPos);
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
-  RangeFromEdit.Text := IntToStr(XFrom);
-  RangeToEdit.Text := IntToStr(XTo);
   SetEditEnabled(True);
   SetClearButtonEnabled(False);
   InputEdit.Enabled := True;
@@ -724,6 +727,7 @@ begin
   PenWidthComboBox.Enabled := True;
   ColorBox.Enabled := True;
   ClearInputButton.Enabled := True;
+  ShowGraphButton.Enabled := False;
 end;
 
 procedure TMainForm.ClearGraphButtonClick(Sender: TObject);
@@ -747,6 +751,8 @@ end;
 
 procedure TMainForm.ClearGraphComboBoxChange(Sender: TObject);
 begin
+  ClearGraphComboBox.Visible := False;
+  ClearGraphComboBox.DroppedDown := False;
   var Index := ClearGraphComboBox.ItemIndex + 1;
   ClearGraphComboBox.Items.Delete(Index - 1);
   GraphsArray[Index].Free;
@@ -768,17 +774,7 @@ begin
   PenWidthComboBox.Enabled := True;
   MathInputPanel.Enabled := True;
   ShowGraphButton.Enabled := True;
-
-  ClearGraphComboBox.DroppedDown := False;
-  ClearGraphComboBox.Visible := False;
-end;
-
-procedure TMainForm.ClearGraphComboBoxClick(Sender: TObject);
-begin
-  if (GraphAmount > 1) then
-    ClearGraphComboBox.DroppedDown := True
-  else
-    ClearGraphComboBox.DroppedDown := False;
+  ClearInputButton.Enabled := True;
 end;
 
 procedure MathInputEditor(var InputEdit: TEdit; const Text: String);
@@ -859,6 +855,11 @@ begin
   MathInputEditor(Self.InputEdit, '()^2');
 end;
 
+procedure TMainForm.CubeButtonClick(Sender: TObject);
+begin
+  MathInputEditor(Self.InputEdit, '()^3');
+end;
+
 procedure TMainForm.ParenthesesButtonClick(Sender: TObject);
 begin
   MathInputEditor(Self.InputEdit, '()');
@@ -872,6 +873,19 @@ begin
   CurrInput := InputEdit.Text;
   CurrCursorPos := InputEdit.SelStart;
   Insert('x^2', CurrInput, CurrCursorPos + 1);
+  InputEdit.Text := CurrInput;
+  InputEdit.SetFocus;
+  InputEdit.SelStart := CurrCursorPos + 3;
+end;
+
+procedure TMainForm.XCubeButtonClick(Sender: TObject);
+var
+  CurrInput: String;
+  CurrCursorPos: Integer;
+begin
+  CurrInput := InputEdit.Text;
+  CurrCursorPos := InputEdit.SelStart;
+  Insert('x^3', CurrInput, CurrCursorPos + 1);
   InputEdit.Text := CurrInput;
   InputEdit.SetFocus;
   InputEdit.SelStart := CurrCursorPos + 3;
