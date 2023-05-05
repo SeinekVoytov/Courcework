@@ -47,7 +47,6 @@ object MainForm: TMainForm
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitLeft = 180
     DesignSize = (
       274
       602)

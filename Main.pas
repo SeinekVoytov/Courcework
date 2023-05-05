@@ -589,7 +589,7 @@ end;
 
 procedure TMainForm.RangeFromEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeFromEdit.Text) or (XTo <= StrToInt(RangeFromEdit.Text))) then
+  if (CheckInput(RangeFromEdit.Text)) or (XTo <= StrToInt(RangeFromEdit.Text)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
       ShowGraphButton.Enabled := False;
@@ -618,9 +618,10 @@ end;
 
 procedure TMainForm.RangeToEditChange(Sender: TObject);
 begin
-  if (not CheckInput(RangeToEdit.Text) or (XFrom >= StrToInt(RangeToEdit.Text))) then
+  if (CheckInput(RangeToEdit.Text)) or (XFrom >= StrToInt(RangeToEdit.Text)) then
     Begin
       // покраснение рамки edit и блокировка кнопки
+
       ShowGraphButton.Enabled := False;
     End
   else
@@ -779,6 +780,7 @@ begin
   PenWidthComboBox.Enabled := True;
   MathInputPanel.Enabled := True;
   ShowGraphButton.Enabled := True;
+  ClearInputButton.Enabled := True;
 
   ClearGraphComboBox.DroppedDown := False;
   ClearGraphComboBox.Visible := False;
