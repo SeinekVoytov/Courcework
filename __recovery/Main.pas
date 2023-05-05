@@ -546,7 +546,7 @@ begin
       if Self.ShowGraphButton.Enabled then
         ShowGraphButtonClick(Sender)
       else
-        ShowMessage('Ввод некорректен');
+        ShowMessage('Ввод некорректен. Построение невозможно.');
       Key := 0;
       KeyPreview := True;
     End;
@@ -749,6 +749,8 @@ end;
 
 procedure TMainForm.ClearGraphComboBoxChange(Sender: TObject);
 begin
+  ClearGraphComboBox.Visible := False;
+  ClearGraphComboBox.DroppedDown := False;
   var Index := ClearGraphComboBox.ItemIndex + 1;
   ClearGraphComboBox.Items.Delete(Index - 1);
   GraphsArray[Index].Free;
@@ -771,9 +773,6 @@ begin
   MathInputPanel.Enabled := True;
   ShowGraphButton.Enabled := True;
   ClearInputButton.Enabled := True;
-
-  ClearGraphComboBox.DroppedDown := False;
-  ClearGraphComboBox.Visible := False;
 end;
 
 procedure TMainForm.ClearGraphComboBoxClick(Sender: TObject);
