@@ -47,6 +47,18 @@ object MainForm: TMainForm
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
+    object HintLabel: TLabel
+      Left = 9
+      Top = 496
+      Width = 3
+      Height = 15
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsItalic]
+      ParentFont = False
+    end
     object MathInputPanel: TPanel
       Left = 0
       Top = 308

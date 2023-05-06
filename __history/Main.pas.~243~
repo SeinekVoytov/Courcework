@@ -39,13 +39,9 @@ Type
     ClearGraphButton: TButton;
     ClearAllButton: TButton;
     ClearInputButton: TButton;
-    MinusScaleButton: TButton;
-    PlusScaleButton: TButton;
     SquareButton: TButton;
     XSquareButton: TButton;
     PiButton: TButton;
-    ScaleLabel: TLabel;
-    InfoScaleLabel: TLabel;
     ExtremaCheckBox: TCheckBox;
     ClearGraphComboBox: TComboBox;
     ChooseColorLabel: TLabel;
@@ -86,8 +82,6 @@ Type
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
     Procedure PaintAllGraphs();
-    procedure PlusScaleButtonClick(Sender: TObject);
-    procedure MinusScaleButtonClick(Sender: TObject);
     procedure SquareButtonClick(Sender: TObject);
     procedure XSquareButtonClick(Sender: TObject);
     procedure PiButtonClick(Sender: TObject);
@@ -120,7 +114,8 @@ const
 
 var
   MainForm: TMainForm;
-  ZoomFactor: Byte;
+  researchmode: Boolean;
+  CanBeZoomed, CanBeUnzoomed: Boolean;
 
 implementation
 
@@ -178,70 +173,6 @@ begin
   CurrX := StrToInt(RangeEdit.Text);
   Inc(CurrX, Delta);
   RangeEdit.Text := IntToStr(CurrX);
-end;
-
-procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
-begin
-  EditScaleLabel(ScaleLabel, 10);
-  Inc(XFrom);
-  Dec(XTo);
-  Inc(YFrom);
-  Dec(YTo);
-  Inc(ZoomStep);
-  Inc(LBorder, IterationsPerUnit);
-  Dec(RBorder, IterationsPerUnit);
-  Step := GraphPaintBox.Width / (RBorder - LBorder);
-  Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := YTo * Scale;
-  CurrYAxisPos := -XFrom * Scale;
-  ClearPaintBox();
-  PaintXAxis(CurrXAxisPos);
-  PaintYAxis(CurrYAxisPos);
-  YOffset := CurrXAxisPos;
-  PaintAllGraphs();
-  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-  MinusScaleButton.Enabled := True;
-  if (XTo - XFrom = 4) then
-    PlusScaleButton.Enabled := False;
-
-end;
-
-procedure TMainForm.MinusScaleButtonClick(Sender: TObject);
-begin
-  EditScaleLabel(ScaleLabel, -10);
-  if (LBorder = 0) then
-    Begin
-      Inc(XTo, 2);
-      Inc(RBorder, 2*IterationsPerUnit);
-    End
-  else if (RBorder = ITERATION_COUNT) then
-    Begin
-      Dec(XFrom, 2);
-      Dec(LBorder, 2*IterationsPerUnit);
-    End
-  else
-    Begin
-      Dec(XFrom);
-      Dec(LBorder, IterationsPerUnit);
-      Inc(XTo);
-      Inc(RBorder, IterationsPerUnit);
-    End;
-  Dec(YFrom);
-  Inc(YTo);
-  Dec(ZoomStep);
-  Step := GraphPaintBox.Width / (RBorder - LBorder);
-  Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := YTo * Scale;
-  CurrYAxisPos := -XFrom * Scale;
-  ClearPaintBox();
-  PaintXAxis(CurrXAxisPos);
-  PaintYAxis(CurrYAxisPos);
-  YOffset := CurrXAxisPos;
-  PaintAllGraphs();
-  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-  PlusScaleButton.Enabled := True;
-  if (StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text) = XTo - XFrom) then
-    MinusScaleButton.Enabled := False;
 end;
 
 Procedure TMainForm.PaintXAxis(const Y: Integer);
@@ -371,6 +302,9 @@ Procedure TMainForm.FormCreate(Sender: TObject);
           End;
       End;
   begin
+    CanBeZoomed := True;
+    CanBeUnzoomed := False;
+    ResearchMode := False;
     XFrom := -10;
     XTo := 10;
     YFrom := -10;
@@ -399,7 +333,6 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
     ShowGraphButton.Enabled := False;
-    MinusScaleButton.Enabled := False;
     InitPenWidthComboBox();
     InitPenColorComboBox();
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
@@ -416,10 +349,11 @@ begin
   case Key of
     VK_UP, VK_DOWN:
       Begin
-//        if (not InputEdit.Focused) then
+        if ResearchMode then
           with GraphPicture.Canvas.Pen do
             begin
-              KeyPreview := True;
+              KeyPreview := False;
+              Key := 0;
               ClearPaintBox();
               if (Key = VK_UP) then
                 begin
@@ -444,7 +378,7 @@ begin
       End;
     VK_RIGHT, VK_LEFT:
       begin
-//        if (not InputEdit.Focused) then
+        if ResearchMode then
         with GraphPicture.Canvas.Pen do
           begin
             KeyPreview := True;
@@ -490,8 +424,104 @@ begin
 
             PaintAllGraphs();
           end;
+        Key := 0;
         GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
+    Ord('R'):
+      Begin
+        if (ssCtrl in Shift) then
+          Begin
+            if (not ResearchMode) then
+              Begin
+                if (MathInput) then
+                  MathInputButtonClick(Sender);
+                for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
+                  RangeAndBuildPanel.Controls[i].Enabled := False;
+                ResearchMode := True
+              End
+            else
+              Begin
+                for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
+                  RangeAndBuildPanel.Controls[i].Enabled := True;
+                ResearchMode := False;
+              End;
+          End;
+      End;
+    VK_OEM_MINUS:
+      Begin
+        if (ssCtrl in Shift) and (ResearchMode) then
+          Begin
+            if (not CanBeunzoomed) then
+              ShowMessage('Достигнут максимальный уровень отдаления')
+            else
+              Begin
+                CanBeZoomed := True;
+                if (LBorder = 0) then
+                  Begin
+                    Inc(XTo, 2);
+                    Inc(RBorder, 2*IterationsPerUnit);
+                  End
+                else if (RBorder = ITERATION_COUNT) then
+                  Begin
+                    Dec(XFrom, 2);
+                    Dec(LBorder, 2*IterationsPerUnit);
+                  End
+                else
+                  Begin
+                    Dec(XFrom);
+                    Dec(LBorder, IterationsPerUnit);
+                    Inc(XTo);
+                    Inc(RBorder, IterationsPerUnit);
+                  End;
+                Dec(YFrom);
+                Inc(YTo);
+                Dec(ZoomStep);
+                Step := GraphPaintBox.Width / (RBorder - LBorder);
+                Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+                CurrXAxisPos := YTo * Scale;
+                CurrYAxisPos := -XFrom * Scale;
+                ClearPaintBox();
+                PaintXAxis(CurrXAxisPos);
+                PaintYAxis(CurrYAxisPos);
+                YOffset := CurrXAxisPos;
+                PaintAllGraphs();
+                GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+                if (StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text) = XTo - XFrom) then
+                  CanBeUnzoomed := False;
+              End;
+          End;
+      End;
+    VK_OEM_PLUS:
+      Begin
+        if (ssCtrl in Shift) and (ResearchMode) then
+          Begin
+            if (not CanBeZoomed) then
+              ShowMessage('Достигнут максимальный уровень приближения')
+            else
+              Begin
+                CanBeUnzoomed := True;
+                Inc(XFrom);
+                Dec(XTo);
+                Inc(YFrom);
+                Dec(YTo);
+                Inc(ZoomStep);
+                Inc(LBorder, IterationsPerUnit);
+                Dec(RBorder, IterationsPerUnit);
+                Step := GraphPaintBox.Width / (RBorder - LBorder);
+                Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+                CurrXAxisPos := YTo * Scale;
+                CurrYAxisPos := -XFrom * Scale;
+                ClearPaintBox();
+                PaintXAxis(CurrXAxisPos);
+                PaintYAxis(CurrYAxisPos);
+                YOffset := CurrXAxisPos;
+                PaintAllGraphs();
+                GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+                if (XTo - XFrom = 4) then
+                  CanBeZoomed := False;
+              End;
+          End;
+      End;
   end;
 end;
 
@@ -712,11 +742,9 @@ begin
   CurrXAxisPos := Abs(YTo) * Scale;
   CurrYAxisPos := -XFrom * Scale;
   YOffset := CurrXAxisPos;
-  PaintYAxis(CurrXAxisPos);
-  PaintXAxis(CurrYAxisPos);
+  PaintXAxis(CurrXAxisPos);
+  PaintYAxis(CurrYAxisPos);
   GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
-  RangeFromEdit.Text := IntToStr(XFrom);
-  RangeToEdit.Text := IntToStr(XTo);
   SetEditEnabled(True);
   SetClearButtonEnabled(False);
   InputEdit.Enabled := True;

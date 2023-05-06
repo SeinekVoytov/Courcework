@@ -49,6 +49,7 @@ Type
     ParenthesesButton: TButton;
     XCubeButton: TButton;
     CubeButton: TButton;
+    HintLabel: TLabel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -301,10 +302,16 @@ Procedure TMainForm.FormCreate(Sender: TObject);
             ItemIndex := 1;
           End;
       End;
+    const
+      HINT_LABEL_CAPTION = '* включен режим исследования графика' + #10#13 +
+      #10#13 + 'для увеличения масштаба нажмите Ctrl + "+", ' + #10#13 +
+      'для уменьшения - Ctrl + "-"';
   begin
     CanBeZoomed := True;
     CanBeUnzoomed := False;
     ResearchMode := False;
+    HintLabel.Caption := HINT_LABEL_CAPTION;
+    HintLabel.Visible := False;
     XFrom := -10;
     XTo := 10;
     YFrom := -10;
@@ -353,7 +360,6 @@ begin
           with GraphPicture.Canvas.Pen do
             begin
               KeyPreview := False;
-              Key := 0;
               ClearPaintBox();
               if (Key = VK_UP) then
                 begin
@@ -374,6 +380,7 @@ begin
               PaintYAxis(CurrYAxisPos);
               PaintAllGraphs();
             end;
+          Key := 0;
           GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       End;
     VK_RIGHT, VK_LEFT:
@@ -433,6 +440,7 @@ begin
           Begin
             if (not ResearchMode) then
               Begin
+                HintLabel.Visible := True;
                 if (MathInput) then
                   MathInputButtonClick(Sender);
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
@@ -441,6 +449,7 @@ begin
               End
             else
               Begin
+                HintLabel.Visible := False;
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
                   RangeAndBuildPanel.Controls[i].Enabled := True;
                 ResearchMode := False;
