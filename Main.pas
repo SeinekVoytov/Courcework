@@ -90,6 +90,7 @@ Type
     procedure ParenthesesButtonClick(Sender: TObject);
     procedure CubeButtonClick(Sender: TObject);
     procedure XCubeButtonClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
@@ -264,6 +265,38 @@ begin
       Rectangle(0, 0, Self.GraphPaintBox.Width, Self.GraphPaintBox.Height);
       Pen.Color := Color;
     End;
+end;
+
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+var
+  IsBuilt: Boolean;
+begin
+  IsBuilt := False;
+  for var I := Low(GraphsArray) to High(GraphsArray) do
+    if (GraphsArray[I] <> nil) then
+      Begin
+        IsBuilt := True;
+        break;
+      End;
+  if (IsBuilt) then
+    Begin
+      var UserChoice := MessageDlg('Сохранить полученное изображение?', mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+        case UserChoice of
+          mrYes:
+            Begin
+              {сохранение в файл}
+              CanClose := True;
+            End;
+          mrNo:
+            Begin
+              CanClose := True;
+            End;
+          mrCancel:
+            CanClose := False;
+        end;
+    End
+  else
+    CanClose := True;
 end;
 
 Procedure TMainForm.FormCreate(Sender: TObject);
@@ -732,7 +765,6 @@ end;
 
 procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
-  GraphAmount := 0;
   ClearPaintBox();
   XFrom := StrToInt(RangeFromEdit.Text);
   XTo := StrToInt(RangeToEdit.Text);
@@ -747,6 +779,9 @@ begin
   CurrYAxisPos := -XFrom * Scale;
   for var I := 1 to GraphAmount do
     GraphsArray[I].Destroy;
+  for var I := 1 to GraphAmount do
+    GraphsArray[I] := nil;
+  GraphAmount := 0;
   ClearGraphComboBox.Items.Clear;
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;

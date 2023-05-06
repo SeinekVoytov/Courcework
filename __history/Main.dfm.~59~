@@ -3,7 +3,7 @@ object MainForm: TMainForm
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   BorderStyle = bsSingle
-  Caption = 'GraphBuilder'
+  Caption = 'MainForm'
   ClientHeight = 612
   ClientWidth = 886
   Color = clBtnFace

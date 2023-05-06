@@ -3,7 +3,7 @@ object MainForm: TMainForm
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   BorderStyle = bsSingle
-  Caption = 'MainForm'
+  Caption = 'GraphBuilder'
   ClientHeight = 612
   ClientWidth = 886
   Color = clBtnFace
@@ -17,6 +17,7 @@ object MainForm: TMainForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poDesigned
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnResize = FormResize
