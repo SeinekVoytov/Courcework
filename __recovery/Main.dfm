@@ -1,9 +1,11 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
-  Caption = 'MainForm'
-  ClientHeight = 602
-  ClientWidth = 876
+  BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
+  BorderStyle = bsSingle
+  Caption = 'GraphBuilder'
+  ClientHeight = 612
+  ClientWidth = 886
   Color = clBtnFace
   Constraints.MinHeight = 641
   Constraints.MinWidth = 892
@@ -23,30 +25,35 @@ object MainForm: TMainForm
   object GraphPanel: TPanel
     Left = 274
     Top = 0
-    Width = 602
-    Height = 602
+    Width = 612
+    Height = 612
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 602
+    ExplicitHeight = 602
     object GraphPaintBox: TPaintBox
       Left = 1
       Top = 1
-      Width = 600
-      Height = 600
+      Width = 610
+      Height = 610
       Align = alClient
       OnPaint = GraphPaintBoxPaint
       ExplicitLeft = -10
       ExplicitTop = -47
+      ExplicitWidth = 600
+      ExplicitHeight = 600
     end
   end
   object EditPanel: TPanel
     Left = 0
     Top = 0
     Width = 274
-    Height = 602
+    Height = 612
     Align = alLeft
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitHeight = 602
     object HintLabel: TLabel
       Left = 9
       Top = 496
@@ -285,7 +292,7 @@ object MainForm: TMainForm
         Top = 58
         Width = 41
         Height = 21
-        TabOrder = 4
+        TabOrder = 3
         Text = '-10'
         OnChange = RangeFromEditChange
       end
@@ -294,7 +301,7 @@ object MainForm: TMainForm
         Top = 58
         Width = 45
         Height = 21
-        TabOrder = 6
+        TabOrder = 4
         Text = '10'
         OnChange = RangeToEditChange
       end
@@ -304,7 +311,7 @@ object MainForm: TMainForm
         Width = 105
         Height = 25
         Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
-        TabOrder = 0
+        TabOrder = 7
         OnClick = ShowGraphButtonClick
       end
       object ColorBox: TColorBox
@@ -312,7 +319,7 @@ object MainForm: TMainForm
         Top = 105
         Width = 125
         Height = 22
-        TabOrder = 8
+        TabOrder = 5
       end
       object PenWidthComboBox: TComboBox
         Left = 17
@@ -320,7 +327,7 @@ object MainForm: TMainForm
         Width = 125
         Height = 21
         Style = csDropDownList
-        TabOrder = 10
+        TabOrder = 6
       end
       object ClearGraphButton: TButton
         Left = 154
@@ -328,7 +335,7 @@ object MainForm: TMainForm
         Width = 91
         Height = 25
         Caption = #1057#1090#1077#1088#1077#1090#1100' '#1075#1088#1072#1092#1080#1082
-        TabOrder = 5
+        TabOrder = 8
         OnClick = ClearGraphButtonClick
       end
       object ClearAllButton: TButton
@@ -337,7 +344,7 @@ object MainForm: TMainForm
         Width = 91
         Height = 25
         Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
-        TabOrder = 7
+        TabOrder = 9
         OnClick = ClearAllButtonClick
       end
       object ExtremaCheckBox: TCheckBox
@@ -346,7 +353,7 @@ object MainForm: TMainForm
         Width = 119
         Height = 17
         Caption = #1048#1089#1082#1072#1090#1100' '#1101#1082#1089#1090#1088#1077#1084#1091#1084#1099
-        TabOrder = 9
+        TabOrder = 10
       end
       object ClearGraphComboBox: TComboBox
         Left = 154
@@ -370,7 +377,7 @@ object MainForm: TMainForm
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
-        TabOrder = 1
+        TabOrder = 0
         OnChange = InputEditChange
         OnKeyDown = InputEditKeyDown
       end
@@ -380,7 +387,7 @@ object MainForm: TMainForm
         Width = 21
         Height = 21
         Caption = #10006
-        TabOrder = 2
+        TabOrder = 1
         OnClick = ClearInputButtonClick
       end
       object MathInputButton: TButton
@@ -394,7 +401,7 @@ object MainForm: TMainForm
         Caption = #55357#56507
         ParentShowHint = False
         ShowHint = True
-        TabOrder = 3
+        TabOrder = 2
         OnClick = MathInputButtonClick
       end
     end
