@@ -18,7 +18,7 @@ Type
     LeftBound: Integer;
     constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     destructor Destroy();
-    procedure Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
+    Function Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer): Boolean;
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
     procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo: Integer);
@@ -68,7 +68,7 @@ implementation
       inherited;
     End;
 
-  procedure TGraph.Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer);
+  Function TGraph.Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer): Boolean;
   var
     WasNan: Boolean;
     CurrX: Real;
@@ -76,6 +76,7 @@ implementation
     I: Integer;
     Begin
       WasNan := True;
+      Result := False;
       CurrX := 0;
       Bitmap.Canvas.Pen.Color := Self.Color;
       Bitmap.Canvas.Pen.Width := Self.Width;
@@ -90,9 +91,13 @@ implementation
             begin
               Bitmap.Canvas.MoveTo(Trunc(CurrX), CurrY);
               WasNan := False;
+              Result := True;
             End
           else
-            Bitmap.Canvas.LineTo(Trunc(CurrX), CurrY);
+            Begin
+              Bitmap.Canvas.LineTo(Trunc(CurrX), CurrY);
+              Result := True;
+            End;
 
           CurrX := CurrX + XStep;
         End;

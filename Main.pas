@@ -213,7 +213,7 @@ Procedure TMainForm.PaintAllGraphs();
 Begin
   for var I := 1 to GraphAmount do
     Begin
-      GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
+     GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
       if GraphsArray[I].IsExtremaFound then
         GraphsArray[I].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.XTo, Self.YTo);
     End;
@@ -713,7 +713,8 @@ begin
       GraphsArray[GraphAmount].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.XTo, Self.YTo);
     End;
 
-  GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
+  if (not GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)) then
+    ShowMessage('График не существует на указанном промежутке');
 
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
