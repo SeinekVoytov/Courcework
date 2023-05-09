@@ -50,6 +50,7 @@ Type
     XCubeButton: TButton;
     CubeButton: TButton;
     HintLabel: TLabel;
+    SavePictureButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -91,7 +92,7 @@ Type
     procedure CubeButtonClick(Sender: TObject);
     procedure XCubeButtonClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-
+    procedure SavePicture();
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
     GraphsArray: array [1..3] of TGraph;
@@ -122,6 +123,19 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TMainForm.SavePicture();
+var
+  SaveDialog: TFileOpenDialog;
+begin
+  SaveDialog := TFileOpenDialog.Create(Self);
+  try
+    SaveDialog.Title := 'Выберите директорию для сохранения изображения';
+    SaveDialog.Options := SaveDialog.Options + [fdoPickFolders];
+  finally
+    SaveDialog.Free();
+  end;
+end;
 
 Procedure TMainForm.PaintYAxis(const X: Integer);
 const
@@ -284,6 +298,7 @@ begin
         case UserChoice of
           mrYes:
             Begin
+              {сохранение в файл}
               CanClose := True;
             End;
           mrNo:
@@ -296,7 +311,6 @@ begin
     End
   else
     CanClose := True;
-  GraphPicture.SaveToFile('\\Mac\Home\Desktop\NewFolder');
 end;
 
 Procedure TMainForm.FormCreate(Sender: TObject);
@@ -373,6 +387,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
     ShowGraphButton.Enabled := False;
+    SavePictureButton.Visible := False;
     InitPenWidthComboBox();
     InitPenColorComboBox();
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
@@ -713,6 +728,7 @@ procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
     CurrExpr: String;
 begin
   Inc(GraphAmount);
+  SavePictureButton.Visible := True;
   SetEditEnabled(False);
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
@@ -766,6 +782,7 @@ end;
 procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
   ClearPaintBox();
+  SavePictureButton.Visible := False;
   XFrom := StrToInt(RangeFromEdit.Text);
   XTo := StrToInt(RangeToEdit.Text);
   YTo := Abs((XTo - XFrom) div 2);
@@ -839,6 +856,8 @@ begin
     End;
 
   Dec(GraphAmount);
+  if (GraphAmount = 0) then
+    SavePictureButton.Visible := False;
   ClearPaintBox();
   PaintYAxis(CurrYAxisPos);
   PaintXAxis(CurrXAxisPos);

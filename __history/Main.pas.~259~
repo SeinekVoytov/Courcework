@@ -49,6 +49,8 @@ Type
     ParenthesesButton: TButton;
     XCubeButton: TButton;
     CubeButton: TButton;
+    HintLabel: TLabel;
+    SavePictureButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -82,8 +84,6 @@ Type
     Procedure SetEditEnabled(const Value: Boolean);
     Procedure SetClearButtonEnabled(const Value: Boolean);
     Procedure PaintAllGraphs();
-    procedure PlusScaleButtonClick(Sender: TObject);
-    procedure MinusScaleButtonClick(Sender: TObject);
     procedure SquareButtonClick(Sender: TObject);
     procedure XSquareButtonClick(Sender: TObject);
     procedure PiButtonClick(Sender: TObject);
@@ -91,7 +91,9 @@ Type
     procedure ParenthesesButtonClick(Sender: TObject);
     procedure CubeButtonClick(Sender: TObject);
     procedure XCubeButtonClick(Sender: TObject);
-
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure SavePicture();
+    procedure SavePictureButtonClick(Sender: TObject);
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
     GraphsArray: array [1..3] of TGraph;
@@ -122,6 +124,28 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TMainForm.SavePicture();
+var
+  SaveDialog: TFileOpenDialog;
+begin
+  SaveDialog := TFileOpenDialog.Create(Self);
+  try
+    SaveDialog.Title := 'Выберите директорию для сохранения изображения';
+    SaveDialog.Options := SaveDialog.Options + [fdoPickFolders];
+    if (SaveDialog.Execute) then
+      Begin
+
+      End;
+  finally
+    SaveDialog.Free();
+  end;
+end;
+
+procedure TMainForm.SavePictureButtonClick(Sender: TObject);
+begin
+  SavePicture();
+end;
 
 Procedure TMainForm.PaintYAxis(const X: Integer);
 const
@@ -177,70 +201,6 @@ begin
   RangeEdit.Text := IntToStr(CurrX);
 end;
 
-procedure TMainForm.PlusScaleButtonClick(Sender: TObject);
-begin
-  EditScaleLabel(ScaleLabel, 10);
-  Inc(XFrom);
-  Dec(XTo);
-  Inc(YFrom);
-  Dec(YTo);
-  Inc(ZoomStep);
-  Inc(LBorder, IterationsPerUnit);
-  Dec(RBorder, IterationsPerUnit);
-  Step := GraphPaintBox.Width / (RBorder - LBorder);
-  Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := YTo * Scale;
-  CurrYAxisPos := -XFrom * Scale;
-  ClearPaintBox();
-  PaintXAxis(CurrXAxisPos);
-  PaintYAxis(CurrYAxisPos);
-  YOffset := CurrXAxisPos;
-  PaintAllGraphs();
-  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-  MinusScaleButton.Enabled := True;
-  if (XTo - XFrom = 4) then
-    PlusScaleButton.Enabled := False;
-
-end;
-
-procedure TMainForm.MinusScaleButtonClick(Sender: TObject);
-begin
-  EditScaleLabel(ScaleLabel, -10);
-  if (LBorder = 0) then
-    Begin
-      Inc(XTo, 2);
-      Inc(RBorder, 2*IterationsPerUnit);
-    End
-  else if (RBorder = ITERATION_COUNT) then
-    Begin
-      Dec(XFrom, 2);
-      Dec(LBorder, 2*IterationsPerUnit);
-    End
-  else
-    Begin
-      Dec(XFrom);
-      Dec(LBorder, IterationsPerUnit);
-      Inc(XTo);
-      Inc(RBorder, IterationsPerUnit);
-    End;
-  Dec(YFrom);
-  Inc(YTo);
-  Dec(ZoomStep);
-  Step := GraphPaintBox.Width / (RBorder - LBorder);
-  Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
-  CurrXAxisPos := YTo * Scale;
-  CurrYAxisPos := -XFrom * Scale;
-  ClearPaintBox();
-  PaintXAxis(CurrXAxisPos);
-  PaintYAxis(CurrYAxisPos);
-  YOffset := CurrXAxisPos;
-  PaintAllGraphs();
-  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-  PlusScaleButton.Enabled := True;
-  if (StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text) = XTo - XFrom) then
-    MinusScaleButton.Enabled := False;
-end;
-
 Procedure TMainForm.PaintXAxis(const Y: Integer);
 const
   ARROW_WIDTH = 10;
@@ -257,9 +217,9 @@ begin
       Pen.Width := STANDART_PEN_WIDTH;
       Pen.Color := clBlack;
       MoveTo(0, Y);
-      LineTo(Self.GraphPaintBox.Width, Y);     // axis painting
+      LineTo(Self.GraphPaintBox.Width, Y);
       X := Scale;
-      for I := Self.XFrom + 1 to Self.XTo - 1 do      // sticks painting
+      for I := Self.XFrom + 1 to Self.XTo - 1 do
         Begin
           MoveTo(X, Self.CurrXAxisPos - STICK_WIDTH);
           LineTo(X, Self.CurrXAxisPos + STICK_WIDTH);
@@ -278,7 +238,7 @@ Procedure TMainForm.PaintAllGraphs();
 Begin
   for var I := 1 to GraphAmount do
     Begin
-      GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
+     GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
       if GraphsArray[I].IsExtremaFound then
         GraphsArray[I].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.XTo, Self.YTo);
     End;
@@ -331,6 +291,38 @@ begin
     End;
 end;
 
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+var
+  IsBuilt: Boolean;
+begin
+  IsBuilt := False;
+  for var I := Low(GraphsArray) to High(GraphsArray) do
+    if (GraphsArray[I] <> nil) then
+      Begin
+        IsBuilt := True;
+        break;
+      End;
+  if (IsBuilt) then
+    Begin
+      var UserChoice := MessageDlg('Сохранить полученное изображение?', mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+        case UserChoice of
+          mrYes:
+            Begin
+              SavePicture();
+              CanClose := True;
+            End;
+          mrNo:
+            Begin
+              CanClose := True;
+            End;
+          mrCancel:
+            CanClose := False;
+        end;
+    End
+  else
+    CanClose := True;
+end;
+
 Procedure TMainForm.FormCreate(Sender: TObject);
 
   Procedure SetFormMaxHeight();
@@ -367,14 +359,16 @@ Procedure TMainForm.FormCreate(Sender: TObject);
             ItemIndex := 1;
           End;
       End;
+    const
+      HINT_LABEL_CAPTION = '* включен режим исследования графика' + #10#13 +
+      #10#13 + 'для увеличения масштаба нажмите Ctrl + "+", ' + #10#13 +
+      'для уменьшения - Ctrl + "-"';
   begin
     CanBeZoomed := True;
     CanBeUnzoomed := False;
     ResearchMode := False;
-    PlusScaleButton.Enabled := False;
-    MinusScaleButton.Enabled := False;
-    InfoScaleLabel.Enabled := False;
-    ScaleLabel.Enabled := False;
+    HintLabel.Caption := HINT_LABEL_CAPTION;
+    HintLabel.Visible := False;
     XFrom := -10;
     XTo := 10;
     YFrom := -10;
@@ -403,7 +397,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
     ShowGraphButton.Enabled := False;
-    MinusScaleButton.Enabled := False;
+    SavePictureButton.Visible := False;
     InitPenWidthComboBox();
     InitPenColorComboBox();
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
@@ -424,7 +418,6 @@ begin
           with GraphPicture.Canvas.Pen do
             begin
               KeyPreview := False;
-              Key := 0;
               ClearPaintBox();
               if (Key = VK_UP) then
                 begin
@@ -445,6 +438,7 @@ begin
               PaintYAxis(CurrYAxisPos);
               PaintAllGraphs();
             end;
+          Key := 0;
           GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       End;
     VK_RIGHT, VK_LEFT:
@@ -504,10 +498,7 @@ begin
           Begin
             if (not ResearchMode) then
               Begin
-                PlusScaleButton.Enabled := True;
-                MinusScaleButton.Enabled := True;
-                InfoScaleLabel.Enabled := True;
-                ScaleLabel.Enabled := True;
+                HintLabel.Visible := True;
                 if (MathInput) then
                   MathInputButtonClick(Sender);
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
@@ -516,10 +507,7 @@ begin
               End
             else
               Begin
-                PlusScaleButton.Enabled := False;
-                MinusScaleButton.Enabled := False;
-                InfoScaleLabel.Enabled := False;
-                ScaleLabel.Enabled := False;
+                HintLabel.Visible := False;
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
                   RangeAndBuildPanel.Controls[i].Enabled := True;
                 ResearchMode := False;
@@ -565,7 +553,6 @@ begin
                 YOffset := CurrXAxisPos;
                 PaintAllGraphs();
                 GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-                PlusScaleButton.Enabled := True;
                 if (StrToInt(RangeToEdit.Text) - StrToInt(RangeFromEdit.Text) = XTo - XFrom) then
                   CanBeUnzoomed := False;
               End;
@@ -597,7 +584,6 @@ begin
                 YOffset := CurrXAxisPos;
                 PaintAllGraphs();
                 GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-                MinusScaleButton.Enabled := True;
                 if (XTo - XFrom = 4) then
                   CanBeZoomed := False;
               End;
@@ -752,6 +738,7 @@ procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
     CurrExpr: String;
 begin
   Inc(GraphAmount);
+  SavePictureButton.Visible := True;
   SetEditEnabled(False);
   SetClearButtonEnabled(True);
   CurrX := XFrom - LBorder div IterationsPerUnit;
@@ -785,7 +772,8 @@ begin
       GraphsArray[GraphAmount].PaintExtremaDots(Self.GraphPicture, Self.Scale, Self.XFrom, Self.XTo, Self.YTo);
     End;
 
-  GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
+  if (not GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)) then
+    ShowMessage('График не существует на указанном промежутке');
 
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
@@ -803,8 +791,8 @@ end;
 
 procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
-  GraphAmount := 0;
   ClearPaintBox();
+  SavePictureButton.Visible := False;
   XFrom := StrToInt(RangeFromEdit.Text);
   XTo := StrToInt(RangeToEdit.Text);
   YTo := Abs((XTo - XFrom) div 2);
@@ -818,6 +806,9 @@ begin
   CurrYAxisPos := -XFrom * Scale;
   for var I := 1 to GraphAmount do
     GraphsArray[I].Destroy;
+  for var I := 1 to GraphAmount do
+    GraphsArray[I] := nil;
+  GraphAmount := 0;
   ClearGraphComboBox.Items.Clear;
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   CurrXAxisPos := Abs(YTo) * Scale;
@@ -875,6 +866,8 @@ begin
     End;
 
   Dec(GraphAmount);
+  if (GraphAmount = 0) then
+    SavePictureButton.Visible := False;
   ClearPaintBox();
   PaintYAxis(CurrYAxisPos);
   PaintXAxis(CurrXAxisPos);

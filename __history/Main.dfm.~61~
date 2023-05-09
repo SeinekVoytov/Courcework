@@ -1,9 +1,11 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
-  Caption = 'MainForm'
-  ClientHeight = 602
-  ClientWidth = 876
+  BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
+  BorderStyle = bsSingle
+  Caption = 'GraphBuilder'
+  ClientHeight = 612
+  ClientWidth = 886
   Color = clBtnFace
   Constraints.MinHeight = 641
   Constraints.MinWidth = 892
@@ -15,6 +17,7 @@ object MainForm: TMainForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poDesigned
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnResize = FormResize
@@ -23,84 +26,46 @@ object MainForm: TMainForm
   object GraphPanel: TPanel
     Left = 274
     Top = 0
-    Width = 602
-    Height = 602
+    Width = 612
+    Height = 612
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 602
+    ExplicitHeight = 602
     object GraphPaintBox: TPaintBox
       Left = 1
       Top = 1
-      Width = 600
-      Height = 600
+      Width = 610
+      Height = 610
       Align = alClient
       OnPaint = GraphPaintBoxPaint
       ExplicitLeft = -10
       ExplicitTop = -47
+      ExplicitWidth = 600
+      ExplicitHeight = 600
     end
   end
   object EditPanel: TPanel
     Left = 0
     Top = 0
     Width = 274
-    Height = 602
+    Height = 612
     Align = alLeft
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
-    DesignSize = (
-      274
-      602)
-    object ScaleLabel: TLabel
-      Left = 40
-      Top = 573
-      Width = 29
-      Height = 13
-      Anchors = [akLeft, akBottom]
-      Caption = '100%'
+    ExplicitHeight = 602
+    object HintLabel: TLabel
+      Left = 9
+      Top = 496
+      Width = 3
+      Height = 15
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsItalic]
       ParentFont = False
-    end
-    object InfoScaleLabel: TLabel
-      Left = 15
-      Top = 552
-      Width = 45
-      Height = 13
-      Anchors = [akLeft, akBottom]
-      Caption = #1052#1072#1089#1096#1090#1072#1073
-    end
-    object InputEdit: TEdit
-      Left = 16
-      Top = 36
-      Width = 193
-      Height = 20
-      BorderStyle = bsNone
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -15
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-      TabOrder = 0
-      OnChange = InputEditChange
-      OnKeyDown = InputEditKeyDown
-    end
-    object MathInputButton: TButton
-      AlignWithMargins = True
-      Left = 223
-      Top = 36
-      Width = 21
-      Height = 21
-      Hint = #1052#1072#1090#1077#1084#1072#1090#1080#1095#1077#1089#1082#1080#1081' '#1074#1074#1086#1076
-      Cancel = True
-      Caption = #55357#56507
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 1
-      OnClick = MathInputButtonClick
     end
     object MathInputPanel: TPanel
       Left = 0
@@ -114,7 +79,7 @@ object MainForm: TMainForm
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-      TabOrder = 2
+      TabOrder = 0
       object SinButton: TButton
         Left = 87
         Top = 6
@@ -283,153 +248,163 @@ object MainForm: TMainForm
     end
     object RangeAndBuildPanel: TPanel
       Left = -1
-      Top = 65
+      Top = 32
       Width = 269
-      Height = 224
+      Height = 257
       BevelOuter = bvNone
-      TabOrder = 3
+      TabOrder = 1
       object RangeLabel: TLabel
         Left = 17
-        Top = 9
+        Top = 39
         Width = 110
         Height = 13
         Caption = #1043#1088#1072#1085#1080#1094#1099' '#1087#1086#1089#1090#1088#1086#1077#1085#1080#1103':'
       end
       object ToLabel: TLabel
         Left = 82
-        Top = 31
+        Top = 61
         Width = 13
         Height = 13
         Caption = #1076#1086
       end
       object FromLabel: TLabel
         Left = 20
-        Top = 31
+        Top = 61
         Width = 14
         Height = 13
         Caption = #1054#1090
       end
       object ChooseColorLabel: TLabel
         Left = 20
-        Top = 58
+        Top = 88
         Width = 72
         Height = 13
         Caption = #1062#1074#1077#1090' '#1075#1088#1072#1092#1080#1082#1072
       end
       object ChooseWidthLabel: TLabel
         Left = 20
-        Top = 100
+        Top = 130
         Width = 91
         Height = 13
         Caption = #1058#1086#1083#1097#1080#1085#1072' '#1075#1088#1072#1092#1080#1082#1072
       end
       object RangeFromEdit: TEdit
         Left = 37
-        Top = 28
+        Top = 58
         Width = 41
         Height = 21
-        TabOrder = 0
+        TabOrder = 3
         Text = '-10'
         OnChange = RangeFromEditChange
       end
       object RangeToEdit: TEdit
         Left = 98
-        Top = 28
+        Top = 58
         Width = 45
         Height = 21
-        TabOrder = 1
+        TabOrder = 4
         Text = '10'
         OnChange = RangeToEditChange
       end
       object ShowGraphButton: TButton
         Left = 37
-        Top = 143
+        Top = 173
         Width = 105
         Height = 25
         Caption = #1055#1086#1089#1090#1088#1086#1080#1090#1100' '#1075#1088#1072#1092#1080#1082
-        TabOrder = 2
+        TabOrder = 7
         OnClick = ShowGraphButtonClick
       end
       object ColorBox: TColorBox
         Left = 17
-        Top = 75
+        Top = 105
         Width = 125
         Height = 22
-        TabOrder = 3
+        TabOrder = 5
       end
       object PenWidthComboBox: TComboBox
         Left = 17
-        Top = 116
+        Top = 146
         Width = 125
         Height = 21
         Style = csDropDownList
-        TabOrder = 4
+        TabOrder = 6
       end
       object ClearGraphButton: TButton
         Left = 154
-        Top = 143
+        Top = 173
         Width = 91
         Height = 25
         Caption = #1057#1090#1077#1088#1077#1090#1100' '#1075#1088#1072#1092#1080#1082
-        TabOrder = 5
+        TabOrder = 8
         OnClick = ClearGraphButtonClick
       end
       object ClearAllButton: TButton
         Left = 154
-        Top = 184
+        Top = 210
         Width = 91
         Height = 25
         Caption = 'O'#1095#1080#1089#1090#1080#1090#1100' '
-        TabOrder = 6
+        TabOrder = 9
         OnClick = ClearAllButtonClick
       end
       object ExtremaCheckBox: TCheckBox
         Left = 16
-        Top = 184
+        Top = 214
         Width = 119
         Height = 17
         Caption = #1048#1089#1082#1072#1090#1100' '#1101#1082#1089#1090#1088#1077#1084#1091#1084#1099
-        TabOrder = 7
+        TabOrder = 10
       end
       object ClearGraphComboBox: TComboBox
         Left = 154
-        Top = 165
+        Top = 195
         Width = 91
         Height = 21
         Style = csDropDownList
-        TabOrder = 8
+        TabOrder = 11
         Visible = False
         OnChange = ClearGraphComboBoxChange
       end
-    end
-    object ClearInputButton: TButton
-      Left = 204
-      Top = 36
-      Width = 21
-      Height = 21
-      Caption = #10006
-      TabOrder = 4
-      OnClick = ClearInputButtonClick
-    end
-    object MinusScaleButton: TButton
-      Left = 15
-      Top = 568
-      Width = 25
-      Height = 25
-      Anchors = [akLeft, akBottom]
-      Caption = '-'
-      TabOrder = 5
-      OnClick = MinusScaleButtonClick
-    end
-    object PlusScaleButton: TButton
-      Left = 69
-      Top = 568
-      Width = 25
-      Height = 25
-      Anchors = [akLeft, akBottom]
-      Caption = '+'
-      TabOrder = 6
-      OnClick = PlusScaleButtonClick
+      object InputEdit: TEdit
+        Left = 16
+        Top = 10
+        Width = 193
+        Height = 20
+        BorderStyle = bsNone
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -15
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 0
+        OnChange = InputEditChange
+        OnKeyDown = InputEditKeyDown
+      end
+      object ClearInputButton: TButton
+        Left = 204
+        Top = 9
+        Width = 21
+        Height = 21
+        Caption = #10006
+        TabOrder = 1
+        OnClick = ClearInputButtonClick
+      end
+      object MathInputButton: TButton
+        AlignWithMargins = True
+        Left = 223
+        Top = 9
+        Width = 21
+        Height = 21
+        Hint = #1052#1072#1090#1077#1084#1072#1090#1080#1095#1077#1089#1082#1080#1081' '#1074#1074#1086#1076
+        Cancel = True
+        Caption = #55357#56507
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 2
+        OnClick = MathInputButtonClick
+      end
     end
   end
 end

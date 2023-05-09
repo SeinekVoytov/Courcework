@@ -30,8 +30,6 @@ object MainForm: TMainForm
     Height = 612
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 602
-    ExplicitHeight = 602
     object GraphPaintBox: TPaintBox
       Left = 1
       Top = 1
@@ -54,7 +52,6 @@ object MainForm: TMainForm
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitHeight = 602
     object HintLabel: TLabel
       Left = 9
       Top = 496
@@ -405,6 +402,16 @@ object MainForm: TMainForm
         TabOrder = 2
         OnClick = MathInputButtonClick
       end
+    end
+    object SavePictureButton: TButton
+      Left = 64
+      Top = 586
+      Width = 115
+      Height = 25
+      Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100' '#1082#1072#1088#1090#1080#1085#1082#1091
+      TabOrder = 2
+      TabStop = False
+      OnClick = SavePictureButtonClick
     end
   end
 end
