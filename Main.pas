@@ -157,7 +157,7 @@ const
 var
   Width: Integer;
   Color: TColor;
-  Y, I: Integer;
+  Y, I, SticksStep: Integer;
 begin
   Width := Self.GraphPicture.Canvas.Pen.Width;
   Color := Self.GraphPicture.Canvas.Pen.Color;
@@ -168,6 +168,7 @@ begin
       MoveTo(X, 0);
       LineTo(X, Self.GraphPaintBox.Height);       // axis painting
       Y := Self.Scale;
+      //SticksStep := Trunc((Self.XTo - Self.XFrom) / 20);
       for I := Self.YTo - 1 downto Self.YFrom + 1  do      // sticks painting
         Begin
           if (I <> 0) then
@@ -211,7 +212,7 @@ const
 var
   Width: Integer;
   Color: TColor;
-  X, I: Integer;
+  X, I, SticksStep: Integer;
 begin
   with Self.GraphPicture.Canvas do
     begin
@@ -222,6 +223,19 @@ begin
       MoveTo(0, Y);
       LineTo(Self.GraphPaintBox.Width, Y);
       X := Scale;
+      if (Self.XTo - Self.XFrom < 20) then
+        SticksStep := 1
+      else
+        SticksStep := Trunc((Self.XTo - Self.XFrom) / 20);
+//      I := Self.XFrom + 1;
+//      while (I < Self.XTo - 1) do
+//        Begin
+//          MoveTo(X, Self.CurrXAxisPos - STICK_WIDTH);
+//          LineTo(X, Self.CurrXAxisPos + STICK_WIDTH);
+//          TextOut(X, Self.CurrXAxisPos + STICK_WIDTH, IntToStr(I));
+//          X := X + Self.Scale * SticksStep;
+//          Inc(I, SticksStep);
+//        End;
       for I := Self.XFrom + 1 to Self.XTo - 1 do
         Begin
           MoveTo(X, Self.CurrXAxisPos - STICK_WIDTH);
@@ -777,7 +791,16 @@ begin
     End;
 
   if (not GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)) then
-    ShowMessage('График не существует на указанном промежутке');
+    Begin
+      if (GraphAmount = 1) then
+        Begin
+          IsPictureSaved := False;
+          SavePictureButton.Visible := False;
+        End;
+      ShowMessage('График не существует на указанном промежутке');
+      GraphsArray[GraphAmount].Destroy;
+      Dec(GraphAmount);
+    End;
 
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
