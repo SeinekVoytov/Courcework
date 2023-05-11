@@ -521,7 +521,10 @@ begin
                   MathInputButtonClick(Sender);
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
                   RangeAndBuildPanel.Controls[i].Enabled := False;
-                ResearchMode := True
+                ResearchMode := True;
+
+                if (SavePictureButton.Visible) then
+                  SavePictureButton.Visible := False;
               End
             else
               Begin
@@ -529,6 +532,9 @@ begin
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
                   RangeAndBuildPanel.Controls[i].Enabled := True;
                 ResearchMode := False;
+
+                if (not IsPictureSaved) then
+                  SavePictureButton.Visible := True;
               End;
           End;
       End;
