@@ -513,9 +513,9 @@ begin
             PaintYAxis(CurrYAxisPos);
             IsPictureSaved := False;
             PaintAllGraphs();
+            Key := 0;
+            GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
           end;
-        Key := 0;
-        GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
     Ord('R'):
       Begin
@@ -683,7 +683,7 @@ begin
       InputEdit.SelStart := InputEdit.SelStart + 1;
       Key := 0;
     End
-  else if (Key = LEFT) then
+  else if (Key = VK_LEFT) then
     Begin
       InputEdit.SelStart := InputEdit.SelStart - 1;
       Key := 0;
