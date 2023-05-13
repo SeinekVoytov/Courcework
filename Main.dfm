@@ -20,6 +20,7 @@ object MainForm: TMainForm
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
+  OnMouseDown = FormMouseDown
   OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
@@ -36,6 +37,7 @@ object MainForm: TMainForm
       Width = 610
       Height = 610
       Align = alClient
+      OnMouseDown = GraphPaintBoxMouseDown
       OnPaint = GraphPaintBoxPaint
       ExplicitLeft = -10
       ExplicitTop = -47
@@ -52,6 +54,7 @@ object MainForm: TMainForm
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     TabOrder = 1
+    OnMouseDown = EditPanelMouseDown
     object HintLabel: TLabel
       Left = 9
       Top = 496
@@ -244,8 +247,8 @@ object MainForm: TMainForm
       end
     end
     object RangeAndBuildPanel: TPanel
-      Left = -1
-      Top = 32
+      Left = 5
+      Top = 37
       Width = 269
       Height = 257
       BevelOuter = bvNone
@@ -362,10 +365,11 @@ object MainForm: TMainForm
         TabOrder = 11
         Visible = False
         OnChange = ClearGraphComboBoxChange
+        OnExit = ClearGraphComboBoxExit
       end
       object InputEdit: TEdit
-        Left = 16
-        Top = 10
+        Left = 37
+        Top = 13
         Width = 193
         Height = 20
         BorderStyle = bsNone
@@ -380,18 +384,19 @@ object MainForm: TMainForm
         OnKeyDown = InputEditKeyDown
       end
       object ClearInputButton: TButton
-        Left = 204
-        Top = 9
+        Left = 225
+        Top = 12
         Width = 21
         Height = 21
+        Hint = #1054#1095#1080#1089#1090#1080#1090#1100' '#1074#1074#1086#1076
         Caption = #10006
         TabOrder = 1
         OnClick = ClearInputButtonClick
       end
       object MathInputButton: TButton
         AlignWithMargins = True
-        Left = 223
-        Top = 9
+        Left = 244
+        Top = 12
         Width = 21
         Height = 21
         Hint = #1052#1072#1090#1077#1084#1072#1090#1080#1095#1077#1089#1082#1080#1081' '#1074#1074#1086#1076
@@ -401,6 +406,14 @@ object MainForm: TMainForm
         ShowHint = True
         TabOrder = 2
         OnClick = MathInputButtonClick
+      end
+      object RecentInputButton: TButton
+        Left = 188
+        Top = 56
+        Width = 21
+        Height = 21
+        Caption = #55357#56675
+        TabOrder = 12
       end
     end
     object SavePictureButton: TButton

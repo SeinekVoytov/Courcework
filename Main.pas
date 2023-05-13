@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
-  Checker, Calculator, Converter, List, Graph;
+  Checker, Calculator, Converter, List, Graph, IOUtils;
 
 Type
   TMainForm = class(TForm)
@@ -51,6 +51,7 @@ Type
     CubeButton: TButton;
     HintLabel: TLabel;
     SavePictureButton: TButton;
+    RecentInputButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -94,6 +95,13 @@ Type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure SavePicture();
     procedure SavePictureButtonClick(Sender: TObject);
+    procedure ClearGraphComboBoxExit(Sender: TObject);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure EditPanelMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure GraphPaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
     GraphsArray: array [1..3] of TGraph;
@@ -106,7 +114,6 @@ Type
     LBorder, RBorder: Integer;
     IterationsPerUnit: Integer;
     PrevWidth, PrevHeight: Integer;
-    ZoomStep: Byte;
     IsPictureSaved: Boolean;
   public
     GraphPicture: TBitmap;
@@ -136,8 +143,9 @@ begin
     SaveDialog.Options := SaveDialog.Options + [fdoPickFolders];
     if (SaveDialog.Execute) then
       Begin
-        var SelectedDirectory := ExtractFilePath(SaveDialog.FileName);
-        GraphPicture.SaveToFile(SelectedDirectory);
+        var SelectedDirectory := SaveDialog.FileName;
+        var ImagePath := TPath.Combine(SelectedDirectory, 'Graph.png');
+        GraphPicture.SaveToFile(ImagePath);
       End;
   finally
     SaveDialog.Free();
@@ -389,7 +397,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
       'для уменьшения - Ctrl + "-"';
   begin
     CanBeZoomed := True;
-    IsPictureSaved := False;
+    IsPictureSaved := True;
     CanBeUnzoomed := False;
     ResearchMode := False;
     HintLabel.Caption := HINT_LABEL_CAPTION;
@@ -406,7 +414,6 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     CurrYAxisPos := GraphPaintBox.Width div 2;
     YOffset := CurrXAxisPos;
     LBorder := 0;
-    ZoomStep := 0;
     RBorder := ITERATION_COUNT;
     PrevWidth := ClientWidth;
     PrevHeight := ClientHeight;
@@ -573,7 +580,6 @@ begin
                   End;
                 Dec(YFrom);
                 Inc(YTo);
-                Dec(ZoomStep);
                 Step := GraphPaintBox.Width / (RBorder - LBorder);
                 Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
                 CurrXAxisPos := YTo * Scale;
@@ -603,7 +609,6 @@ begin
                 Dec(XTo);
                 Inc(YFrom);
                 Dec(YTo);
-                Inc(ZoomStep);
                 Inc(LBorder, IterationsPerUnit);
                 Dec(RBorder, IterationsPerUnit);
                 Step := GraphPaintBox.Width / (RBorder - LBorder);
@@ -623,6 +628,17 @@ begin
           End;
       End;
   end;
+end;
+
+procedure TMainForm.FormMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if (ClearGraphComboBox.Visible) and (not PtInRect(ClearGraphComboBox.BoundsRect, Point(X, Y))) then
+    Begin
+      ClearGraphComboBox.DroppedDown := False;
+      ClearGraphComboBox.Visible := False;
+      ClearGraphButton.SetFocus;
+    End;
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
@@ -648,6 +664,17 @@ begin
   PaintAllGraphs();
   GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+end;
+
+procedure TMainForm.GraphPaintBoxMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if (ClearGraphComboBox.Visible) and (not PtInRect(ClearGraphComboBox.BoundsRect, Point(X, Y))) then
+    Begin
+      ClearGraphComboBox.DroppedDown := False;
+      ClearGraphComboBox.Visible := False;
+      ClearGraphButton.SetFocus;
+    End;
 end;
 
 procedure TMainForm.GraphPaintBoxPaint(Sender: TObject);
@@ -688,9 +715,6 @@ begin
       InputEdit.SelStart := InputEdit.SelStart - 1;
       Key := 0;
     End;
-
-
-
 end;
 
 procedure TMainForm.ClearInputButtonClick(Sender: TObject);
@@ -820,7 +844,7 @@ begin
     Begin
       if (GraphAmount = 1) then
         Begin
-          IsPictureSaved := False;
+          IsPictureSaved := True;
           SavePictureButton.Visible := False;
         End;
       ShowMessage('График не существует на указанном промежутке');
@@ -844,7 +868,7 @@ end;
 
 procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
-  IsPictureSaved := False;
+  IsPictureSaved := True;
   ClearPaintBox();
   SavePictureButton.Visible := False;
   XFrom := StrToInt(RangeFromEdit.Text);
@@ -888,14 +912,15 @@ end;
 
 procedure TMainForm.ClearGraphButtonClick(Sender: TObject);
 begin
-  IsPictureSaved := False;
   if (GraphAmount > 1) then
     Begin
+      IsPictureSaved := False;
       ClearGraphComboBox.Visible := True;
       ClearGraphComboBox.DroppedDown := True;
     End
   else
     Begin
+      IsPictureSaved := True;
       ClearGraphComboBox.ItemIndex := 0;
       ClearGraphComboBoxChange(Sender);
     End;
@@ -933,6 +958,12 @@ begin
   MathInputPanel.Enabled := True;
   ShowGraphButton.Enabled := True;
   ClearInputButton.Enabled := True;
+end;
+
+procedure TMainForm.ClearGraphComboBoxExit(Sender: TObject);
+begin
+  ClearGraphComboBox.Visible := False;
+  ClearGraphComboBox.DroppedDown := False;
 end;
 
 procedure MathInputEditor(var InputEdit: TEdit; const Text: String);
@@ -1016,6 +1047,17 @@ end;
 procedure TMainForm.CubeButtonClick(Sender: TObject);
 begin
   MathInputEditor(Self.InputEdit, '()^3');
+end;
+
+procedure TMainForm.EditPanelMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  if (ClearGraphComboBox.Visible) and (not PtInRect(ClearGraphComboBox.BoundsRect, Point(X, Y))) then
+    Begin
+      ClearGraphComboBox.DroppedDown := False;
+      ClearGraphComboBox.Visible := False;
+      ClearGraphButton.SetFocus;
+    End;
 end;
 
 procedure TMainForm.ParenthesesButtonClick(Sender: TObject);

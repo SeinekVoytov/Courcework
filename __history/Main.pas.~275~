@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
-  Checker, Calculator, Converter, List, Graph;
+  Checker, Calculator, Converter, List, Graph, IOUtils;
 
 Type
   TMainForm = class(TForm)
@@ -51,6 +51,7 @@ Type
     CubeButton: TButton;
     HintLabel: TLabel;
     SavePictureButton: TButton;
+    RecentInputButton: TButton;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -106,14 +107,14 @@ Type
     LBorder, RBorder: Integer;
     IterationsPerUnit: Integer;
     PrevWidth, PrevHeight: Integer;
-    ZoomStep: Byte;
+
     IsPictureSaved: Boolean;
   public
     GraphPicture: TBitmap;
   end;
 
 const
-  ITERATION_COUNT = 10000;
+  ITERATION_COUNT = 20000;
   MAX_GRAPH_AMOUNT = 3;
   STANDART_PEN_WIDTH = 3;
 
@@ -136,8 +137,9 @@ begin
     SaveDialog.Options := SaveDialog.Options + [fdoPickFolders];
     if (SaveDialog.Execute) then
       Begin
-        var SelectedDirectory := ExtractFilePath(SaveDialog.FileName);
-        GraphPicture.SaveToFile(SelectedDirectory);
+        var SelectedDirectory := SaveDialog.FileName;
+        var ImagePath := TPath.Combine(SelectedDirectory, 'Graph.png');
+        GraphPicture.SaveToFile(ImagePath);
       End;
   finally
     SaveDialog.Free();
@@ -146,7 +148,15 @@ end;
 
 procedure TMainForm.SavePictureButtonClick(Sender: TObject);
 begin
+  IsPictureSaved := True;
   SavePicture();
+end;
+
+Function CalcSticksStep(CoordFrom, CoordTo: Integer): Real;
+var
+  Range: Integer;
+begin
+  Range := CoordTo - CoordFrom;
 end;
 
 Procedure TMainForm.PaintYAxis(const X: Integer);
@@ -156,7 +166,7 @@ const
 var
   Width: Integer;
   Color: TColor;
-  Y, I: Integer;
+  Y, I, SticksStep: Integer;
 begin
   Width := Self.GraphPicture.Canvas.Pen.Width;
   Color := Self.GraphPicture.Canvas.Pen.Color;
@@ -167,6 +177,7 @@ begin
       MoveTo(X, 0);
       LineTo(X, Self.GraphPaintBox.Height);       // axis painting
       Y := Self.Scale;
+      //SticksStep := Trunc((Self.XTo - Self.XFrom) / 20);
       for I := Self.YTo - 1 downto Self.YFrom + 1  do      // sticks painting
         Begin
           if (I <> 0) then
@@ -210,7 +221,7 @@ const
 var
   Width: Integer;
   Color: TColor;
-  X, I: Integer;
+  X, I, SticksStep: Integer;
 begin
   with Self.GraphPicture.Canvas do
     begin
@@ -221,6 +232,19 @@ begin
       MoveTo(0, Y);
       LineTo(Self.GraphPaintBox.Width, Y);
       X := Scale;
+      if (Self.XTo - Self.XFrom < 20) then
+        SticksStep := 1
+      else
+        SticksStep := Trunc((Self.XTo - Self.XFrom) / 20);
+//      I := Self.XFrom + 1;
+//      while (I < Self.XTo - 1) do
+//        Begin
+//          MoveTo(X, Self.CurrXAxisPos - STICK_WIDTH);
+//          LineTo(X, Self.CurrXAxisPos + STICK_WIDTH);
+//          TextOut(X, Self.CurrXAxisPos + STICK_WIDTH, IntToStr(I));
+//          X := X + Self.Scale * SticksStep;
+//          Inc(I, SticksStep);
+//        End;
       for I := Self.XFrom + 1 to Self.XTo - 1 do
         Begin
           MoveTo(X, Self.CurrXAxisPos - STICK_WIDTH);
@@ -304,7 +328,7 @@ begin
         IsBuilt := True;
         break;
       End;
-  if (IsBuilt) then
+  if (not IsPictureSaved) then
     Begin
       var UserChoice := MessageDlg('Сохранить полученное изображение?', mtConfirmation, [mbYes, mbNo, mbCancel], 0);
         case UserChoice of
@@ -384,7 +408,6 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     CurrYAxisPos := GraphPaintBox.Width div 2;
     YOffset := CurrXAxisPos;
     LBorder := 0;
-    ZoomStep := 0;
     RBorder := ITERATION_COUNT;
     PrevWidth := ClientWidth;
     PrevHeight := ClientHeight;
@@ -491,9 +514,9 @@ begin
             PaintYAxis(CurrYAxisPos);
             IsPictureSaved := False;
             PaintAllGraphs();
+            Key := 0;
+            GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
           end;
-        Key := 0;
-        GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
       end;
     Ord('R'):
       Begin
@@ -506,7 +529,10 @@ begin
                   MathInputButtonClick(Sender);
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
                   RangeAndBuildPanel.Controls[i].Enabled := False;
-                ResearchMode := True
+                ResearchMode := True;
+
+                if (SavePictureButton.Visible) then
+                  SavePictureButton.Visible := False;
               End
             else
               Begin
@@ -514,6 +540,9 @@ begin
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
                   RangeAndBuildPanel.Controls[i].Enabled := True;
                 ResearchMode := False;
+
+                if (not IsPictureSaved) then
+                  SavePictureButton.Visible := True;
               End;
           End;
       End;
@@ -545,7 +574,6 @@ begin
                   End;
                 Dec(YFrom);
                 Inc(YTo);
-                Dec(ZoomStep);
                 Step := GraphPaintBox.Width / (RBorder - LBorder);
                 Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
                 CurrXAxisPos := YTo * Scale;
@@ -575,7 +603,6 @@ begin
                 Dec(XTo);
                 Inc(YFrom);
                 Dec(YTo);
-                Inc(ZoomStep);
                 Inc(LBorder, IterationsPerUnit);
                 Dec(RBorder, IterationsPerUnit);
                 Step := GraphPaintBox.Width / (RBorder - LBorder);
@@ -649,6 +676,16 @@ begin
         ShowMessage('Ввод некорректен. Построение невозможно.');
       Key := 0;
       KeyPreview := True;
+    End
+  else if (Key = VK_RIGHT) then
+    Begin
+      InputEdit.SelStart := InputEdit.SelStart + 1;
+      Key := 0;
+    End
+  else if (Key = VK_LEFT) then
+    Begin
+      InputEdit.SelStart := InputEdit.SelStart - 1;
+      Key := 0;
     End;
 end;
 
@@ -776,7 +813,16 @@ begin
     End;
 
   if (not GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)) then
-    ShowMessage('График не существует на указанном промежутке');
+    Begin
+      if (GraphAmount = 1) then
+        Begin
+          IsPictureSaved := False;
+          SavePictureButton.Visible := False;
+        End;
+      ShowMessage('График не существует на указанном промежутке');
+      GraphsArray[GraphAmount].Destroy;
+      Dec(GraphAmount);
+    End;
 
   GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
   if (GraphAmount = MAX_GRAPH_AMOUNT) then
