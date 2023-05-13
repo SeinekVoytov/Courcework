@@ -26,7 +26,7 @@ Type
   end;
 
 const
-  ITERATION_COUNT = 10000;
+  ITERATION_COUNT = 20000;
 
 implementation
   constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);

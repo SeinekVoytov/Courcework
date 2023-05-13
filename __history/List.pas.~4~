@@ -3,7 +3,7 @@ unit List;
 interface
 
 Type
-  TDotArray = array [1..20000] of Real;
+  TDotArray = array [1..10000] of Real;
 
 Type
   PNode = ^TListNode;

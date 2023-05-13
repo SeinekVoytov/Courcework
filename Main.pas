@@ -113,7 +113,7 @@ Type
   end;
 
 const
-  ITERATION_COUNT = 10000;
+  ITERATION_COUNT = 20000;
   MAX_GRAPH_AMOUNT = 3;
   STANDART_PEN_WIDTH = 3;
 
@@ -148,6 +148,13 @@ procedure TMainForm.SavePictureButtonClick(Sender: TObject);
 begin
   IsPictureSaved := True;
   SavePicture();
+end;
+
+Function CalcSticksStep(CoordFrom, CoordTo: Integer): Real;
+var
+  Range: Integer;
+begin
+  Range := CoordTo - CoordFrom;
 end;
 
 Procedure TMainForm.PaintYAxis(const X: Integer);
@@ -670,7 +677,20 @@ begin
         ShowMessage('Ввод некорректен. Построение невозможно.');
       Key := 0;
       KeyPreview := True;
+    End
+  else if (Key = VK_RIGHT) then
+    Begin
+      InputEdit.SelStart := InputEdit.SelStart + 1;
+      Key := 0;
+    End
+  else if (Key = LEFT) then
+    Begin
+      InputEdit.SelStart := InputEdit.SelStart - 1;
+      Key := 0;
     End;
+
+
+
 end;
 
 procedure TMainForm.ClearInputButtonClick(Sender: TObject);

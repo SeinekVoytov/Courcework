@@ -1,4 +1,4 @@
-unit Main;
+﻿unit Main;
 
 interface
 
@@ -113,7 +113,7 @@ Type
   end;
 
 const
-  ITERATION_COUNT = 10000;
+  ITERATION_COUNT = 20000;
   MAX_GRAPH_AMOUNT = 3;
   STANDART_PEN_WIDTH = 3;
 
@@ -148,6 +148,13 @@ procedure TMainForm.SavePictureButtonClick(Sender: TObject);
 begin
   IsPictureSaved := True;
   SavePicture();
+end;
+
+Function CalcSticksStep(CoordFrom, CoordTo: Integer): Real;
+var
+  Range: Integer;
+begin
+  Range := CoordTo - CoordFrom;
 end;
 
 Procedure TMainForm.PaintYAxis(const X: Integer);
