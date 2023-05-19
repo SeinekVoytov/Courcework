@@ -3,14 +3,13 @@ unit List;
 interface
 
 Type
-  TDotArray = array [1..20000] of Real;
+  TDotArray = array [1..2] of array [1..10000] of Real;
 
 Type
   PNode = ^TListNode;
 
   TListNode = record
-    X: Real;
-    Y: Real;
+    Index: Integer;
     Next: PNode;
   end;
 
@@ -20,7 +19,7 @@ Type
       Head: PNode;
     public
       function GetHead(): PNode;
-      procedure Add(X, Y: Real);
+      procedure Add(Index: Integer);
       function IsEmpty(): Boolean;
       constructor Create();
       destructor Destroy();
@@ -33,7 +32,7 @@ implementation
       Result := Head;
     End;
 
-  procedure TList.Add(X, Y: Real);
+  procedure TList.Add(Index: Integer);
     var
       CurrNode: PNode;
     Begin
@@ -42,8 +41,7 @@ implementation
         CurrNode := CurrNode.Next;
       New(CurrNode.Next);
       CurrNode := CurrNode.Next;
-      CurrNode^.X := X;
-      CurrNode^.Y := Y;
+      CurrNode^.Index := Index;
       CurrNode^.Next := nil;
     End;
 

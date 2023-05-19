@@ -117,7 +117,7 @@ Type
   end;
 
 const
-  ITERATION_COUNT = 20000;
+  ITERATION_COUNT = 10000;
   MAX_GRAPH_AMOUNT = 3;
   STANDART_PEN_WIDTH = 3;
 
@@ -153,13 +153,6 @@ procedure TMainForm.SavePictureButtonClick(Sender: TObject);
 begin
   IsPictureSaved := True;
   SavePicture();
-end;
-
-Function CalcSticksStep(CoordFrom, CoordTo: Integer): Real;
-var
-  Range: Integer;
-begin
-  Range := CoordTo - CoordFrom;
 end;
 
 Procedure TMainForm.PaintAxises(const X, Y: Integer);
@@ -248,32 +241,10 @@ begin
   end;
 end;
 
-procedure EditScaleLabel(var ScaleLabel: TLabel; const Delta: Short);
-var
-  CurrScale: Byte;
-begin
-  CurrScale := StrToInt(Copy(ScaleLabel.Caption, 1, Length(ScaleLabel.Caption) - 1));
-  Inc(CurrScale, Delta);
-  ScaleLabel.Caption := IntToStr(CurrScale) + '%';
-end;
-
-procedure EditRangeEdit(var RangeEdit: TEdit; const Delta: Short);
-var
-  CurrX: Integer;
-begin
-  CurrX := StrToInt(RangeEdit.Text);
-  Inc(CurrX, Delta);
-  RangeEdit.Text := IntToStr(CurrX);
-end;
-
 Procedure TMainForm.PaintAllGraphs();
 Begin
   for var I := 1 to GraphAmount do
-    Begin
-     GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
-      if GraphsArray[I].IsExtremaFound then
-        GraphsArray[I].PaintExtremaDots(Self.GraphPicture, Trunc(Self.Scale), Self.XFrom, Self.XTo, Self.YTo);
-    End;
+    GraphsArray[I].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder);
 End;
 
 Function TMainForm.GetSelectedWidth(): Byte;
@@ -336,7 +307,7 @@ begin
       End;
   if (not IsPictureSaved) then
     Begin
-      var UserChoice := MessageDlg('Сохранить полученное изображение?', mtConfirmation, [mbYes, mbNo, mbCancel], 0);
+      var UserChoice := MessageDlg('Сохранить изображение?', mtWarning, [mbYes, mbNo, mbCancel], 0);
         case UserChoice of
           mrYes:
             Begin
@@ -817,7 +788,6 @@ begin
   if (ExtremaCheckBox.Checked) then
     Begin
       GraphsArray[GraphAmount].FindExtrema(Self.XFrom, Self.Range);
-      GraphsArray[GraphAmount].PaintExtremaDots(Self.GraphPicture, Trunc(Self.Scale), Self.XFrom, Self.XTo, Self.YTo);
     End;
 
   if (not GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)) then
