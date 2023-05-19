@@ -21,7 +21,7 @@ Type
     function Paint(var Bitmap: TBitmap; XStep, Scale: Real; YOffset, LBorder, RBorder: Integer): Boolean;
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
-    procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo: Integer);
+    procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo, YOffset: Integer);
     procedure FindExtrema(XFrom: Integer; Range: Real);
   end;
 
@@ -41,11 +41,17 @@ implementation
               MaxY := CurrY;
             if (CurrY < MinY) then
               MinY := CurrY;
-            ArrayOfDots[I] := CurrY;
+            ArrayOfDots[2][I] := CurrY;
+            ArrayOfDots[1][I] := CurrX;
 
             CurrX := CurrX + XStep;
           End;
       End;
+
+    procedure InitArratOfDotsWithExtrema();
+    begin
+
+    end;
 
     Begin
       Self.Expression := Expression;
@@ -82,20 +88,20 @@ implementation
       Bitmap.Canvas.Pen.Width := Self.Width;
       for I := LBorder + 1 to RBorder do
         Begin
-          CurrY := Round(-Scale * Self.ArrayOfDots[I]) + YOffset;
-          if (FloatToStr(Self.ArrayOfDots[I]) = 'NAN') or
-             (Self.ArrayOfDots[I] > 4375000) or
-             (Self.ArrayOfDots[I] < -4375000) then
+          CurrY := Round(-Scale * Self.ArrayOfDots[2][I]) + YOffset;
+          if (FloatToStr(Self.ArrayOfDots[2][I]) = 'NAN') or
+             (Self.ArrayOfDots[2][I] > 4375000) or
+             (Self.ArrayOfDots[2][I] < -4375000) then
             WasNaN := True
           else if (WasNan) then
             begin
-              Bitmap.Canvas.MoveTo(Trunc(CurrX), CurrY);
+              Bitmap.Canvas.MoveTo(Round(CurrX), CurrY);
               WasNan := False;
               Result := True;
             End
           else
             Begin
-              Bitmap.Canvas.LineTo(Trunc(CurrX), CurrY);
+              Bitmap.Canvas.LineTo(Round(CurrX), CurrY);
               Result := True;
             End;
 
@@ -109,12 +115,16 @@ implementation
     Begin
       Dec(LeftBound);
       for var I := High(ArrayOfDots) - ShiftingSize downto Low(ArrayOfDots) do
-        ArrayOfDots[I + ShiftingSize] := ArrayOfDots[I];
+      begin
+        ArrayOfDots[1][I + ShiftingSize] := ArrayOfDots[1][I];
+        ArrayOfDots[2][I + ShiftingSize] := ArrayOfDots[2][I];
+      end;
 
       X := XFrom;
       for var I := ShiftingSize downto Low(ArrayOfDots) do
         Begin
-          ArrayOfDots[I] := Calculate(Expression, X);
+          ArrayOfDots[1][I] := X;
+          ArrayOfDots[2][I] := Calculate(Expression, X);
           X := X - XStep;
         End;
     End;
@@ -125,12 +135,16 @@ implementation
     Begin
       Inc(LeftBound);
       for var I := ShiftingSize + 1 to High(ArrayOfDots) do
-        ArrayOfDots[I - ShiftingSize] := ArrayOfDots[I];
+      begin
+        ArrayOfDots[1][I - ShiftingSize] := ArrayOfDots[1][I];
+        ArrayOfDots[2][I - ShiftingSize] := ArrayOfDots[2][I];
+      end;
 
       X := XTo;
       for var I := ITERATION_COUNT - ShiftingSize + 1 to ITERATION_COUNT do
         Begin
-          ArrayOfDots[I] := Calculate(Expression, X);
+          ArrayOfDots[1][I] := X;
+          ArrayOfDots[2][I] := Calculate(Expression, X);
           X := X + XStep;
         End;
     End;
@@ -149,24 +163,24 @@ implementation
           MinExtrList := TList.Create;
           MaxExtrList := TList.Create;
         End;
-      for var I := Low(ArrayOfDots) + 1 to  High(ArrayOfDots) - 1 do
+      for var I := Low(ArrayOfDots[2]) + 1 to  High(ArrayOfDots[2]) - 1 do
         Begin
-          if (FloatToStr(ArrayOfDots[I]) <> 'NAN') and
-             (FloatToStr(ArrayOfDots[I - 1]) <> 'NAN') and
-             (FloatToStr(ArrayOfDots[I + 1]) <> 'NAN') then
+          if (FloatToStr(ArrayOfDots[2][I]) <> 'NAN') and
+             (FloatToStr(ArrayOfDots[2][I - 1]) <> 'NAN') and
+             (FloatToStr(ArrayOfDots[2][I + 1]) <> 'NAN') then
             Begin
-              if (ArrayOfDots[I] > ArrayOfDots[I + 1]) and
-                 (ArrayOfDots[I] > ArrayOfDots[I - 1]) then
-                MaxExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+              if (ArrayOfDots[2][I] > ArrayOfDots[2][I + 1]) and
+                 (ArrayOfDots[2][I] > ArrayOfDots[2][I - 1]) then
+                MaxExtrList.Add(ArrayOfDots[1][I], ArrayOfDots[2][I]);
 
-              if (ArrayOfDots[I] < ArrayOfDots[I + 1]) and
-                 (ArrayOfDots[I] < ArrayOfDots[I - 1]) then
-                MinExtrList.Add(Math.RoundTo(LeftBound + Range * (I - 1), -3), Math.RoundTo(ArrayOfDots[I], -3));
+              if (ArrayOfDots[2][I] < ArrayOfDots[2][I + 1]) and
+                 (ArrayOfDots[2][I] < ArrayOfDots[2][I - 1]) then
+                MinExtrList.Add(ArrayOfDots[1][I], ArrayOfDots[2][I]);
             End;
         End;
     End;
 
-  procedure TGraph.PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo: Integer);
+  procedure TGraph.PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo, YOffset: Integer);
   const
     CIRCLE_RADIUS = 5;
 
@@ -180,8 +194,8 @@ implementation
         Begin
           if (CurrNode.X >= XFrom)  and (CurrNode.X <= XTo) then
             Begin
-              X := Trunc((CurrNode.X - XFrom) * Scale);
-              Y := Trunc((YTo - CurrNode.Y) * Scale);
+              X := Round((CurrNode.X - XFrom) * Scale);
+              Y := Round(-Scale * CurrNode.Y + YOffset);
               Bitmap.Canvas.Ellipse(X - CIRCLE_RADIUS, Y - CIRCLE_RADIUS,
                                     X + CIRCLE_RADIUS, Y + CIRCLE_RADIUS);
             End;

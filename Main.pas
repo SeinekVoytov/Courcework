@@ -168,8 +168,6 @@ const
   STICK_WIDTH = 4;
 
 function CalcSticksStep(XFrom, XTo: Integer): Real;
-var
-  Temp: Real;
 begin
   Result := (XTo - XFrom) / 20;
 end;
@@ -214,14 +212,14 @@ begin
     I := Self.YTo - SticksStep;
     while (I > YFrom + 0.01) do
     Begin
-      if (I <> 0) then
+      if (I > 0.05) or (I < -0.05) then
       Begin
         MoveTo(Self.CurrYAxisPos - STICK_WIDTH, Y);
         LineTo(Self.CurrYAxisPos + STICK_WIDTH, Y);
         TextOut(Self.CurrYAxisPos + STICK_WIDTH, Y, FloatToStr(Math.RoundTo(I, -2)));
       End;
       Y := Y + Step;
-      I := I + SticksStep;
+      I := I - SticksStep;
     End;
     MoveTo(Self.CurrYAxisPos - ARROW_WIDTH, ARROW_WIDTH);
     LineTo(Self.CurrYAxisPos, 0);
@@ -230,7 +228,7 @@ begin
 end;
 
 var
-  Width, PixelsPerUnit: Integer;
+  Width: Integer;
   Color: TColor;
   SticksStep: Real;
 begin
@@ -241,7 +239,6 @@ begin
     Pen.Width := STANDART_PEN_WIDTH;
     Pen.Color := clBlack;
 
-    PixelsPerUnit := GraphPaintBox.Width div 20;
     SticksStep := CalcSticksStep(XFrom, XTo);
     PaintXAxis(CurrXAxisPos, SticksStep);
     PaintYAxis(CurrYAxisPos, SticksStep);
@@ -457,15 +454,15 @@ begin
                 begin
                   Inc(YTo);
                   Inc(YFrom);
-                  CurrXAxisPos := Trunc(CurrXAxisPos + Scale);
-                  YOffset := Trunc(YOffset + Scale);
+                  CurrXAxisPos := Round(CurrXAxisPos + Scale);
+                  YOffset := CurrXAxisPos;
                 end
               else
                 begin
                   Dec(YTo);
                   Dec(YFrom);
-                  CurrXAxisPos := Trunc(CurrXAxisPos - Scale);
-                  YOffset := Trunc(YOffset - Scale);
+                  CurrXAxisPos := Round(CurrXAxisPos - Scale);
+                  YOffset := CurrXAxisPos;
                 end;
 
               PaintAxises(CurrYAxisPos, CurrXAxisPos);
@@ -483,7 +480,7 @@ begin
             ClearPaintBox();
             if (Key = VK_LEFT) then
               begin
-                CurrYAxisPos := Trunc(CurrYAxisPos + Scale);
+                CurrYAxisPos := Round(CurrYAxisPos + Scale);
                 if (LBorder > 0) then
                   Begin
                     Dec(RBorder, IterationsPerUnit);
@@ -501,7 +498,7 @@ begin
               end
             else
               begin
-                CurrYAxisPos := Trunc(CurrYAxisPos - Scale);
+                CurrYAxisPos := Round(CurrYAxisPos - Scale);
                  if (RBorder < ITERATION_COUNT) then
                    Begin
                      Inc(LBorder, IterationsPerUnit);
@@ -581,7 +578,7 @@ begin
                 Dec(YFrom);
                 Inc(YTo);
                 Step := GraphPaintBox.Width / (RBorder - LBorder);
-                Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
+                Scale := GraphPaintBox.Width / (XTo - XFrom);
                 CurrXAxisPos := Round(YTo * Scale);
                 CurrYAxisPos := Round(-XFrom * Scale);
                 ClearPaintBox();
@@ -611,7 +608,7 @@ begin
                 Inc(LBorder, IterationsPerUnit);
                 Dec(RBorder, IterationsPerUnit);
                 Step := GraphPaintBox.Width / (RBorder - LBorder);
-                Scale := Round(GraphPaintBox.Width / (XTo - XFrom));
+                Scale := GraphPaintBox.Width / (XTo - XFrom);
                 CurrXAxisPos := Round(YTo * Scale);
                 CurrYAxisPos := Round(-XFrom * Scale);
                 ClearPaintBox();
@@ -738,7 +735,7 @@ begin
       ShowGraphButton.Enabled := True;
       ClearPaintBox();
       XFrom := StrToInt(RangeFromEdit.Text);
-      Scale := GraphPaintBox.Width div (XTo - XFrom);
+      Scale := GraphPaintBox.Width / (XTo - XFrom);
       YTo := Abs((XTo - XFrom) div 2);
       if ((XTo - XFrom) mod 2 = 1) then
         YFrom := -YTo - 1
@@ -771,8 +768,8 @@ begin
         YFrom := -YTo - 1
       else
         YFrom := -YTo;
-      CurrXAxisPos := Trunc(Abs(YTo) * Scale);
-      CurrYAxisPos := Trunc(-XFrom * Scale);
+      CurrXAxisPos := Round(Abs(YTo) * Scale);
+      CurrYAxisPos := Round(-XFrom * Scale);
       YOffset := CurrXAxisPos;
       PaintAxises(CurrYAxisPos, CurrXAxisPos);
 
@@ -852,19 +849,16 @@ end;
 procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
   IsPictureSaved := True;
-  ClearPaintBox();
   SavePictureButton.Visible := False;
-  XFrom := StrToInt(RangeFromEdit.Text);
-  XTo := StrToInt(RangeToEdit.Text);
-  YTo := Abs((XTo - XFrom) div 2);
-  if ((XTo - XFrom) mod 2 = 1) then
-    YFrom := -YTo - 1
-  else
-    YFrom := -YTo;
+  XFrom := -10;
+  XTo := 10;
+  YFrom := -10;
+  YTo := 10;
+
   LBorder := 0;
   RBorder := ITERATION_COUNT;
-  CurrXAxisPos := Round(YTo * Scale);
-  CurrYAxisPos := Round(-XFrom * Scale);
+  CurrXAxisPos := GraphPaintBox.Height div 2;
+  CurrYAxisPos := GraphPaintBox.Width div 2;
   for var I := 1 to GraphAmount do
   begin
     GraphsArray[I].Destroy;
@@ -875,8 +869,17 @@ begin
   ClearGraphComboBox.Items.Clear;
   Scale := Trunc(GraphPaintBox.Width / (XTo - XFrom));
   YOffset := CurrXAxisPos;
-  PaintAxises(CurrYAxisPos, CurrXAxisPos);
-  GraphPaintBox.Canvas.Draw(0,0,GraphPicture);
+  if (RangeToEdit.Text = '10') and (RangeFromEdit.Text = '-10') then
+  begin
+    ClearPaintBox();
+    PaintAxises(CurrYAxisPos, CurrXAxisPos);
+    GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+  end
+  else
+  begin
+    RangeFromEdit.Text := '-10';
+    RangeToEdit.Text := '10';
+  end;
   SetEditEnabled(True);
   SetClearButtonEnabled(False);
   InputEdit.Enabled := True;
