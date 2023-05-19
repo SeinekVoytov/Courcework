@@ -18,7 +18,7 @@ Type
     LeftBound: Integer;
     constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     destructor Destroy();
-    Function Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer): Boolean;
+    function Paint(var Bitmap: TBitmap; XStep, Scale: Real; YOffset, LBorder, RBorder: Integer): Boolean;
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
     procedure PaintExtremaDots(var Bitmap: TBitmap; Scale, XFrom, XTo, YTo: Integer);
@@ -68,7 +68,7 @@ implementation
       inherited;
     End;
 
-  Function TGraph.Paint(var Bitmap: TBitmap; XStep: Real; Scale, YOffset, LBorder, RBorder: Integer): Boolean;
+  Function TGraph.Paint(var Bitmap: TBitmap; XStep, Scale: Real; YOffset, LBorder, RBorder: Integer): Boolean;
   var
     WasNan: Boolean;
     CurrX: Real;
@@ -82,7 +82,7 @@ implementation
       Bitmap.Canvas.Pen.Width := Self.Width;
       for I := LBorder + 1 to RBorder do
         Begin
-          CurrY := Trunc(-Scale * Self.ArrayOfDots[I]) + YOffset;
+          CurrY := Round(-Scale * Self.ArrayOfDots[I]) + YOffset;
           if (FloatToStr(Self.ArrayOfDots[I]) = 'NAN') or
              (Self.ArrayOfDots[I] > 4375000) or
              (Self.ArrayOfDots[I] < -4375000) then

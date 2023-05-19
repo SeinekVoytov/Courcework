@@ -9,6 +9,7 @@ object MainForm: TMainForm
   Color = clBtnFace
   Constraints.MinHeight = 641
   Constraints.MinWidth = 892
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -20,7 +21,6 @@ object MainForm: TMainForm
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
-  OnMouseDown = FormMouseDown
   OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
