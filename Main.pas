@@ -179,9 +179,13 @@ begin
     I := Self.XFrom + SticksStep;
     while (I < XTo - 0.01) do
     Begin
-      MoveTo(X, Self.CurrXAxisPos - STICK_WIDTH);
-      LineTo(X, Self.CurrXAxisPos + STICK_WIDTH);
-      TextOut(X, Self.CurrXAxisPos + STICK_WIDTH, FloatToStr(Math.RoundTo(I, -2)));
+      if (X > CurrYAxisPos + ClientWidth div 30) or
+         (X < CurrYAxisPos - ClientWidth div 30) then
+      begin
+        MoveTo(X, Self.CurrXAxisPos - STICK_WIDTH);
+        LineTo(X, Self.CurrXAxisPos + STICK_WIDTH);
+        TextOut(X, Self.CurrXAxisPos + STICK_WIDTH, FloatToStr(Math.RoundTo(I, -2)));
+      end;
       X := X + Step;
       I := I + SticksStep;
     End;
@@ -205,7 +209,8 @@ begin
     I := Self.YTo - SticksStep;
     while (I > YFrom + 0.01) do
     Begin
-      if (I > 0.05) or (I < -0.05) then
+      if (Y > CurrXAxisPos + ClientWidth div 30) or
+         (Y < CurrXAxisPos - ClientWidth div 30) then
       Begin
         MoveTo(Self.CurrYAxisPos - STICK_WIDTH, Y);
         LineTo(Self.CurrYAxisPos + STICK_WIDTH, Y);
@@ -235,7 +240,7 @@ begin
     SticksStep := CalcSticksStep(XFrom, XTo);
     PaintXAxis(CurrXAxisPos, SticksStep);
     PaintYAxis(CurrYAxisPos, SticksStep);
-
+    GraphPicture.Canvas.TextOut(CurrYAxisPos + ClientHeight div 155, CurrXAxisPos + ClientHeight div 185, '0');
     Pen.Color := Color;
     Pen.Width := Width;
   end;
