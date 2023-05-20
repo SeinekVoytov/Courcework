@@ -126,28 +126,18 @@ implementation
                 End;
 
               Pen.Color := ExtremaColor;
-              if (CurrMinListNode <> nil) then
+              if (CurrMinListNode <> nil) and (CurrMinListNode.Index = I) then
                 begin
-                  if (CurrMinListNode.Index = I) then
-                  begin
-                    Bitmap.Canvas.Ellipse(Round(CurrX) - CIRCLE_RADIUS, CurrY - CIRCLE_RADIUS,
-                                        Round(CurrX) + CIRCLE_RADIUS, CurrY + CIRCLE_RADIUS);
-                    CurrMinListNode := CurrMinListNode.Next;
-                  end
-                  else if (CurrMinListNode.Index <  I) then
-                    CurrMinListNode := CurrMinListNode.Next;
+                  Bitmap.Canvas.Ellipse(Round(CurrX) - CIRCLE_RADIUS, CurrY - CIRCLE_RADIUS,
+                                      Round(CurrX) + CIRCLE_RADIUS, CurrY + CIRCLE_RADIUS);
+                  CurrMinListNode := CurrMinListNode.Next;
                 end;
 
-              if (CurrMaxListNode <> nil) then
+              if (CurrMaxListNode <> nil) and (CurrMaxListNode.Index = I) then
                 begin
-                  if (CurrMaxListNode.Index = I) then
-                  begin
-                    Bitmap.Canvas.Ellipse(Round(CurrX) - CIRCLE_RADIUS, CurrY - CIRCLE_RADIUS,
-                                        Round(CurrX) + CIRCLE_RADIUS, CurrY + CIRCLE_RADIUS);
-                    CurrMaxListNode := CurrMaxListNode.Next;
-                  end
-                  else if (CurrMaxListNode.Index < I) then
-                    CurrMaxListNode := CurrMaxListNode.Next;
+                  Bitmap.Canvas.Ellipse(Round(CurrX) - CIRCLE_RADIUS, CurrY - CIRCLE_RADIUS,
+                                      Round(CurrX) + CIRCLE_RADIUS, CurrY + CIRCLE_RADIUS);
+                  CurrMaxListNode := CurrMaxListNode.Next;
                 end;
 
               CurrX := CurrX + XStep;
