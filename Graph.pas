@@ -76,52 +76,74 @@ implementation
     CurrX: Real;
     CurrY: LongInt;
     I: Integer;
+    BrushColor: TColor;
     Begin
       WasNan := True;
       Result := False;
       CurrX := 0;
-      Bitmap.Canvas.Pen.Color := Self.Color;
-      Bitmap.Canvas.Pen.Width := Self.Width;
+      with Bitmap.Canvas do
+      begin
+        Pen.Color := Self.Color;
+        Pen.Width := Self.Width;
+        BrushColor := Brush.Color;
+      end;
       if (IsExtremaFound) then
       begin
+        var ExtremaColor: TColor;
+        if (Bitmap.Canvas.Pen.Color = clBlack) then
+          begin
+            ExtremaColor := clRed;
+            Bitmap.Canvas.Brush.Color := clRed;
+          end
+        else
+          begin
+            ExtremaColor := clBlack;
+            Bitmap.Canvas.Brush.Color := clBlack;
+          end;
         var CurrMinListNode, CurrMaxListNode: PNode;
         CurrMinListNode := MinExtrList.GetHead.Next;
         CurrMaxListNode := MaxExtrList.GetHead.Next;
-        for I := LBorder + 1 to RBorder do
-          Begin
-            CurrY := Round(-Scale * Self.ArrayOfDots[2][I]) + YOffset;
-            if (FloatToStr(Self.ArrayOfDots[2][I]) = 'NAN') or
-               (Self.ArrayOfDots[2][I] > 4375000) or
-               (Self.ArrayOfDots[2][I] < -4375000) then
-              WasNaN := True
-            else if (WasNan) then
-              begin
-                Bitmap.Canvas.MoveTo(Round(CurrX), CurrY);
-                WasNan := False;
-                Result := True;
-              End
-            else
-              Begin
-                Bitmap.Canvas.LineTo(Round(CurrX), CurrY);
-                Result := True;
-              End;
+        with Bitmap.Canvas do
+        begin
+          for I := LBorder + 1 to RBorder do
+            Begin
+              Pen.Color := Self.Color;
+              CurrY := Round(-Scale * Self.ArrayOfDots[2][I]) + YOffset;
+              if (FloatToStr(Self.ArrayOfDots[2][I]) = 'NAN') or
+                 (Self.ArrayOfDots[2][I] > 4375000) or
+                 (Self.ArrayOfDots[2][I] < -4375000) then
+                WasNaN := True
+              else if (WasNan) then
+                begin
+                  Bitmap.Canvas.MoveTo(Round(CurrX), CurrY);
+                  WasNan := False;
+                  Result := True;
+                End
+              else
+                Begin
+                  Bitmap.Canvas.LineTo(Round(CurrX), CurrY);
+                  Result := True;
+                End;
 
-            if (CurrMinListNode <> nil) and (CurrMinListNode.Index = I) then
-              begin
-                Bitmap.Canvas.Ellipse(Round(CurrX) - CIRCLE_RADIUS, CurrY - CIRCLE_RADIUS,
-                                    Round(CurrX) + CIRCLE_RADIUS, CurrY + CIRCLE_RADIUS);
-                CurrMinListNode := CurrMinListNode.Next;
-              end;
+              Pen.Color := ExtremaColor;
+              if (CurrMinListNode <> nil) and (CurrMinListNode.Index = I) then
+                begin
+                  Bitmap.Canvas.Ellipse(Round(CurrX) - CIRCLE_RADIUS, CurrY - CIRCLE_RADIUS,
+                                      Round(CurrX) + CIRCLE_RADIUS, CurrY + CIRCLE_RADIUS);
+                  CurrMinListNode := CurrMinListNode.Next;
+                end;
 
-            if (CurrMaxListNode <> nil) and (CurrMaxListNode.Index = I) then
-              begin
-                Bitmap.Canvas.Ellipse(Round(CurrX) - CIRCLE_RADIUS, CurrY - CIRCLE_RADIUS,
-                                    Round(CurrX) + CIRCLE_RADIUS, CurrY + CIRCLE_RADIUS);
-                CurrMaxListNode := CurrMaxListNode.Next;
-              end;
+              if (CurrMaxListNode <> nil) and (CurrMaxListNode.Index = I) then
+                begin
+                  Bitmap.Canvas.Ellipse(Round(CurrX) - CIRCLE_RADIUS, CurrY - CIRCLE_RADIUS,
+                                      Round(CurrX) + CIRCLE_RADIUS, CurrY + CIRCLE_RADIUS);
+                  CurrMaxListNode := CurrMaxListNode.Next;
+                end;
 
-            CurrX := CurrX + XStep;
-          End;
+              CurrX := CurrX + XStep;
+            End;
+        end;
+        Bitmap.Canvas.Brush.Color := BrushColor;
       end
       else
       begin
