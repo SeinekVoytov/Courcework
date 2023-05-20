@@ -1,0 +1,465 @@
+object MainForm: TMainForm
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
+  BorderStyle = bsSingle
+  Caption = 'GraphBuilder'
+  ClientHeight = 612
+  ClientWidth = 886
+  Color = clBtnFace
+  Constraints.MinHeight = 641
+  Constraints.MinWidth = 892
+  DoubleBuffered = True
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  Menu = MainMenu
+  OldCreateOrder = False
+  Position = poDesigned
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
+  OnResize = FormResize
+  PixelsPerInch = 96
+  TextHeight = 13
+  object GraphPanel: TPanel
+    Left = 274
+    Top = 0
+    Width = 612
+    Height = 612
+    Align = alClient
+    TabOrder = 0
+    object GraphPaintBox: TPaintBox
+      Left = 1
+      Top = 1
+      Width = 610
+      Height = 610
+      Align = alClient
+      OnMouseDown = GraphPaintBoxMouseDown
+      OnPaint = GraphPaintBoxPaint
+      ExplicitLeft = -10
+      ExplicitTop = -47
+      ExplicitWidth = 600
+      ExplicitHeight = 600
+    end
+  end
+  object EditPanel: TPanel
+    Left = 0
+    Top = 0
+    Width = 274
+    Height = 612
+    Align = alLeft
+    Anchors = [akLeft, akBottom]
+    BevelOuter = bvNone
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 1
+    OnMouseDown = EditPanelMouseDown
+    object HintLabel: TLabel
+      Left = 9
+      Top = 496
+      Width = 3
+      Height = 15
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Times New Roman'
+      Font.Style = [fsItalic]
+      ParentFont = False
+    end
+    object ResearchModeLabel: TLabel
+      Left = 0
+      Top = 576
+      Width = 274
+      Height = 36
+      Hint = 
+        'Research mode is activated.  To increase scale press Ctrl + "+",' +
+        ' to decrease - Ctrl + "-".'
+      Align = alBottom
+      Caption = 'R'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -30
+      Font.Name = 'Bahnschrift'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      ExplicitWidth = 20
+    end
+    object MathInputPanel: TPanel
+      Left = 0
+      Top = 308
+      Width = 269
+      Height = 93
+      BevelOuter = bvNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 0
+      object SinButton: TButton
+        Left = 87
+        Top = 6
+        Width = 30
+        Height = 25
+        Caption = 'Sin'
+        TabOrder = 0
+        OnClick = SinButtonClick
+      end
+      object CosButton: TButton
+        Left = 118
+        Top = 6
+        Width = 30
+        Height = 25
+        Caption = 'Cos'
+        TabOrder = 1
+        OnClick = CosButtonClick
+      end
+      object TgButton: TButton
+        Left = 149
+        Top = 6
+        Width = 30
+        Height = 25
+        Caption = 'Tg'
+        TabOrder = 2
+        OnClick = TgButtonClick
+      end
+      object CtgButton: TButton
+        Left = 180
+        Top = 6
+        Width = 30
+        Height = 25
+        Caption = 'Ctg'
+        TabOrder = 3
+        OnClick = CtgButtonClick
+      end
+      object ASinButton: TButton
+        Left = 87
+        Top = 32
+        Width = 30
+        Height = 25
+        Caption = 'ASin'
+        TabOrder = 4
+        OnClick = ASinButtonClick
+      end
+      object ACosButton: TButton
+        Left = 118
+        Top = 32
+        Width = 30
+        Height = 25
+        Caption = 'ACos'
+        TabOrder = 5
+        TabStop = False
+        OnClick = ACosButtonClick
+      end
+      object ATgButton: TButton
+        Left = 149
+        Top = 32
+        Width = 30
+        Height = 25
+        Caption = 'ATg'
+        TabOrder = 6
+        OnClick = ATgButtonClick
+      end
+      object ACtgButton: TButton
+        Left = 180
+        Top = 32
+        Width = 30
+        Height = 25
+        Caption = 'ACtg'
+        TabOrder = 7
+        OnClick = ACtgButtonClick
+      end
+      object SqrtButton: TButton
+        Left = 87
+        Top = 58
+        Width = 30
+        Height = 25
+        Caption = #8730
+        DisabledImageIndex = 42
+        TabOrder = 8
+        OnClick = SqrtButtonClick
+      end
+      object LogButton: TButton
+        Left = 118
+        Top = 58
+        Width = 30
+        Height = 25
+        Caption = 'Log'#8321#8320
+        TabOrder = 9
+        OnClick = LogButtonClick
+      end
+      object LnButton: TButton
+        Left = 149
+        Top = 58
+        Width = 30
+        Height = 25
+        Caption = 'Ln'
+        TabOrder = 10
+        OnClick = LnButtonClick
+      end
+      object AbsButton: TButton
+        Left = 180
+        Top = 58
+        Width = 30
+        Height = 25
+        Caption = '|  |'
+        TabOrder = 11
+        OnClick = AbsButtonClick
+      end
+      object SquareButton: TButton
+        Left = 25
+        Top = 6
+        Width = 30
+        Height = 25
+        Caption = #9633#178
+        TabOrder = 12
+        TabStop = False
+        OnClick = SquareButtonClick
+      end
+      object XSquareButton: TButton
+        Left = 25
+        Top = 32
+        Width = 30
+        Height = 25
+        Caption = 'x'#178
+        TabOrder = 13
+        OnClick = XSquareButtonClick
+      end
+      object PiButton: TButton
+        Left = 25
+        Top = 58
+        Width = 30
+        Height = 25
+        Caption = #960
+        TabOrder = 14
+        OnClick = PiButtonClick
+      end
+      object ParenthesesButton: TButton
+        Left = 56
+        Top = 58
+        Width = 30
+        Height = 25
+        Caption = '('#9633')'
+        TabOrder = 15
+        OnClick = ParenthesesButtonClick
+      end
+      object XCubeButton: TButton
+        Left = 56
+        Top = 32
+        Width = 30
+        Height = 25
+        Caption = 'x'#179
+        TabOrder = 16
+        OnClick = XCubeButtonClick
+      end
+      object CubeButton: TButton
+        Left = 56
+        Top = 6
+        Width = 30
+        Height = 25
+        Caption = #9633#179
+        TabOrder = 17
+        OnClick = CubeButtonClick
+      end
+    end
+    object RangeAndBuildPanel: TPanel
+      Left = 5
+      Top = 13
+      Width = 269
+      Height = 257
+      BevelOuter = bvNone
+      TabOrder = 1
+      object RangeLabel: TLabel
+        Left = 17
+        Top = 43
+        Width = 74
+        Height = 14
+        Caption = 'Build Borders:'
+      end
+      object ToLabel: TLabel
+        Left = 91
+        Top = 61
+        Width = 12
+        Height = 14
+        Caption = 'to'
+      end
+      object FromLabel: TLabel
+        Left = 17
+        Top = 61
+        Width = 27
+        Height = 14
+        Caption = 'From'
+      end
+      object ChooseColorLabel: TLabel
+        Left = 17
+        Top = 88
+        Width = 63
+        Height = 14
+        Caption = 'Graph Color'
+      end
+      object ChooseWidthLabel: TLabel
+        Left = 17
+        Top = 130
+        Width = 89
+        Height = 14
+        Caption = 'Graph Thickness'
+      end
+      object RangeFromEdit: TEdit
+        Left = 46
+        Top = 58
+        Width = 41
+        Height = 22
+        MaxLength = 4
+        TabOrder = 3
+        Text = '-10'
+        OnChange = RangeFromEditChange
+      end
+      object RangeToEdit: TEdit
+        Left = 107
+        Top = 58
+        Width = 45
+        Height = 22
+        MaxLength = 4
+        TabOrder = 4
+        Text = '10'
+        OnChange = RangeToEditChange
+      end
+      object ShowGraphButton: TButton
+        Left = 17
+        Top = 196
+        Width = 105
+        Height = 25
+        Caption = 'Build Graph'
+        TabOrder = 7
+        OnClick = ShowGraphButtonClick
+      end
+      object ColorBox: TColorBox
+        Left = 17
+        Top = 105
+        Width = 125
+        Height = 22
+        TabOrder = 5
+      end
+      object PenWidthComboBox: TComboBox
+        Left = 17
+        Top = 146
+        Width = 125
+        Height = 22
+        Style = csDropDownList
+        TabOrder = 6
+      end
+      object ClearGraphButton: TButton
+        Left = 154
+        Top = 173
+        Width = 91
+        Height = 25
+        Caption = 'Clear Graph'
+        TabOrder = 8
+        OnClick = ClearGraphButtonClick
+      end
+      object ClearAllButton: TButton
+        Left = 154
+        Top = 210
+        Width = 91
+        Height = 25
+        Caption = 'Clear All'
+        TabOrder = 9
+        OnClick = ClearAllButtonClick
+      end
+      object ExtremaCheckBox: TCheckBox
+        Left = 17
+        Top = 173
+        Width = 119
+        Height = 17
+        Caption = 'Find Extrema'
+        TabOrder = 10
+      end
+      object ClearGraphComboBox: TComboBox
+        Left = 154
+        Top = 195
+        Width = 91
+        Height = 22
+        Style = csDropDownList
+        TabOrder = 11
+        Visible = False
+        OnChange = ClearGraphComboBoxChange
+        OnExit = ClearGraphComboBoxExit
+      end
+      object InputEdit: TEdit
+        Left = 17
+        Top = 17
+        Width = 193
+        Height = 20
+        BorderStyle = bsNone
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -15
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+        TabOrder = 0
+        OnChange = InputEditChange
+        OnKeyDown = InputEditKeyDown
+      end
+      object ClearInputButton: TButton
+        Left = 210
+        Top = 17
+        Width = 21
+        Height = 21
+        Hint = 'Clear Input'
+        Caption = #10006
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 1
+        OnClick = ClearInputButtonClick
+      end
+      object MathInputButton: TButton
+        AlignWithMargins = True
+        Left = 229
+        Top = 17
+        Width = 21
+        Height = 21
+        Hint = 'Math Input'
+        Cancel = True
+        Caption = #55357#56507
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 2
+        OnClick = MathInputButtonClick
+      end
+    end
+  end
+  object MainMenu: TMainMenu
+    Left = 240
+    Top = 496
+    object File1: TMenuItem
+      Caption = 'File'
+      object SaveMenuItem: TMenuItem
+        Caption = 'Save'
+        ShortCut = 16467
+        OnClick = SaveMenuItemClick
+      end
+      object SaveAsMenuItem: TMenuItem
+        Caption = 'Save As'
+        ShortCut = 12371
+        OnClick = SaveAsMenuItemClick
+      end
+      object NewMenuItem: TMenuItem
+        Caption = 'New'
+        ShortCut = 16462
+        OnClick = NewMenuItemClick
+      end
+    end
+  end
+end

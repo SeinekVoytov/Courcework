@@ -49,14 +49,12 @@ Type
     ParenthesesButton: TButton;
     XCubeButton: TButton;
     CubeButton: TButton;
-    HintLabel: TLabel;
-    SavePictureButton: TButton;
-    RecentInputButton: TButton;
     MainMenu: TMainMenu;
     File1: TMenuItem;
     SaveMenuItem: TMenuItem;
     SaveAsMenuItem: TMenuItem;
     NewMenuItem: TMenuItem;
+    ResearchModeLabel: TLabel;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -157,13 +155,26 @@ end;
 procedure TMainForm.SavePicture();
 var
   SaveDialog: TFileOpenDialog;
+  SaveExtrema: Boolean;
 begin
   SaveDialog := TFileOpenDialog.Create(Self);
   try
-    SaveDialog.Title := 'Save image';
+    SaveExtrema := False;
+    SaveDialog.Title := 'Save results';
     if (SaveDialog.Execute) then
       Begin
-        FileName := SaveDialog.FileName + '.png';
+        for var I := 1 to GraphAmount do
+          if (GraphsArray[I].IsExtremaFound) then
+            SaveExtrema := True;
+
+        var DirectoryPath := SaveDialog.FileName;
+        if (SaveExtrema) then
+        begin
+          ForceDirectories(DirectoryPath);
+          FileName := TPath.Combine(SaveDialog.FileName, 'Graph.png');
+        end
+        else
+          FileName := SaveDialog.FileName +  '.png';
         GraphPicture.SaveToFile(FileName);
       End;
   finally
@@ -368,7 +379,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
 
   Procedure InitPenColorComboBox();
     Const
-      ColorNames: array[0..6] of String = ('Черный', 'Красный', 'Зеленый', 'Синий', 'Желтый', 'Оранжевый', 'Розовый');
+      ColorNames: array[0..6] of String = ('Black', 'Red', 'Green', 'Blue', 'Yellow', 'Orange', 'Pink');
       ColorValues: array[0..6] of string = ('$000000', '$0000FF', '$00FF00', '$FF0000', '$00CCFF', '$00A5FF', '$FF00FF');
     Var
       I: Integer;
@@ -389,18 +400,13 @@ Procedure TMainForm.FormCreate(Sender: TObject);
             ItemIndex := 1;
           End;
       End;
-    const
-      HINT_LABEL_CAPTION = '* включен режим исследования графика' + #10#13 +
-      #10#13 + 'для увеличения масштаба нажмите Ctrl + "+", ' + #10#13 +
-      'для уменьшения - Ctrl + "-"';
   begin
     SaveAsMenuItem.ShortCut := ShortCut(Word('S'), [ssCtrl, ssShift]);
     CanBeZoomed := True;
     IsPictureSaved := True;
     CanBeUnzoomed := False;
     ResearchMode := False;
-    HintLabel.Caption := HINT_LABEL_CAPTION;
-    HintLabel.Visible := False;
+    ResearchModeLabel.Visible := False;
     XFrom := -10;
     XTo := 10;
     YFrom := -10;
@@ -428,7 +434,6 @@ Procedure TMainForm.FormCreate(Sender: TObject);
     GraphPicture.Canvas.Pen.Width := 3;
     MathInputPanel.Visible := False;
     ShowGraphButton.Enabled := False;
-    SavePictureButton.Visible := False;
     InitPenWidthComboBox();
     InitPenColorComboBox();
     GraphPicture.SetSize(GraphPaintBox.Width, GraphPaintBox.Height);
@@ -526,25 +531,19 @@ begin
           Begin
             if (not ResearchMode) then
               Begin
-                HintLabel.Visible := True;
+                ResearchModeLabel.Visible := True;
                 if (MathInput) then
                   MathInputButtonClick(Sender);
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
                   RangeAndBuildPanel.Controls[i].Enabled := False;
                 ResearchMode := True;
-
-                if (SavePictureButton.Visible) then
-                  SavePictureButton.Visible := False;
               End
             else
               Begin
-                HintLabel.Visible := False;
+                ResearchModeLabel.Visible := False;
                 for var I := 0 to RangeAndBuildPanel.ControlCount - 1 do
                   RangeAndBuildPanel.Controls[i].Enabled := True;
                 ResearchMode := False;
-
-                if (not IsPictureSaved) then
-                  SavePictureButton.Visible := True;
               End;
           End;
       End;
@@ -553,7 +552,7 @@ begin
         if (ssCtrl in Shift) and (ResearchMode) then
           Begin
             if (not CanBeunzoomed) then
-              ShowMessage('Достигнут максимальный уровень отдаления')
+              MessageDlg('You''ve reached minimum scale', mtWarning, [mbOk], 0)
             else
               Begin
                 CanBeZoomed := True;
@@ -596,7 +595,7 @@ begin
         if (ssCtrl in Shift) and (ResearchMode) then
           Begin
             if (not CanBeZoomed) then
-              ShowMessage('Достигнут максимальный уровень приближения')
+              MessageDlg('You''ve reached maximum scale', mtWarning, [mbOk], 0)
             else
               Begin
                 CanBeUnzoomed := True;
@@ -683,20 +682,10 @@ begin
       if Self.ShowGraphButton.Enabled then
         ShowGraphButtonClick(Sender)
       else
-        ShowMessage('Ввод некорректен. Построение невозможно.');
+        MessageDlg('Entered expression isn''t correct', mtWarning, [mbOk], 0);
       Key := 0;
       KeyPreview := True;
     End
-  else if (Key = VK_RIGHT) then
-    Begin
-      InputEdit.SelStart := InputEdit.SelStart + 1;
-      Key := 0;
-    End
-  else if (Key = VK_LEFT) then
-    Begin
-      InputEdit.SelStart := InputEdit.SelStart - 1;
-      Key := 0;
-    End;
 end;
 
 procedure TMainForm.ClearInputButtonClick(Sender: TObject);
@@ -810,70 +799,70 @@ procedure TMainForm.ShowGraphButtonClick(Sender: TObject);
     I: Integer;
     CurrExpr: String;
 begin
-  IsPictureSaved := False;
-  Inc(GraphAmount);
-  SavePictureButton.Visible := True;
-  SetEditEnabled(False);
-  SetClearButtonEnabled(True);
-  CurrX := XFrom - LBorder div IterationsPerUnit;
-  ClearGraphComboBox.Items.Add(InputEdit.Text);
-  GraphsArray[GraphAmount] := TGraph.Create(ConvertToPolishNotation(InputEdit.Text), ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom - LBorder div IterationsPerUnit, ExtremaCheckBox.Checked);
+  try
+    CurrExpr := ConvertToPolishNotation(InputEdit.Text);
+    IsPictureSaved := False;
+    Inc(GraphAmount);
+    SetEditEnabled(False);
+    SetClearButtonEnabled(True);
+    CurrX := XFrom - LBorder div IterationsPerUnit;
+    ClearGraphComboBox.Items.Add(InputEdit.Text);
+    GraphsArray[GraphAmount] := TGraph.Create(InputEdit.Text, CurrExpr, ColorBox.Selected, GetSelectedWidth(), Self.Range, CurrX, XFrom - LBorder div IterationsPerUnit, ExtremaCheckBox.Checked);
 
-  if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
-    Begin
-      var Delta := (XTo - XFrom) div 2;
-      if (GraphsArray[GraphAmount].MaxY <= YFrom) then
-        Begin
-          YTo := Trunc(GraphsArray[GraphAmount].MaxY) + Delta;
-          YFrom := Trunc(GraphsArray[GraphAmount].MaxY) - Delta;
-        End;
+    if (GraphAmount = 1) and not ((GraphsArray[GraphAmount].MaxY <= YFrom) and (GraphsArray[GraphAmount].MinY >= YTo)) then
+      Begin
+        var Delta := (XTo - XFrom) div 2;
+        if (GraphsArray[GraphAmount].MaxY <= YFrom) then
+          Begin
+            YTo := Trunc(GraphsArray[GraphAmount].MaxY) + Delta;
+            YFrom := Trunc(GraphsArray[GraphAmount].MaxY) - Delta;
+          End;
 
-      if (GraphsArray[GraphAmount].MinY >= YTo) then
-        Begin
-          YTo := Trunc(GraphsArray[GraphAmount].MinY) + Delta;
-          YFrom := Trunc(GraphsArray[GraphAmount].MinY) - Delta;
-        End;
-      ClearPaintBox();
-      CurrXAxisPos := Round(YTo * Scale);
-      YOffset := CurrXAxisPos;
-      PaintAxises(CurrYAxisPos, CurrXAxisPos);
-    End;
+        if (GraphsArray[GraphAmount].MinY >= YTo) then
+          Begin
+            YTo := Trunc(GraphsArray[GraphAmount].MinY) + Delta;
+            YFrom := Trunc(GraphsArray[GraphAmount].MinY) - Delta;
+          End;
+        ClearPaintBox();
+        CurrXAxisPos := Round(YTo * Scale);
+        YOffset := CurrXAxisPos;
+        PaintAxises(CurrYAxisPos, CurrXAxisPos);
+      End;
 
-  if (ExtremaCheckBox.Checked) then
-    Begin
-      GraphsArray[GraphAmount].FindExtrema(Self.XFrom, Self.Range);
-    End;
+    if (ExtremaCheckBox.Checked) then
+      Begin
+        GraphsArray[GraphAmount].FindExtrema(Self.XFrom, Self.Range);
+      End;
 
-  if (not GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)) then
-    Begin
-      if (GraphAmount = 1) then
-        Begin
+    if (not GraphsArray[GraphAmount].Paint(Self.GraphPicture, Self.Step, Self.Scale, Self.YOffset, Self.LBorder, Self.RBorder)) then
+      Begin
+        if (GraphAmount = 1) then
           IsPictureSaved := True;
-          SavePictureButton.Visible := False;
-        End;
-      ShowMessage('График не существует на указанном промежутке');
-      GraphsArray[GraphAmount].Destroy;
-      Dec(GraphAmount);
-    End;
+        ShowMessage('Graph doesn''t exist on the specified interval');
+        GraphsArray[GraphAmount].Destroy;
+        Dec(GraphAmount);
+      End;
 
-  GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
-  if (GraphAmount = MAX_GRAPH_AMOUNT) then
-    Begin
-      MathInputPanel.Enabled := False;
-      InputEdit.Enabled := False;
-      ColorBox.Enabled := False;
-      PenWidthComboBox.Enabled := False;
-      ShowGraphButton.Enabled := False;
-      PenWidthComboBox.Enabled := False;
-      ColorBox.Enabled := False;
-      ClearInputButton.Enabled := False;
-    End;
+    GraphPaintBox.Canvas.Draw(0, 0, GraphPicture);
+    if (GraphAmount = MAX_GRAPH_AMOUNT) then
+      Begin
+        MathInputPanel.Enabled := False;
+        InputEdit.Enabled := False;
+        ColorBox.Enabled := False;
+        PenWidthComboBox.Enabled := False;
+        ShowGraphButton.Enabled := False;
+        PenWidthComboBox.Enabled := False;
+        ColorBox.Enabled := False;
+        ClearInputButton.Enabled := False;
+      End;
+  except
+    MessageDlg('Entered expression isn''t correct', mtWarning, [mbOk], 0);
+  end;
 end;
 
 procedure TMainForm.ClearAllButtonClick(Sender: TObject);
 begin
   IsPictureSaved := True;
-  SavePictureButton.Visible := False;
   XFrom := -10;
   XTo := 10;
   YFrom := -10;
@@ -959,8 +948,6 @@ begin
     End;
 
   Dec(GraphAmount);
-  if (GraphAmount = 0) then
-    SavePictureButton.Visible := False;
   ClearPaintBox();
   PaintAxises(CurrYAxisPos, CurrXAxisPos);
   PaintAllGraphs();

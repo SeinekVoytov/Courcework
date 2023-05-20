@@ -8,7 +8,7 @@ Type
   TGraph = class
   private
     ArrayOfDots: TDotArray;
-    Expression: String;
+    OldExpression, Expression: String;
     MinExtrList: TList;
     MaxExtrList: TList;
     Color: TColor;
@@ -16,19 +16,20 @@ Type
   public
     IsExtremaFound: Boolean;
      MinY, MaxY: Real;
-    constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
+    constructor Create(OldExpression, Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     destructor Destroy();
     function Paint(var Bitmap: TBitmap; XStep, Scale: Real; YOffset, LBorder, RBorder: Integer): Boolean;
     procedure ShiftArrayOfDotsRight(const XFrom, ShiftingSize: Integer; XStep: Real);
     procedure ShiftArrayOfDotsLeft(const XTo, ShiftingSize: Integer; XStep: Real);
     procedure FindExtrema(XFrom: Integer; Range: Real);
+    procedure SaveExtremaToFile(Path: String);
   end;
 
 const
   ITERATION_COUNT = 10000;
 
 implementation
-  constructor TGraph.Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
+  constructor TGraph.Create(OldExpression, Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     procedure InitArrayOfDots();
       var
         CurrY: Real;
@@ -49,6 +50,7 @@ implementation
 
     Begin
       Self.Expression := Expression;
+      Self.OldExpression := OldExpression;
       MaxY := Single.MinValue;
       Self.IsExtremaFound := IsExtremaFound;
       MinY := Single.MaxValue;
@@ -248,5 +250,34 @@ implementation
             End;
         End;
     End;
+
+    procedure TGraph.SaveExtremaToFile(Path: String);
+    var
+      TxtFile: TextFile;
+      CurrNode: PNode;
+    begin
+      AssignFile(TxtFile, Path);
+      Append(TxtFile);
+      Writeln(TxtFile, Self.OldExpression);
+      Writeln(TxtFile, 'Mins:');
+      CurrNode := MinExtrList.GetHead().Next;
+      while (CurrNode <> nil) do
+      begin
+        Write(TxtFile, FloatToStr(Math.RoundTo(ArrayOfDots[1][CurrNode.Index], -3)) + ' ');
+        Writeln(TxtFile, FloatToStr(Math.RoundTo(ArrayOfDots[2][CurrNode.Index], -3)));
+        CurrNode := CurrNode.Next;
+      end;
+
+      Writeln(TxtFile, 'Maxs:');
+      CurrNode := MaxExtrList.GetHead().Next;
+      while (CurrNode <> nil) do
+      begin
+        Write(TxtFile, FloatToStr(Math.RoundTo(ArrayOfDots[1][CurrNode.Index], -3)) + ' ');
+        Writeln(TxtFile, FloatToStr(Math.RoundTo(ArrayOfDots[2][CurrNode.Index], -3)));
+        CurrNode := CurrNode.Next;
+      end;
+      CloseFile(TxtFile);
+    end;
+
 
 end.

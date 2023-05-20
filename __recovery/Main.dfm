@@ -54,6 +54,12 @@ object MainForm: TMainForm
     Align = alLeft
     Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 1
     OnMouseDown = EditPanelMouseDown
     object HintLabel: TLabel
@@ -67,6 +73,26 @@ object MainForm: TMainForm
       Font.Name = 'Times New Roman'
       Font.Style = [fsItalic]
       ParentFont = False
+    end
+    object ResearchModeLabel: TLabel
+      Left = 0
+      Top = 576
+      Width = 274
+      Height = 36
+      Hint = 
+        'Research mode is activated.  To increase scale press Ctrl + "+",' +
+        ' to decrease - Ctrl + "-".'
+      Align = alBottom
+      Caption = 'R'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -30
+      Font.Name = 'Bahnschrift'
+      Font.Style = [fsBold]
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      ExplicitWidth = 20
     end
     object MathInputPanel: TPanel
       Left = 0
@@ -249,7 +275,7 @@ object MainForm: TMainForm
     end
     object RangeAndBuildPanel: TPanel
       Left = 5
-      Top = 37
+      Top = 13
       Width = 269
       Height = 257
       BevelOuter = bvNone
@@ -257,43 +283,44 @@ object MainForm: TMainForm
       object RangeLabel: TLabel
         Left = 17
         Top = 43
-        Width = 66
-        Height = 13
+        Width = 74
+        Height = 14
         Caption = 'Build Borders:'
       end
       object ToLabel: TLabel
         Left = 91
         Top = 61
-        Width = 10
-        Height = 13
+        Width = 12
+        Height = 14
         Caption = 'to'
       end
       object FromLabel: TLabel
         Left = 17
         Top = 61
-        Width = 24
-        Height = 13
+        Width = 27
+        Height = 14
         Caption = 'From'
       end
       object ChooseColorLabel: TLabel
         Left = 17
         Top = 88
-        Width = 57
-        Height = 13
+        Width = 63
+        Height = 14
         Caption = 'Graph Color'
       end
       object ChooseWidthLabel: TLabel
         Left = 17
         Top = 130
-        Width = 78
-        Height = 13
+        Width = 89
+        Height = 14
         Caption = 'Graph Thickness'
       end
       object RangeFromEdit: TEdit
         Left = 46
         Top = 58
         Width = 41
-        Height = 21
+        Height = 22
+        MaxLength = 4
         TabOrder = 3
         Text = '-10'
         OnChange = RangeFromEditChange
@@ -302,14 +329,15 @@ object MainForm: TMainForm
         Left = 107
         Top = 58
         Width = 45
-        Height = 21
+        Height = 22
+        MaxLength = 4
         TabOrder = 4
         Text = '10'
         OnChange = RangeToEditChange
       end
       object ShowGraphButton: TButton
-        Left = 37
-        Top = 173
+        Left = 17
+        Top = 196
         Width = 105
         Height = 25
         Caption = 'Build Graph'
@@ -327,7 +355,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 146
         Width = 125
-        Height = 21
+        Height = 22
         Style = csDropDownList
         TabOrder = 6
       end
@@ -351,7 +379,7 @@ object MainForm: TMainForm
       end
       object ExtremaCheckBox: TCheckBox
         Left = 17
-        Top = 214
+        Top = 173
         Width = 119
         Height = 17
         Caption = 'Find Extrema'
@@ -361,7 +389,7 @@ object MainForm: TMainForm
         Left = 154
         Top = 195
         Width = 91
-        Height = 21
+        Height = 22
         Style = csDropDownList
         TabOrder = 11
         Visible = False
@@ -369,7 +397,7 @@ object MainForm: TMainForm
         OnExit = ClearGraphComboBoxExit
       end
       object InputEdit: TEdit
-        Left = 16
+        Left = 17
         Top = 17
         Width = 193
         Height = 20
@@ -385,19 +413,21 @@ object MainForm: TMainForm
         OnKeyDown = InputEditKeyDown
       end
       object ClearInputButton: TButton
-        Left = 225
-        Top = 12
+        Left = 210
+        Top = 17
         Width = 21
         Height = 21
         Hint = 'Clear Input'
         Caption = #10006
+        ParentShowHint = False
+        ShowHint = True
         TabOrder = 1
         OnClick = ClearInputButtonClick
       end
       object MathInputButton: TButton
         AlignWithMargins = True
-        Left = 244
-        Top = 12
+        Left = 229
+        Top = 17
         Width = 21
         Height = 21
         Hint = 'Math Input'
@@ -407,14 +437,6 @@ object MainForm: TMainForm
         ShowHint = True
         TabOrder = 2
         OnClick = MathInputButtonClick
-      end
-      object RecentInputButton: TButton
-        Left = 188
-        Top = 56
-        Width = 21
-        Height = 21
-        Caption = #55357#56675
-        TabOrder = 12
       end
     end
   end
