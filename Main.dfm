@@ -16,6 +16,7 @@ object MainForm: TMainForm
   Font.Name = 'Tahoma'
   Font.Style = []
   KeyPreview = True
+  Menu = MainMenu
   OldCreateOrder = False
   Position = poDesigned
   OnCloseQuery = FormCloseQuery
@@ -426,6 +427,28 @@ object MainForm: TMainForm
       TabOrder = 2
       TabStop = False
       OnClick = SavePictureButtonClick
+    end
+  end
+  object MainMenu: TMainMenu
+    Left = 240
+    Top = 496
+    object File1: TMenuItem
+      Caption = 'File'
+      object SaveMenuItem: TMenuItem
+        Caption = 'Save'
+        ShortCut = 16467
+        OnClick = SaveMenuItemClick
+      end
+      object SaveAsMenuItem: TMenuItem
+        Caption = 'Save As'
+        ShortCut = 12371
+        OnClick = SaveAsMenuItemClick
+      end
+      object NewMenuItem: TMenuItem
+        Caption = 'New'
+        ShortCut = 16462
+        OnClick = NewMenuItemClick
+      end
     end
   end
 end

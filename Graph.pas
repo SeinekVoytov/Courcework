@@ -6,16 +6,16 @@ uses List, Graphics, SysUtils, Calculator, Math;
 
 Type
   TGraph = class
-  public
+  private
     ArrayOfDots: TDotArray;
     Expression: String;
-    MinY, MaxY: Real;
     MinExtrList: TList;
     MaxExtrList: TList;
     Color: TColor;
     Width: Byte;
+  public
     IsExtremaFound: Boolean;
-    LeftBound: Integer;
+     MinY, MaxY: Real;
     constructor Create(Expression: String; Color: TColor; Width: Byte; XStep, CurrX: Real; XFrom: Integer; IsExtremaFound: Boolean);
     destructor Destroy();
     function Paint(var Bitmap: TBitmap; XStep, Scale: Real; YOffset, LBorder, RBorder: Integer): Boolean;
@@ -55,7 +55,6 @@ implementation
       InitArrayOfDots();
       Self.Color := Color;
       Self.Width := Width;
-      LeftBound := XFrom;
     End;
 
   destructor TGraph.Destroy();
@@ -185,7 +184,6 @@ implementation
     var
       X: Real;
     Begin
-      Dec(LeftBound);
       for var I := High(ArrayOfDots[2]) - ShiftingSize downto Low(ArrayOfDots[2]) do
       begin
         ArrayOfDots[1][I + ShiftingSize] := ArrayOfDots[1][I];
@@ -205,7 +203,6 @@ implementation
   var
     X: Real;
     Begin
-      Inc(LeftBound);
       for var I := ShiftingSize + 1 to High(ArrayOfDots[2]) do
       begin
         ArrayOfDots[1][I - ShiftingSize] := ArrayOfDots[1][I];

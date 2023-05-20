@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Math,
-  Checker, Calculator, Converter, List, Graph, IOUtils;
+  Checker, Calculator, Converter, List, Graph, IOUtils, Vcl.Menus;
 
 Type
   TMainForm = class(TForm)
@@ -52,6 +52,11 @@ Type
     HintLabel: TLabel;
     SavePictureButton: TButton;
     RecentInputButton: TButton;
+    MainMenu: TMainMenu;
+    File1: TMenuItem;
+    SaveMenuItem: TMenuItem;
+    SaveAsMenuItem: TMenuItem;
+    NewMenuItem: TMenuItem;
     procedure InputEditChange(Sender: TObject);
     procedure GraphPaintBoxPaint(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -99,6 +104,9 @@ Type
       Shift: TShiftState; X, Y: Integer);
     procedure GraphPaintBoxMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure SaveMenuItemClick(Sender: TObject);
+    procedure SaveAsMenuItemClick(Sender: TObject);
+    procedure NewMenuItemClick(Sender: TObject);
   private
     CurrXAxisPos, CurrYAxisPos: Integer;
     GraphsArray: array [1..3] of TGraph;
@@ -125,10 +133,26 @@ var
   MainForm: TMainForm;
   researchmode: Boolean;
   CanBeZoomed, CanBeUnzoomed: Boolean;
+  FileName: String;
 
 implementation
 
 {$R *.dfm}
+
+procedure TMainForm.SaveMenuItemClick(Sender: TObject);
+begin
+  IsPictureSaved := True;
+  if (FileName = '') then
+    SavePicture()
+  else
+    GraphPicture.SaveToFile(FileName);
+end;
+
+procedure TMainForm.SaveAsMenuItemClick(Sender: TObject);
+begin
+  IsPictureSaved := True;
+  SavePicture();
+end;
 
 procedure TMainForm.SavePicture();
 var
@@ -136,13 +160,11 @@ var
 begin
   SaveDialog := TFileOpenDialog.Create(Self);
   try
-    SaveDialog.Title := 'Выберите директорию для сохранения изображения';
-    SaveDialog.Options := SaveDialog.Options + [fdoPickFolders];
+    SaveDialog.Title := 'Save image';
     if (SaveDialog.Execute) then
       Begin
-        var SelectedDirectory := SaveDialog.FileName;
-        var ImagePath := TPath.Combine(SelectedDirectory, 'Graph.png');
-        GraphPicture.SaveToFile(ImagePath);
+        FileName := SaveDialog.FileName + '.png';
+        GraphPicture.SaveToFile(FileName);
       End;
   finally
     SaveDialog.Free();
@@ -312,8 +334,8 @@ begin
       End;
   if (not IsPictureSaved) then
     Begin
-      var UserChoice := MessageDlg('Сохранить изображение?', mtWarning, [mbYes, mbNo, mbCancel], 0);
-        case UserChoice of
+      var Response := MessageDlg('Save image?', mtWarning, [mbYes, mbNo, mbCancel], 0);
+        case Response of
           mrYes:
             Begin
               SavePicture();
@@ -372,6 +394,7 @@ Procedure TMainForm.FormCreate(Sender: TObject);
       #10#13 + 'для увеличения масштаба нажмите Ctrl + "+", ' + #10#13 +
       'для уменьшения - Ctrl + "-"';
   begin
+    SaveAsMenuItem.ShortCut := ShortCut(Word('S'), [ssCtrl, ssShift]);
     CanBeZoomed := True;
     IsPictureSaved := True;
     CanBeUnzoomed := False;
@@ -698,6 +721,32 @@ begin
       RangeAndBuildPanel.Top := MathInputPanel.Top;
       MathInputPanel.Top := RangeAndBuildPanel.Top + RangeAndBuildPanel.Height;
     End
+end;
+
+procedure TMainForm.NewMenuItemClick(Sender: TObject);
+begin
+  if (not IsPictureSaved) then
+  begin
+    var Response := MessageDlg('Save image?', mtWarning, [mbYes, mbNo, mbCancel], 0);
+    case Response of
+      mrYes:
+      begin
+        SavePicture();
+        ClearAllButtonClick(Sender);
+        FileName := '';
+      end;
+      mrNo:
+      begin
+        ClearAllButtonClick(Sender);
+        FileName := '';
+      end;
+    end;
+  end
+  else
+  begin
+    ClearAllButtonClick(Sender);
+    FileName := '';
+  end;
 end;
 
 procedure TMainForm.RangeFromEditChange(Sender: TObject);
